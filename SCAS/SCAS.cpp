@@ -8,14 +8,15 @@
 
 const ZP_PORT_TYPE CvtPortType = ZP_PORT_IP;
 
-std::vector<_ZG_ENUM_CVT_INFO> cvtInfoArr;
+std::vector<std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO *>> *cvtInfoArr;
 
 void EnumConvertors() {
+
 	HANDLE hSearch;
 	INT_PTR nDevCount = 0;
 	_ZP_SEARCH_PARAMS rSP;
-	cvtInfoArr = * new std::vector<_ZG_ENUM_CVT_INFO>;
 	ZeroMemory(&rSP, sizeof(rSP));
+	cvtInfoArr = new std::vector<std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO *>>;
 
 	if (!CheckZGError(ZG_SearchDevices(&hSearch, &rSP, FALSE, TRUE), _T("ZG_SearchDevices")))
 		return;
@@ -25,17 +26,17 @@ void EnumConvertors() {
 		HRESULT hr;
 		_ZP_PORT_INFO cvtPortsInfo[2];
 		PZP_PORT_INFO cvtPortInfo;
-		_ZG_ENUM_CVT_INFO cvtInfo;
+		_ZG_ENUM_IPCVT_INFO cvtInfo;
 		INT_PTR nPortCount;
 	
-		cvtInfo.cbSize = sizeof(_ZG_ENUM_CVT_INFO);
+		cvtInfo.cbSize = sizeof(_ZG_ENUM_IPCVT_INFO);
 
-		while ((hr = ZP_FindNextDevice(hSearch, &cvtInfo, cvtPortsInfo, _countof(cvtPortsInfo), &nPortCount)) == S_OK) {
+		while ((hr = ZG_FindNextDevice(hSearch, &cvtInfo, cvtPortsInfo, _countof(cvtPortsInfo), &nPortCount)) == S_OK) {
+
 			nDevCount++;
-
-			cvtInfoArr.push_back(cvtInfo);
-
-			if (cvtInfo.cbSize == sizeof(_ZG_ENUM_CVT_INFO)) {
+			cvtInfoArr->push_back(std::make_pair(cvtInfo, cvtPortsInfo));
+			
+			/*if (cvtInfo.cbSize == sizeof(_ZG_ENUM_IPCVT_INFO)) {
 				_tprintf(TEXT("%d. %s, s/n: %d, v%d.%d.%d, mode: %s;\n"),
 					nDevCount,
 					CvtTypeStrs[cvtInfo.nType],
@@ -48,7 +49,7 @@ void EnumConvertors() {
 					nDevCount,
 					cvtInfo.nModel,
 					cvtInfo.nSn,
-					(cvtInfo.nVersion & 0xff), (cvtInfo.nVersion >> 8) & 0xff, (cvtInfo.nVersion >> 16) & 0xf);
+					(cvtInfo.nVersion & 0xff), (cvtInfo.nVersion >> 8) & 0xff, (cvtInfo.nVersion >> 16) & 0xff);
 			}
 			for (INT_PTR i = 0; i < nPortCount; i++)
 			{
@@ -58,7 +59,7 @@ void EnumConvertors() {
 					cvtPortInfo->szName,
 					cvtPortInfo->szFriendly,
 					(cvtPortInfo->nFlags & ZP_PIF_BUSY) ? TEXT("busy") : TEXT(""));
-			}
+			}*/
 		}
 		if (!CheckZGError(hr, _T("ZP_FindNextDevice")))
 			return;
@@ -67,47 +68,42 @@ void EnumConvertors() {
 		ZG_CloseHandle(hSearch);
 		_tprintf(TEXT("--------------\n"));
 		if (nDevCount > 0)
-			_tprintf(TEXT("Found %d converters.\n"), nDevCount);
+			_tprintf(TEXT("Found %d converters.\n\n"), nDevCount);
 		else
-			_tprintf(TEXT("Converters not found.\n"));
+			_tprintf(TEXT("Converters not found.\n\n"));
 	}
 }
-
-inline void PrintMenu() {
-	PRINT("Enter commant: \n");
-	PRINT("1 - EnumConvertors\n");
-	PRINT("2 - EnumControllers\n");
-	PRINT("3 - \n");
-	PRINT("4 - \n");
-	PRINT("0 - quit\n");
-
-	TCHAR szBuf[128];
-	if (_tscanf_s(TEXT("%s"), szBuf, _countof(szBuf)) == 1) {
-		_tprintf(TEXT("\n"));
-		switch (_ttoi(szBuf)) {
-		case 1:
-			EnumConvertors();
-			break;
-		case 2:
-			break;
-		case 3:
-			break;
-		case 4:
-			break;
-		case 0:
-			return;
-		default:
-			PRINT("Invalid command.\n");
-		}
-	}
-}	
-
 
 void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 	while (1) {
-		PrintMenu();
+		PRINT("Enter commant: \n");
+		PRINT("1 - EnumConvertors\n");
+		PRINT("2 - EnumControllers\n");
+		PRINT("3 - Scan\n");
+		PRINT("4 - \n");
+		PRINT("0 - quit\n");
+
+		TCHAR szBuf[128];
+		if (_tscanf_s(TEXT("%s"), szBuf, _countof(szBuf)) == 1) {
+			_tprintf(TEXT("\n"));
+			switch (_ttoi(szBuf)) {
+			case 1:
+				EnumConvertors();
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			case 0:
+				return;
+			default:
+				PRINT("Invalid command.\n");
+			}
+		}
 	}
 }
 

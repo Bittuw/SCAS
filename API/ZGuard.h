@@ -28,7 +28,7 @@
 
 // Совместимая версия SDK
 #define ZG_SDK_VER_MAJOR	3
-#define ZG_SDK_VER_MINOR	34
+#define ZG_SDK_VER_MINOR	35
 
 #include "ZPort.h"
 #include "ZBase.h"
