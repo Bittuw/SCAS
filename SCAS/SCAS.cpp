@@ -8,12 +8,22 @@
 
 const ZP_PORT_TYPE CvtPortType = ZP_PORT_IP;
 
-std::vector<std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO *>> *cvtInfoArr;
+std::vector<std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO*>> *cvtInfoArr;
 
 void EnumControllers() {
-	for each (std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO *> convertor in *cvtInfoArr)
+	for each (std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO*> convertor in *cvtInfoArr)
 	{
+		for (int nPort = 0; nPort < 2; nPort++)
+		
+		__try {
+			_ZG_CVT_OPEN_PARAMS rOp;
+			ZeroMemory(&rOp, sizeof(rOp));
+			rOp.nType = CvtPortType;
+			rOp.pszName = convertor.second[0].szName;
+		}
+		__finally {
 
+		}
 	}
 }
 
