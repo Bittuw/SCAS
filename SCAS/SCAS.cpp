@@ -10,10 +10,16 @@ const ZP_PORT_TYPE CvtPortType = ZP_PORT_IP;
 
 std::vector<std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO *>> *cvtInfoArr;
 
+void EnumControllers() {
+	for each (std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO *> convertor in *cvtInfoArr)
+	{
+
+	}
+}
+
 void EnumConvertors() {
 
 	HANDLE hSearch;
-	INT_PTR nDevCount = 0;
 	_ZP_SEARCH_PARAMS rSP;
 	ZeroMemory(&rSP, sizeof(rSP));
 	cvtInfoArr = new std::vector<std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO *>>;
@@ -33,7 +39,6 @@ void EnumConvertors() {
 
 		while ((hr = ZG_FindNextDevice(hSearch, &cvtInfo, cvtPortsInfo, _countof(cvtPortsInfo), &nPortCount)) == S_OK) {
 
-			nDevCount++;
 			cvtInfoArr->push_back(std::make_pair(cvtInfo, cvtPortsInfo));
 			
 			/*if (cvtInfo.cbSize == sizeof(_ZG_ENUM_IPCVT_INFO)) {
@@ -61,14 +66,15 @@ void EnumConvertors() {
 					(cvtPortInfo->nFlags & ZP_PIF_BUSY) ? TEXT("busy") : TEXT(""));
 			}*/
 		}
-		if (!CheckZGError(hr, _T("ZP_FindNextDevice")))
+		if (!CheckZGError(hr, _T("ZG_FindNextDevice")))
 			return;
 	}
 	__finally {
 		ZG_CloseHandle(hSearch);
 		_tprintf(TEXT("--------------\n"));
-		if (nDevCount > 0)
-			_tprintf(TEXT("Found %d converters.\n\n"), nDevCount);
+
+		if (cvtInfoArr->size() > 0)
+			_tprintf(TEXT("Found %d converters.\n\n"), cvtInfoArr->size());
 		else
 			_tprintf(TEXT("Converters not found.\n\n"));
 	}
@@ -79,18 +85,19 @@ void MainLoop() {
 		return;
 	while (1) {
 		PRINT("Enter commant: \n");
-		PRINT("1 - EnumConvertors\n");
-		PRINT("2 - EnumControllers\n");
-		PRINT("3 - Scan\n");
+		PRINT("1 - Scan Network\n");
+		PRINT("2 - Connect\n");
+		PRINT("3 - \n");
 		PRINT("4 - \n");
 		PRINT("0 - quit\n");
-
+	
 		TCHAR szBuf[128];
 		if (_tscanf_s(TEXT("%s"), szBuf, _countof(szBuf)) == 1) {
 			_tprintf(TEXT("\n"));
 			switch (_ttoi(szBuf)) {
 			case 1:
 				EnumConvertors();
+				//EnumControllers();
 				break;
 			case 2:
 				break;
@@ -101,7 +108,8 @@ void MainLoop() {
 			case 0:
 				return;
 			default:
-				PRINT("Invalid command.\n");
+				PRINT("Invalid command.\n\n");
+				break;
 			}
 		}
 	}
