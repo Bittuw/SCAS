@@ -4,24 +4,29 @@
 #include "stdafx.h"
 
 
-#define PRINT(text) _tprintf(TEXT(text))
+#define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
+
+
+#define sptr(T) std::shared_ptr<T>
+#define mvector(T) std::vector<T>
+#define mpair(T, N) std::pair<T, N>
 
 const ZP_PORT_TYPE CvtPortType = ZP_PORT_IP;
 
-std::vector<std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO*>> *cvtInfoArr;
+sptr(mvector(mpair(_ZG_ENUM_IPCVT_INFO, sptr(_ZP_PORT_INFO)))) cvtInfoArr;
 
 void EnumControllers() {
-	for each (std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO*> convertor in *cvtInfoArr)
+	for each (mpair(_ZG_ENUM_IPCVT_INFO, sptr(_ZP_PORT_INFO)) convertor in *cvtInfoArr.get())
 	{
 		for (int nPort = 0; nPort < 2; nPort++)
 		
-		__try {
+		try {
 			_ZG_CVT_OPEN_PARAMS rOp;
 			ZeroMemory(&rOp, sizeof(rOp));
 			rOp.nType = CvtPortType;
-			rOp.pszName = convertor.second[0].szName;
+			rOp.pszName = convertor.second->szName;
 		}
-		__finally {
+		catch (std::exception_ptr e) {
 
 		}
 	}
@@ -32,12 +37,17 @@ void EnumConvertors() {
 	HANDLE hSearch;
 	_ZP_SEARCH_PARAMS rSP;
 	ZeroMemory(&rSP, sizeof(rSP));
-	cvtInfoArr = new std::vector<std::pair<_ZG_ENUM_IPCVT_INFO, _ZP_PORT_INFO *>>;
+	cvtInfoArr = 
+		sptr(
+			mvector(
+				mpair(_ZG_ENUM_IPCVT_INFO, sptr(_ZP_PORT_INFO))
+			)
+		) (new mvector(mpair(_ZG_ENUM_IPCVT_INFO, sptr(_ZP_PORT_INFO))));
 
 	if (!CheckZGError(ZG_SearchDevices(&hSearch, &rSP, FALSE, TRUE), _T("ZG_SearchDevices")))
 		return;
 
-	__try {
+	try {
 
 		HRESULT hr;
 		_ZP_PORT_INFO cvtPortsInfo[2];
@@ -49,7 +59,7 @@ void EnumConvertors() {
 
 		while ((hr = ZG_FindNextDevice(hSearch, &cvtInfo, cvtPortsInfo, _countof(cvtPortsInfo), &nPortCount)) == S_OK) {
 
-			cvtInfoArr->push_back(std::make_pair(cvtInfo, cvtPortsInfo));
+			cvtInfoArr->push_back(std::make_pair(cvtInfo, sptr(_ZP_PORT_INFO) (cvtPortsInfo)));
 			
 			/*if (cvtInfo.cbSize == sizeof(_ZG_ENUM_IPCVT_INFO)) {
 				_tprintf(TEXT("%d. %s, s/n: %d, v%d.%d.%d, mode: %s;\n"),
@@ -78,16 +88,20 @@ void EnumConvertors() {
 		}
 		if (!CheckZGError(hr, _T("ZG_FindNextDevice")))
 			return;
-	}
-	__finally {
-		ZG_CloseHandle(hSearch);
-		_tprintf(TEXT("--------------\n"));
+	} catch (std::exception e){
 
-		if (cvtInfoArr->size() > 0)
-			_tprintf(TEXT("Found %d converters.\n\n"), cvtInfoArr->size());
-		else
-			_tprintf(TEXT("Converters not found.\n\n"));
 	}
+	
+	ZG_CloseHandle(hSearch);
+	_tprintf(TEXT("--------------\n"));
+
+	if (cvtInfoArr->size() > 0) {
+		_tprintf(TEXT("Found %d converters.\n\n"), cvtInfoArr->size());
+		PRINT("Found %d converters.\n\n", cvtInfoArr->size());
+	}
+	else
+		_tprintf(TEXT("Converters not found.\n\n"));
+	
 }
 
 void MainLoop() {
@@ -105,15 +119,15 @@ void MainLoop() {
 		if (_tscanf_s(TEXT("%s"), szBuf, _countof(szBuf)) == 1) {
 			_tprintf(TEXT("\n"));
 			switch (_ttoi(szBuf)) {
-			case 1:
+			case 1: // TODO сделать анализ сети (Найти конверторы и контроллеры на них) и собрать все в массив
 				EnumConvertors();
 				//EnumControllers();
 				break;
-			case 2:
+			case 2: // TODO Подписатья на контроллеры для сбора событий онлайн
 				break;
-			case 3:
+			case 3: // TODO Собрать логи с конверторов и контроллеров
 				break;
-			case 4:
+			case 4: // TODO 
 				break;
 			case 0:
 				return;
