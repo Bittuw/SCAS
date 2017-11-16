@@ -28,7 +28,8 @@ public:
 
 	typedef mConverter TypeOfData; // Тип для внешних зависимостей
 
-	bool beginScanNetwork(const _ZP_SEARCH_PARAMS); // Начало сканирования сети
+	bool beginScanNetwork(const _ZP_SEARCH_PARAMS); // Начало сканирования сети, rescan
+	bool beginScanConverter();
 	std::vector<mConverter> getVector(); // Получить список конверторов
 	int getNumberOfConverters();
 	int getNumberOfControllers();
