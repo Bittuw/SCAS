@@ -146,8 +146,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\API\Utils.h" />
-    <ClInclude Include="Controller.h" />
-    <ClInclude Include="Convertor.h" />
     <ClInclude Include="FindDevices.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="SaveInfo.h" />
@@ -159,8 +157,6 @@
     <ClCompile Include="..\API\Utils.cpp" />
     <ClCompile Include="..\API\ZGuard.cpp" />
     <ClCompile Include="..\API\ZPort.cpp" />
-    <ClCompile Include="Controller.cpp" />
-    <ClCompile Include="Convertor.cpp" />
     <ClCompile Include="FindDevices.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="SaveInfo.cpp" />
