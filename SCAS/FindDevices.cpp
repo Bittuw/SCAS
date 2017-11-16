@@ -18,6 +18,8 @@ FindDevices::~FindDevices()
 bool FindDevices::beginScanNetwork(const _ZP_SEARCH_PARAMS searchParams) {
 	// TODO log trace
 	HANDLE hSearch;
+	this->numberOfControllers = 0;
+	this->numberOfConverters = 0;
 
 	if (!CheckZGError(ZG_SearchDevices(&hSearch, &((_ZP_SEARCH_PARAMS &)searchParams), FALSE, TRUE), _T("ZG_SearchDevices"))) {
 		return FALSE; // TODO log trace
@@ -54,6 +56,7 @@ bool FindDevices::findConvertor(HANDLE *hSearch) {
 		// TODO log trace
 		if (hOpenedConvector != NULL) {
 			findControllers(&hOpenedConvector);
+			ZG_CloseHandle(hOpenedConvector);
 		}
 		else {
 			// TODO log trace
@@ -64,7 +67,7 @@ bool FindDevices::findConvertor(HANDLE *hSearch) {
 		);
 	}
 
-	if (!this->mConvertorsList->size())
+	if (this->mConvertorsList->size())
 		return TRUE;
 	return FALSE;
 	// TODO log trace
