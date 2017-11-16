@@ -105,3 +105,4 @@ CZGuardLoader::~CZGuardLoader()
 	if (SUCCEEDED(m_nStatus))
 		UnloadZGuard();
 }
+

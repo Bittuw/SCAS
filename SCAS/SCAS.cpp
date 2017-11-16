@@ -107,6 +107,13 @@ void EnumConvertors() {
 void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
+
+	FindDevices *searching = new FindDevices();
+	std::vector<FindDevices::TypeOfData> temp;
+
+	_ZP_SEARCH_PARAMS rSP;
+	ZeroMemory(&rSP, sizeof(rSP));
+
 	while (1) {
 		PRINT("Enter commant: \n");
 		PRINT("1 - Scan Network\n");
@@ -120,12 +127,15 @@ void MainLoop() {
 			_tprintf(TEXT("\n"));
 			switch (_ttoi(szBuf)) {
 			case 1: // TODO сделать анализ сети (Найти конверторы и контроллеры на них) и собрать все в массив
-				EnumConvertors();
+				//EnumConvertors();
+				searching->beginScanNetwork(rSP);
+				temp = searching->getVector();
+				PRINT("Count of Controllers: %d", searching->getNumberOfControllers());
 				//EnumControllers();
 				break;
-			case 2: // TODO Подписатья на контроллеры для сбора событий онлайн
+			case 2: // TODO Подписатья на контроллеры и и/или конверторы
 				break;
-			case 3: // TODO Собрать логи с конверторов и контроллеров
+			case 3: // TODO Собрать логи
 				break;
 			case 4: // TODO 
 				break;
@@ -150,7 +160,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		getchar();
 		return 0;
 	}
-
+	
 	MainLoop();
 
     return 0;

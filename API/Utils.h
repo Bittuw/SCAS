@@ -3,6 +3,7 @@
 #include <string>
 #include "ZBase.h"
 #include "ZGuard.h"
+#include "Logger.h"
 
 //#define GetBit(val, bitN)	(BOOL)((val >> (bitN)) & 1)
 

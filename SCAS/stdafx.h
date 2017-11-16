@@ -14,12 +14,14 @@
 #include <locale.h>
 #include <ZGuard.h>
 #include <ZPort.h>
+#include <thread>
 #if !defined(ZGUARD_LINKONREQUEST)
 #pragma comment(lib, "ZGuard.lib")
 #elif !defined(ZPORT_LINKONREQUEST)
 #pragma comment(lib, "ZGuard.lib")
 #endif // !ZGUARD_LINKONREQUEST
 #include <Utils.h>
+#include "FindDevices.h"
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
