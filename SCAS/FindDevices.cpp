@@ -5,7 +5,7 @@
 FindDevices::FindDevices()
 {
 	this->mCurrentConverterStruct = new mConverter();
-	ZeroMemory(&this->mCurrentConverterStruct, sizeof(mCurrentConverterStruct));
+	//ZeroMemory(&this->mCurrentConverterStruct, sizeof(mCurrentConverterStruct));
 	this->mConvertorsList = std::make_unique<std::vector<mConverter>>();
 }
 
