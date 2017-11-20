@@ -7,6 +7,7 @@
 
 #include "targetver.h"
 
+#include <exception>
 #include <memory>
 #include <stdio.h>
 #include <tchar.h>
@@ -21,7 +22,11 @@
 #pragma comment(lib, "ZGuard.lib")
 #endif // !ZGUARD_LINKONREQUEST
 #include <Utils.h>
+#include "Exceptions.h"
+#include "SearchDevice.h"
+#include "Connection.h"
 #include "FindDevices.h"
+
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы

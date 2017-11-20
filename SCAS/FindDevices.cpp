@@ -25,7 +25,7 @@ bool FindDevices::beginScanNetwork(const _ZP_SEARCH_PARAMS searchParams) {
 	}
 	// TODO log trace
 	if (findConvertor(&hSearch)) {
-		// TODO log trace
+		// TODO log trace 
 		ZG_CloseHandle(hSearch);
 		return TRUE;
 	} 
