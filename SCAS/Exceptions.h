@@ -16,7 +16,7 @@ private:
 public :
 	InitializationSearchError(const std::string& message) :
 	_message(std::string("Error to initial search: ") + message){}
-	virtual const char* what() const throw() override {
+	virtual const char* what() const throw() {
 		return _message.c_str();
 	}
 };
@@ -27,7 +27,7 @@ private :
 
 public:
 	SearchError(const std::string& message) : _message(std::string("Search ended with an error: ") + message) {}
-	virtual const char* what() const throw() override {
+	virtual const char* what() const throw() {
 		return _message.c_str();
 	}
 };
@@ -40,7 +40,7 @@ public:
 	OpenFailed(const std::string& message, const std::string& device) :
 		_message(std::string("Connection failed with : ") + device + std::string(";\n your message: ") + message) {}
 
-	virtual const char* what() const throw() override {
+	virtual const char* what() const throw() {
 		return _message.c_str();
 	}
 
