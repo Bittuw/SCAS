@@ -108,9 +108,6 @@ void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 
-	FindDevices *searching = new FindDevices();
-	std::vector<FindDevices::TypeOfData> temp;
-
 	_ZP_SEARCH_PARAMS rSP;
 	ZeroMemory(&rSP, sizeof(rSP));
 
@@ -128,9 +125,12 @@ void MainLoop() {
 			switch (_ttoi(szBuf)) {
 			case 1: // TODO сделать анализ сети (Найти конверторы и контроллеры на них) и собрать все в массив
 				//EnumConvertors();
-				searching->beginScanNetwork(rSP);
-				temp = searching->getVector();
-				PRINT("Count of Controllers: %d", searching->getNumberOfControllers());
+				try {
+					Connection::TestConnection();
+				}
+				catch (SearchError error) {
+					std::cout << error.what() << "\n";
+				}
 				//EnumControllers();
 				break;
 			case 2: // TODO Подписатья на контроллеры и и/или конверторы

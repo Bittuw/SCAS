@@ -1,23 +1,26 @@
 #include "stdafx.h"
 #include "SearchDevice.h"
 
-
-SearchDevice::SearchDevice(const _ZP_SEARCH_PARAMS searchParams) :
+SearchDevice::SearchDevice(_ZP_SEARCH_PARAMS* const searchParams) :
 	_searchParams(searchParams){}
 
 
 SearchDevice::~SearchDevice(){}
 
-void SearchDevice::scanNetwork() {
+void SearchDevice::scanNetwork() { // TODO Возможна замена на ZG_SetNotification и ZG_GetNextMessage
+
 	_hSearch = new HANDLE;
 	HRESULT hrSearch;
 	INT_PTR nPortCount;
 	_ZP_PORT_INFO converterPort[2];
 	Connection* tempConnection;
 
+	_ZG_CVT_OPEN_PARAMS _searchParams;
+	ZeroMemory(&_searchParams, sizeof(_searchParams));
+
 	if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)this->_searchParams), FALSE, TRUE), _T("ZG_SearchDevices"))) 
 		throw SearchError(std::string("Error in search")); // TODO log trace
-	
+
 	while ((hrSearch = ZG_FindNextDevice(_hSearch, &(_MainInfo->converterInfo), _MainInfo->converterPorts, _countof(_MainInfo->converterPorts), &nPortCount)) == S_OK) {
 		tempConnection =
 			new Connection(
@@ -29,9 +32,9 @@ void SearchDevice::scanNetwork() {
 			tempConnection->scanControllers();
 			tempConnection->get_controllersInfo();
 		}
-		catch (Connection error) {
+		catch (ConnectionError error) {
 			// TODO log trace and to log base
-			_tprintf(TEXT("%s", error.what()));
+			std::cout << error.what();
 			throw SearchError(std::string("Error in search"));
 		}
 	}

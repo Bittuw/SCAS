@@ -148,8 +148,7 @@
     <ClInclude Include="..\API\Utils.h" />
     <ClInclude Include="Connection.h" />
     <ClInclude Include="Exceptions.h" />
-    <ClInclude Include="FindDevices.h" />
-    <ClInclude Include="GenerateConnetion.h" />
+    <ClInclude Include="ListListener.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="SaveInfo.h" />
     <ClInclude Include="SearchDevice.h" />
@@ -162,8 +161,7 @@
     <ClCompile Include="..\API\ZGuard.cpp" />
     <ClCompile Include="..\API\ZPort.cpp" />
     <ClCompile Include="Connection.cpp" />
-    <ClCompile Include="FindDevices.cpp" />
-    <ClCompile Include="GenerateConnetion.cpp" />
+    <ClCompile Include="ListListener.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="SaveInfo.cpp" />
     <ClCompile Include="SCAS.cpp" />

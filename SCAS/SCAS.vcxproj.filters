@@ -36,9 +36,6 @@
     <ClInclude Include="SaveInfo.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="FindDevices.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="Connection.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
@@ -48,7 +45,7 @@
     <ClInclude Include="SearchDevice.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="GenerateConnetion.h">
+    <ClInclude Include="ListListener.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,16 +71,13 @@
     <ClCompile Include="SaveInfo.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="FindDevices.cpp">
-      <Filter>Файлы исходного кода</Filter>
-    </ClCompile>
     <ClCompile Include="Connection.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
     <ClCompile Include="SearchDevice.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="GenerateConnetion.cpp">
+    <ClCompile Include="ListListener.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>

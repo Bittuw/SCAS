@@ -8,6 +8,7 @@
 #include "targetver.h"
 
 #include <exception>
+#include <iostream>
 #include <memory>
 #include <stdio.h>
 #include <tchar.h>
@@ -25,7 +26,7 @@
 #include "Exceptions.h"
 #include "SearchDevice.h"
 #include "Connection.h"
-#include "FindDevices.h"
+//#include "FindDevices.h"
 
 
 

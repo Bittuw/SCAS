@@ -7,24 +7,26 @@ Connection::Connection(const _ZG_ENUM_IPCVT_INFO convertorInfo, const std::vecto
 	_convertorPorts(convertorPorts),
 	_portType(portType){}
 
-Connection::Connection(MainInfo* const mainInfo) :
-	_convertorInfo(mainInfo->converterInfo),
-	_convertorPorts(mainInfo->converterPorts),
-	_portType(mainInfo->portType),
-	_mainInfo(mainInfo){} 
+//Connection::Connection(MainInfo* const mainInfo) :
+//	_convertorInfo(mainInfo->converterInfo),
+//	_convertorPorts(mainInfo->converterPorts),
+//	_portType(mainInfo->portType),
+//	_mainInfo(mainInfo){} 
 
 Connection::~Connection()
 {// TODO log trace
-	if (_hConvector != nullptr || _hController != nullptr) {
-		ZG_CloseHandle(*_hController);
+	if (_hConvector != nullptr)
 		ZG_CloseHandle(*_hConvector);
-	}
+
+	if (_hController != nullptr)
+		ZG_CloseHandle(*_hController);
+
 	delete this->_hConvector, this->_hController;
 	_hConvector, _hController = nullptr;
 }
 
 bool Connection::openConnection() {
-	for (int i = _convertorPorts.size(); i < 2; i++) {
+	for (unsigned int i = 0; i < _convertorPorts.size(); i++) {
 		// TODO log trace
 		_hConvector = new HANDLE;
 		_ZG_CVT_OPEN_PARAMS openConvectorParams;
@@ -34,7 +36,7 @@ bool Connection::openConnection() {
 		openConvectorParams.nType = _portType;
 		
 		if (!CheckZGError(ZG_Cvt_Open(_hConvector, &openConvectorParams, NULL), _T("ZG_Cvt_Open")))
-			throw OpenFailed(std::string("Connection converter port: " + (WCHAR)this->_convertorPorts[i].szName), std::string("Convector")); // TODO возможно ошибкапреобразования из WCHAR to std::string
+			throw OpenFailed(std::string("Connection converter port: " + *(WCHAR*)this->_convertorPorts[i].szName), std::string("Convector"));
 		else {
 			isOpenConvertor = true;
 			return true;
@@ -51,10 +53,10 @@ void Connection::scanControllers() {
 	_ZG_FIND_CTR_INFO mControllerInfo;
 	_controllersInfo.clear();
 
-	if (!CheckZGError(ZG_Cvt_SearchControllers(_hConvector, MaxCount, NULL), _T("ZG_Cvt_SearchControllers")))
+	if (!CheckZGError(ZG_Cvt_SearchControllers(*_hConvector, MaxCount, NULL), _T("ZG_Cvt_SearchControllers")))
 		throw InitializationSearchError(std::string("test message"));
 
-	while ((hrController = ZG_Cvt_FindNextController(_hConvector, &(_ZG_FIND_CTR_INFO&)mControllerInfo)) == S_OK) {
+	while ((hrController = ZG_Cvt_FindNextController(*_hConvector, &(_ZG_FIND_CTR_INFO&)mControllerInfo)) == S_OK) {
 		// TODO log trace
 		_controllersInfo.push_back(mControllerInfo);
 	}
@@ -74,6 +76,7 @@ bool Connection::openController(const int controllerAddress) {
 
 	isOpenController = true;
 	_addrOfOpenController = controllerAddress;
+	return true;
 }
 
 void Connection::closeController() {
@@ -101,3 +104,43 @@ std::vector<_ZG_FIND_CTR_INFO>* const Connection::get_controllersInfo() {
 	return &_controllersInfo;
 }
 
+#ifdef _DEBUG
+bool Connection::TestConnection() {
+
+	HANDLE *_hSearch = new HANDLE;
+	HRESULT hrSearch;
+	INT_PTR nPortCount;
+	_ZP_PORT_INFO converterPorts[2];
+	Connection* tempConnection;
+	_ZG_ENUM_IPCVT_INFO converterInfo;
+	ZP_PORT_TYPE portType = ZP_PORT_IP;
+	_ZG_CVT_OPEN_PARAMS _searchParams;
+	ZeroMemory(&_searchParams, sizeof(_searchParams));
+	ZeroMemory(&converterInfo, sizeof(converterInfo));
+
+	if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
+		throw SearchError(std::string("Error in search")); // TODO log trace
+
+	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &(converterInfo), converterPorts, _countof(converterPorts), &nPortCount)) == S_OK) {
+		tempConnection =
+			new Connection(
+				converterInfo,
+				*(new std::vector<_ZP_PORT_INFO>(std::begin(converterPorts), std::end(converterPorts))),
+				portType);
+		try {
+			tempConnection->openConnection();
+			tempConnection->scanControllers();
+			tempConnection->get_controllersInfo();
+		}
+		catch (std::exception error) {
+			// TODO log trace and to log base
+			std::cout << error.what() << "\n";
+			//throw SearchError(std::string(error.what()));
+		}
+		_tprintf(TEXT("1 convertor found\n"));
+	}
+	ZG_CloseHandle(*_hSearch);
+	delete tempConnection;
+	return true;
+}
+#endif
