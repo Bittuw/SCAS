@@ -20,21 +20,21 @@ void SearchDevice::scanNetwork() { // TODO Возможна замена на ZG_SetNotification
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
 	while ((hrSearch = ZG_FindNextDevice(_hSearch, &(_MainInfo->converterInfo), _MainInfo->converterPorts, _countof(_MainInfo->converterPorts), &nPortCount)) == S_OK) {
-		//tempConnection =
-		//	new Connection(
-		//		_MainInfo->converterInfo,
-		//		*(new std::vector<_ZP_PORT_INFO>(std::begin(_MainInfo->converterPorts), std::end(_MainInfo->converterPorts))),
-		//		_MainInfo->portType);
-		//try {
-		//	tempConnection->openConnection();
-		//	tempConnection->scanControllers();
-		//	tempConnection->get_controllersInfo();
-		//}
-		//catch (ConnectionError error) {
-		//	// TODO log trace and to log base
-		//	std::cout << error.what();
-		//	throw SearchError(std::string("Error in search"));
-		//}
+		tempConnection =
+			new Connection( // TODO классика
+				_MainInfo->converterInfo,
+				*(new std::vector<_ZP_PORT_INFO>(std::begin(_MainInfo->converterPorts), std::end(_MainInfo->converterPorts))),
+				_MainInfo->portType);
+		try {
+			tempConnection->openConnection();
+			tempConnection->scanControllers();
+			tempConnection->get_controllersInfo();
+		}
+		catch (ConnectionError error) {
+			// TODO log trace and to log base
+			std::cout << error.what();
+			throw SearchError(std::string("Error in search"));
+		}
 	}
 }
 

@@ -140,8 +140,8 @@ bool Connection::StaticTest() {
 	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &(converterInfo), converterPorts, _countof(converterPorts), &nPortCount)) == S_OK) {
 		try {
 			tempAvailableConnection = new AvailableConnection();
-			(tempAvailableConnection->converterInfo) = std::move(&converterInfo);
-			(tempAvailableConnection->portType) = std::move(&portType);
+			(tempAvailableConnection->converterInfo) = &converterInfo;
+			(tempAvailableConnection->portType) = &portType;
 			(tempAvailableConnection->converterPorts) = (
 				new std::vector<_ZP_PORT_INFO>
 					(std::begin(converterPorts), std::end(converterPorts))

@@ -151,7 +151,6 @@
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="ListListener.h" />
     <ClInclude Include="Logger.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="SaveInfo.h" />
     <ClInclude Include="SearchDevice.h" />
     <ClInclude Include="stdafx.h" />
@@ -174,9 +173,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="SCAS.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
