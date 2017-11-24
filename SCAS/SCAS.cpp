@@ -113,8 +113,8 @@ void MainLoop() {
 
 	while (1) {
 		PRINT("Enter commant: \n");
-		PRINT("1 - Scan Network\n");
-		PRINT("2 - Connect\n");
+		PRINT("1 - Test Connection\n");
+		PRINT("2 - Test SearchDevice\n");
 		PRINT("3 - \n");
 		PRINT("4 - \n");
 		PRINT("0 - quit\n");
@@ -123,17 +123,23 @@ void MainLoop() {
 		if (_tscanf_s(TEXT("%s"), szBuf, _countof(szBuf)) == 1) {
 			_tprintf(TEXT("\n"));
 			switch (_ttoi(szBuf)) {
-			case 1: // TODO сделать анализ сети (Найти конверторы и контроллеры на них) и собрать все в массив
+			case 1: 
 				//EnumConvertors();
 				try {
-					Connection::TestConnection();
+					Connection::StaticTest();
 				}
 				catch (SearchError error) {
 					std::cout << error.what() << "\n";
 				}
 				//EnumControllers();
 				break;
-			case 2: // TODO Подписатья на контроллеры и и/или конверторы
+			case 2: 
+				try {
+					SearchDevice::StaticTest();
+				}
+				catch (SearchError error) {
+					std::cout << error.what() << "\n";
+				}
 				break;
 			case 3: // TODO Собрать логи
 				break;

@@ -15,9 +15,6 @@ void SearchDevice::scanNetwork() { // TODO Âîçìîæíà çàìåíà íà ZG_SetNotification
 	_ZP_PORT_INFO converterPort[2];
 	Connection* tempConnection;
 
-	_ZG_CVT_OPEN_PARAMS _searchParams;
-	ZeroMemory(&_searchParams, sizeof(_searchParams));
-
 	if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)this->_searchParams), FALSE, TRUE), _T("ZG_SearchDevices"))) 
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
@@ -38,5 +35,10 @@ void SearchDevice::scanNetwork() { // TODO Âîçìîæíà çàìåíà íà ZG_SetNotification
 			throw SearchError(std::string("Error in search"));
 		}
 	}
+}
+
+#ifdef _DEBUG 
+bool SearchDevice::StaticTest() {
 
 }
+#endif

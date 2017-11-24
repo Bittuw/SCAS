@@ -105,7 +105,7 @@ std::vector<_ZG_FIND_CTR_INFO>* const Connection::get_controllersInfo() {
 }
 
 #ifdef _DEBUG
-bool Connection::TestConnection() {
+bool Connection::StaticTest() {
 
 	HANDLE *_hSearch = new HANDLE;
 	HRESULT hrSearch;

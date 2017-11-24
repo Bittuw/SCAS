@@ -1,4 +1,6 @@
 #pragma once
+#include "Connection.h"
+
 
 struct MainInfo
 {
@@ -14,9 +16,12 @@ struct AvailableConnetion { // TODO возможная замена для MainInfo
 	std::vector<_ZP_PORT_INFO> converterPorts; // Список портов
 	std::vector<_ZG_FIND_CTR_INFO> controllersInfo; // Список конверторов
 	ZP_PORT_TYPE portType; // Тип подключения
-	Connection* connection; // Соединение (Для работы с конвертором/контроллером)
+	Connection* connection; // Соединение (Для работы с конвертором/контроллеро)м
 };
-//std::shared_ptr<std::vector<MainInfo>> convertorsInfoList = std::make_shared<std::vector<MainInfo>>(new std::vector<MainInfo>);
+
+//std::shared_ptr<std::vector<AvailableConnetion>> convertorsInfoList = std::make_shared<std::vector<AvailableConnetion>>(new std::vector<AvailableConnetion>);
+
+auto convertorsInfoList = std::shared_ptr<std::vector<AvailableConnetion>>(new std::vector<AvailableConnetion>);
 
 class SearchDevice
 {
@@ -26,12 +31,12 @@ public:
 	~SearchDevice();
 
 	void scanNetwork();
-	void compareList();
+	//void compareList();
 
-	//static thread* createThread() // TODO Вопрос с созданием потока через статик
+	//static thread* StartThread() // TODO Вопрос с созданием потока через статик
 
 #ifdef _DEBUG
-	static bool TestClass();
+	static bool StaticTest();
 #endif
 
 private:

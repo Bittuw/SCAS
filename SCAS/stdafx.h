@@ -26,8 +26,10 @@
 #include "Exceptions.h"
 #include "SearchDevice.h"
 #include "Connection.h"
+#include "ListListener.h"
 //#include "FindDevices.h"
 
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
+// TODO Заменить include в .cpp на icnlude в .h

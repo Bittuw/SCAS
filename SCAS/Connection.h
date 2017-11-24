@@ -15,7 +15,7 @@ public:
 
 	//static Connection getAutoConnected(); // Автосоединение либо через конструктор
 #ifdef _DEBUG 
-	static bool TestConnection();
+	static bool StaticTest();
 #endif
 
 	HANDLE* const get_hConvertor();
