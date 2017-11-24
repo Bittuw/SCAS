@@ -595,10 +595,15 @@ inline HRESULT ZP_EnumSerialPorts(UINT nDevTypes,
 		_ZP_PORT_INFO rPI;
 		for (int i = 0; i < nPortCount; i++)
 		{
-			if (FAILED(hr = ZP_GetPortInfo(hList, i, &rPI)))
+			if (FAILED(hr = ZP_GetPortInfo(hList, i, &rPI))) {
 				return hr;
-			if (!pEnumProc(&rPI, pUserData))
+				__leave;
+			}
+			if (!pEnumProc(&rPI, pUserData)) {
 				return ZP_S_CANCELLED;
+				__leave;
+			}
+
 		}
 	}
 	__finally

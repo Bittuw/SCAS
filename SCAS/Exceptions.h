@@ -32,6 +32,17 @@ public:
 	}
 };
 
+class ConstructError : public std::exception {
+private:
+	std::string _message;
+
+public:
+	ConstructError(const std::string& message) : _message(std::string("Error in construct method: " + message)){}
+	virtual const char* what() const throw() {
+		return _message.c_str();
+	}
+};
+
 class OpenFailed : public ConnectionError {
 private:
 	std::string _message;
@@ -39,7 +50,7 @@ private:
 public:
 	OpenFailed(const std::string& message, const std::string& device) :
 		_message(std::string("Connection failed with : ") + device + std::string(";\n your message: ") + message) {}
-
+	
 	virtual const char* what() const throw() {
 		return _message.c_str();
 	}

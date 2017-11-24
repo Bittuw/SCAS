@@ -1,11 +1,11 @@
 #pragma once
+struct AvailableConnection;
 
 class Connection
 {
 public:
-	Connection(const _ZG_ENUM_IPCVT_INFO, const std::vector<_ZP_PORT_INFO>, const ZP_PORT_TYPE);
-	//Connection(MainInfo* const); // TODO рассмотреть варинат с внешней информацие о конверторе
-	//Connection(const _ZG_ENUM_IPCVT_INFO, const std::vector<_ZP_PORT_INFO>, const ZP_PORT_TYPE); // Автосоединение с конвертором
+	//Connection(const _ZG_ENUM_IPCVT_INFO, const std::vector<_ZP_PORT_INFO>, const ZP_PORT_TYPE);
+	Connection(std::unique_ptr<AvailableConnection>*); // TODO рассмотреть варинат с внешней информацие о конверторе
 	~Connection();
 
 	bool openConnection();
@@ -32,11 +32,12 @@ private:
 	HANDLE* _hController = nullptr;
 	//MainInfo* _mainInfo;
 
-	std::vector<_ZG_FIND_CTR_INFO> _controllersInfo;
+	/*std::vector<_ZG_FIND_CTR_INFO> _controllersInfo;
 	const std::vector<_ZP_PORT_INFO> _convertorPorts;
 	const _ZG_ENUM_IPCVT_INFO _convertorInfo;
 
 	const ZP_PORT_TYPE _portType;
-	
+	*/
+	std::unique_ptr<AvailableConnection> _availableConnection;
 };
 

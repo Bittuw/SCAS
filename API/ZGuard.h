@@ -1229,8 +1229,10 @@ inline HRESULT ZG_EnumConverters(PZP_PORT_ADDR pPorts, INT nPCount,
 		while ((hr = ZP_FindNextDevice(hSearch, &rDI, &rPI, 1, &nPortCount, INFINITE)) == S_OK)
 		{
 			for (int i = 0; i < nPortCount; i++)
-				if (!pEnumProc(&rDI, &rPI, pUserData))
+				if (!pEnumProc(&rDI, &rPI, pUserData)) {
 					return ZP_S_CANCELLED;
+					__leave;
+				}
 			rDI.cbSize = sizeof(rDI);
 		}
 	}
@@ -1262,8 +1264,10 @@ inline HRESULT ZG_EnumIpConverters(ZG_ENUMIPCVTSPROC pEnumProc, PVOID pUserData,
 		while ((hr = ZP_FindNextDevice(hSearch, &rDI, &rPI, 1, &nPortCount, INFINITE)) == S_OK)
 		{
 			for (int i = 0; i < nPortCount; i++)
-				if (!pEnumProc(&rDI, &rPI, pUserData))
+				if (!pEnumProc(&rDI, &rPI, pUserData)) {
 					return ZP_S_CANCELLED;
+					__leave;
+				}
 			rDI.cbSize = sizeof(rDI);
 		}
 	}
@@ -1297,8 +1301,10 @@ inline HRESULT ZG_FindConverter(PZP_PORT_ADDR pPorts, INT nPCount,
 		rDI.cbSize = sizeof(rDI);
 		ZeroMemory(aPIs, sizeof(aPIs));
 		hr = ZP_FindNextDevice(hSearch, &rDI, aPIs, _countof(aPIs), &nPortCount, INFINITE);
-		if (FAILED(hr))
+		if (FAILED(hr)) {
 			return hr;
+			__leave;
+		}
 		if (hr == S_OK)
 		{
 			*pInfo = rDI;

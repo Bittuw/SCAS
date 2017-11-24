@@ -1,17 +1,32 @@
+#pragma once
 #include "stdafx.h"
 #include "Connection.h"
 
 
-Connection::Connection(const _ZG_ENUM_IPCVT_INFO convertorInfo, const std::vector<_ZP_PORT_INFO> convertorPorts, const ZP_PORT_TYPE portType) :
-	_convertorInfo(convertorInfo),
-	_convertorPorts(convertorPorts),
-	_portType(portType){}
+//Connection::Connection(const _ZG_ENUM_IPCVT_INFO convertorInfo, const std::vector<_ZP_PORT_INFO> convertorPorts, const ZP_PORT_TYPE portType) :
+//	_convertorInfo(convertorInfo),
+//	_convertorPorts(convertorPorts),
+//	_portType(portType){}
 
 //Connection::Connection(MainInfo* const mainInfo) :
 //	_convertorInfo(mainInfo->converterInfo),
 //	_convertorPorts(mainInfo->converterPorts),
 //	_portType(mainInfo->portType),
 //	_mainInfo(mainInfo){} 
+
+Connection::Connection(std::unique_ptr<AvailableConnection>* availableConnection) {
+	if (
+			(*availableConnection)->converterPorts->empty() &&
+			(*availableConnection)->converterInfo == nullptr &&
+			(*availableConnection)->portType == nullptr &&
+			(*availableConnection)->connection != nullptr
+		)
+		throw ConstructError(std::string("Bad initialize data!"));
+
+	_availableConnection = std::move(*availableConnection);
+	_availableConnection->connection = this;
+	_availableConnection->controllersInfo = new std::vector<_ZG_FIND_CTR_INFO>();
+}
 
 Connection::~Connection()
 {// TODO log trace
@@ -26,17 +41,17 @@ Connection::~Connection()
 }
 
 bool Connection::openConnection() {
-	for (unsigned int i = 0; i < _convertorPorts.size(); i++) {
+	for (unsigned int i = 0; i < _availableConnection->converterPorts->size(); i++) {
 		// TODO log trace
 		_hConvector = new HANDLE;
 		_ZG_CVT_OPEN_PARAMS openConvectorParams;
 		ZeroMemory(&openConvectorParams, sizeof(openConvectorParams));
 
-		openConvectorParams.pszName = _convertorPorts[i].szName;
-		openConvectorParams.nType = _portType;
+		openConvectorParams.pszName = (_availableConnection->converterPorts->at(i)).szName;
+		openConvectorParams.nType = *(_availableConnection->portType);
 		
 		if (!CheckZGError(ZG_Cvt_Open(_hConvector, &openConvectorParams, NULL), _T("ZG_Cvt_Open")))
-			throw OpenFailed(std::string("Connection converter port: " + *(WCHAR*)this->_convertorPorts[i].szName), std::string("Convector"));
+			throw OpenFailed(std::string("Connection converter port: " + *(WCHAR*)(_availableConnection->converterPorts->at(i)).szName), std::string("Convector"));
 		else {
 			isOpenConvertor = true;
 			return true;
@@ -51,14 +66,14 @@ void Connection::scanControllers() {
 	INT MaxCount = 0;
 	HRESULT hrController;
 	_ZG_FIND_CTR_INFO mControllerInfo;
-	_controllersInfo.clear();
+	_availableConnection->controllersInfo->clear();
 
 	if (!CheckZGError(ZG_Cvt_SearchControllers(*_hConvector, MaxCount, NULL), _T("ZG_Cvt_SearchControllers")))
 		throw InitializationSearchError(std::string("test message"));
 
 	while ((hrController = ZG_Cvt_FindNextController(*_hConvector, &(_ZG_FIND_CTR_INFO&)mControllerInfo)) == S_OK) {
 		// TODO log trace
-		_controllersInfo.push_back(mControllerInfo);
+		_availableConnection->controllersInfo->push_back(mControllerInfo);
 	}
 
 	if (hrController != ZP_S_NOTFOUND)
@@ -99,9 +114,9 @@ HANDLE* const Connection::get_hController() {
 }
 
 std::vector<_ZG_FIND_CTR_INFO>* const Connection::get_controllersInfo() {
-	if (_controllersInfo.empty())
+	if (_availableConnection->controllersInfo->empty())
 		throw std::runtime_error("Info vector is empty, scanControllers!");
-	return &_controllersInfo;
+	return &(*(_availableConnection->controllersInfo));
 }
 
 #ifdef _DEBUG
@@ -111,7 +126,8 @@ bool Connection::StaticTest() {
 	HRESULT hrSearch;
 	INT_PTR nPortCount;
 	_ZP_PORT_INFO converterPorts[2];
-	Connection* tempConnection;
+	Connection* tempConnection = nullptr;
+	AvailableConnection* tempAvailableConnection = nullptr;
 	_ZG_ENUM_IPCVT_INFO converterInfo;
 	ZP_PORT_TYPE portType = ZP_PORT_IP;
 	_ZG_CVT_OPEN_PARAMS _searchParams;
@@ -122,12 +138,17 @@ bool Connection::StaticTest() {
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
 	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &(converterInfo), converterPorts, _countof(converterPorts), &nPortCount)) == S_OK) {
-		tempConnection =
-			new Connection(
-				converterInfo,
-				*(new std::vector<_ZP_PORT_INFO>(std::begin(converterPorts), std::end(converterPorts))),
-				portType);
 		try {
+			tempAvailableConnection = new AvailableConnection();
+			(tempAvailableConnection->converterInfo) = std::move(&converterInfo);
+			(tempAvailableConnection->portType) = std::move(&portType);
+			(tempAvailableConnection->converterPorts) = (
+				new std::vector<_ZP_PORT_INFO>
+					(std::begin(converterPorts), std::end(converterPorts))
+				);
+
+			tempConnection = new Connection(&(std::unique_ptr<AvailableConnection>(tempAvailableConnection)));
+
 			tempConnection->openConnection();
 			tempConnection->scanControllers();
 			tempConnection->get_controllersInfo();
@@ -137,10 +158,12 @@ bool Connection::StaticTest() {
 			std::cout << error.what() << "\n";
 			//throw SearchError(std::string(error.what()));
 		}
+
+		delete tempConnection;
 		_tprintf(TEXT("1 convertor found\n"));
+		
 	}
 	ZG_CloseHandle(*_hSearch);
-	delete tempConnection;
 	return true;
 }
 #endif

@@ -23,6 +23,7 @@
 #pragma comment(lib, "ZGuard.lib")
 #endif // !ZGUARD_LINKONREQUEST
 #include <Utils.h>
+#include "DataStructs.h"
 #include "Exceptions.h"
 #include "SearchDevice.h"
 #include "Connection.h"
@@ -32,4 +33,3 @@
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
-// TODO Заменить include в .cpp на icnlude в .h

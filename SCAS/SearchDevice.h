@@ -1,6 +1,5 @@
 #pragma once
-#include "Connection.h"
-
+struct AvailableConnection;
 
 struct MainInfo
 {
@@ -11,17 +10,16 @@ struct MainInfo
 };
 
 
-struct AvailableConnetion { // TODO возможная замена для MainInfo
-	_ZG_ENUM_IPCVT_INFO converterInfo; // Общая информация  о конверторе
-	std::vector<_ZP_PORT_INFO> converterPorts; // Список портов
-	std::vector<_ZG_FIND_CTR_INFO> controllersInfo; // Список конверторов
-	ZP_PORT_TYPE portType; // Тип подключения
-	Connection* connection; // Соединение (Для работы с конвертором/контроллеро)м
-};
+//struct AvailableConnection { // TODO возможная замена для MainInfo
+//	_ZG_ENUM_IPCVT_INFO converterInfo; // Общая информация  о конверторе
+//	std::vector<_ZP_PORT_INFO> converterPorts; // Список портов
+//	std::vector<_ZG_FIND_CTR_INFO> controllersInfo; // Список конверторов
+//	ZP_PORT_TYPE portType; // Тип подключения
+//	Connection* connection; // Соединение (Для работы с конвертором/контроллеро)м
+//};
 
 //std::shared_ptr<std::vector<AvailableConnetion>> convertorsInfoList = std::make_shared<std::vector<AvailableConnetion>>(new std::vector<AvailableConnetion>);
 
-auto convertorsInfoList = std::shared_ptr<std::vector<AvailableConnetion>>(new std::vector<AvailableConnetion>);
 
 class SearchDevice
 {
@@ -31,6 +29,7 @@ public:
 	~SearchDevice();
 
 	void scanNetwork();
+	void addInfoList(std::unique_ptr<std::vector<AvailableConnection>> *);
 	//void compareList();
 
 	//static thread* StartThread() // TODO Вопрос с созданием потока через статик
