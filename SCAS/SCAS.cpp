@@ -1,7 +1,8 @@
 // SCAS.cpp: определяет точку входа для консольного приложения.
 //
 #include "stdafx.h"
-
+#include "Connection.h"
+#include "SearchDevice.h"
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
 
@@ -103,12 +104,95 @@ void EnumConvertors() {
 	
 }
 
+HANDLE g_hNotify = NULL;
+HANDLE g_hEvent = NULL;
+HANDLE g_hThread = NULL;
+BOOL g_fThreadActive;
+HANDLE g_hCvt = NULL;
+_ZP_DD_NOTIFY_SETTINGS rNS = { 0 };;
+
+HRESULT CheckNotifyMsgs()
+{
+	HRESULT hr;
+	UINT nMsg;
+	LPARAM nMsgParam;
+	while ((hr = ZG_GetNextMessage(g_hNotify, &nMsg, &nMsgParam)) == S_OK)
+	{
+		switch (nMsg)
+		{
+		case ZP_N_INSERT:
+		{
+			PZP_DDN_PORT_INFO pInfo = (PZP_DDN_PORT_INFO)nMsgParam;
+			_tprintf(TEXT("Port insert: %s (%s) %s;\n"),
+				pInfo->rPort.szName,
+				pInfo->rPort.szFriendly,
+				(pInfo->rPort.nFlags & ZP_PIF_BUSY) ? TEXT(" busy") : TEXT(""));
+		}
+		break;
+		case ZP_N_REMOVE:
+		{
+			PZP_DDN_PORT_INFO pInfo = (PZP_DDN_PORT_INFO)nMsgParam;
+			_tprintf(TEXT("Port removed: %s (%s);\n"),
+				pInfo->rPort.szName,
+				pInfo->rPort.szFriendly);
+		}
+		break;
+		case ZP_N_CHANGE:
+		{
+			PZP_DDN_PORT_INFO pInfo = (PZP_DDN_PORT_INFO)nMsgParam;
+			_tprintf(TEXT("Port changed (%.2Xh): %s (%s)%s;\n"),
+				pInfo->nChangeMask,
+				pInfo->rPort.szName,
+				pInfo->rPort.szFriendly,
+				(pInfo->rPort.nFlags & ZP_PIF_BUSY) ? TEXT(" busy") : TEXT(""));
+		}
+		break;
+		}
+	}
+	if (hr == ZP_S_NOTFOUND)
+		hr = S_OK;
+	return hr;
+}
+
+DWORD WINAPI NotifyThreadProc(LPVOID lpParameter)
+{
+	while (g_fThreadActive)
+	{
+		if (WaitForSingleObject(g_hEvent, INFINITE) == WAIT_OBJECT_0)
+		{
+			ResetEvent(g_hEvent);
+			if (g_hNotify != NULL)
+				CheckNotifyMsgs();
+		}
+	}
+	return 0;
+}
+
+void StartNotifyThread()
+{
+	if (g_hThread != NULL)
+		return;
+	DWORD nThreadId;
+	g_fThreadActive = TRUE;
+	g_hThread = CreateThread(NULL, 0, NotifyThreadProc, NULL, 0, &nThreadId);
+}
+
+void StopNotifyThread()
+{
+	if (g_hThread == NULL)
+		return;
+	g_fThreadActive = FALSE;
+	SetEvent(g_hEvent);
+	WaitForSingleObject(g_hThread, INFINITE);
+	CloseHandle(g_hThread);
+	g_hThread = NULL;
+}
+
 void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 
-	_ZP_SEARCH_PARAMS rSP;
-	ZeroMemory(&rSP, sizeof(rSP));
+	//rNS.nIpDevTypes = ZP_PORT_IP;
 
 	while (1) {
 		PRINT("Enter commant: \n");
@@ -139,6 +223,11 @@ void MainLoop() {
 				catch (SearchError error) {
 					std::cout << error.what() << "\n";
 				}
+
+				/*if (!CheckZGError(ZG_SetNotification(&g_hNotify, &rNS, FALSE, TRUE), _T("ZG_SetNotification")))
+					return;
+
+				StartNotifyThread();*/
 				break;
 			case 3: // TODO Собрать логи
 				break;
@@ -165,7 +254,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		getchar();
 		return 0;
 	}
-	
+
+	//g_hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	//rNS.nNMask = ZP_NF_EXIST | ZP_NF_CHANGE | ZP_NF_IPDEVICE;
+	//rNS.hEvent = g_hEvent;
+
 	MainLoop();
 
     return 0;

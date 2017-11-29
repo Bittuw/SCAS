@@ -25,11 +25,12 @@ class SearchDevice
 {
 
 public:
-	SearchDevice(_ZP_SEARCH_PARAMS *const);
+	SearchDevice(std::unique_ptr<_ZP_SEARCH_PARAMS>);
 	~SearchDevice();
 
 	void scanNetwork();
-	void addInfoList(std::unique_ptr<std::vector<AvailableConnection>> *);
+	void addInfoList(std::unique_ptr<std::vector<AvailableConnection>>*);
+	//void setDevicesList();
 	//void compareList();
 
 	//static thread* StartThread() // TODO ¬опрос с созданием потока через статик
@@ -40,8 +41,10 @@ public:
 
 private:
 
-	HANDLE* _hSearch;
-	MainInfo* _MainInfo;
-	_ZP_SEARCH_PARAMS* const _searchParams;
+	std::unique_ptr<std::list<std::shared_ptr<Connection>>> _localConverterList = std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<Connection>>);
+	std::unique_ptr<HANDLE> _hSearch;
+	std::unique_ptr<AvailableConnection> _connectionData;
+	std::unique_ptr<Connection> _currentConnection;
+	std::unique_ptr<_ZP_SEARCH_PARAMS> _searchParams;
 };
 

@@ -1,34 +1,32 @@
 #include "stdafx.h"
 #include "SearchDevice.h"
 
-
-SearchDevice::SearchDevice(_ZP_SEARCH_PARAMS* const searchParams) :
-	_searchParams(searchParams){}
+SearchDevice::SearchDevice(std::unique_ptr<_ZP_SEARCH_PARAMS> searchParams) :
+	_searchParams(std::move(searchParams)) {
+	ZeroMemory(&*_searchParams, sizeof(*_searchParams));
+}
 
 
 SearchDevice::~SearchDevice(){}
 
-void SearchDevice::scanNetwork() { // TODO Возможна замена на ZG_SetNotification и ZG_GetNextMessage
 
-	_hSearch = new HANDLE;
+void SearchDevice::scanNetwork() { 
+
+	_hSearch = std::unique_ptr<HANDLE> (new HANDLE);
 	HRESULT hrSearch;
 	INT_PTR nPortCount;
-	_ZP_PORT_INFO converterPort[2];
-	Connection* tempConnection;
+	auto isEmpty = _convertorsInfoList->empty();
 
-	if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)this->_searchParams), FALSE, TRUE), _T("ZG_SearchDevices"))) 
+	if (!CheckZGError(ZG_SearchDevices(&*_hSearch, &((_ZP_SEARCH_PARAMS &)this->_searchParams), FALSE, TRUE), _T("ZG_SearchDevices"))) 
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
-	while ((hrSearch = ZG_FindNextDevice(_hSearch, &(_MainInfo->converterInfo), _MainInfo->converterPorts, _countof(_MainInfo->converterPorts), &nPortCount)) == S_OK) {
-		tempConnection =
-			new Connection( // TODO классика
-				_MainInfo->converterInfo,
-				*(new std::vector<_ZP_PORT_INFO>(std::begin(_MainInfo->converterPorts), std::end(_MainInfo->converterPorts))),
-				_MainInfo->portType);
+	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(_connectionData->converterInfo), _connectionData->converterPorts, _countof(_connectionData->converterPorts), &nPortCount)) == S_OK) {
+		_currentConnection = std::unique_ptr<Connection>(new Connection(std::move(_connectionData)));
 		try {
-			tempConnection->openConnection();
-			tempConnection->scanControllers();
-			tempConnection->get_controllersInfo();
+			_currentConnection->openConnection();
+			_currentConnection->scanControllers();
+			//_currentConnection->get_controllersInfo();
+			_localConverterList->push_back(std::move(_currentConnection));
 		}
 		catch (ConnectionError error) {
 			// TODO log trace and to log base
@@ -47,5 +45,5 @@ bool SearchDevice::StaticTest() {
 
 
 void SearchDevice::addInfoList(std::unique_ptr<std::vector<AvailableConnection>>* convertorsInfoList) {
-	*(_convertorsInfoList) = std::move(**convertorsInfoList);
+	//*(_convertorsInfoList) = std::move(**convertorsInfoList);
 }

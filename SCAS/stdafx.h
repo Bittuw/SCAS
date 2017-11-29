@@ -8,15 +8,18 @@
 #include "targetver.h"
 
 #include <exception>
+#include <list>
 #include <iostream>
 #include <memory>
 #include <stdio.h>
 #include <tchar.h>
 #include <vector>
 #include <locale.h>
+#include <thread>
+#include <mutex>
+#include <thread>
 #include <ZGuard.h>
 #include <ZPort.h>
-#include <thread>
 #if !defined(ZGUARD_LINKONREQUEST)
 #pragma comment(lib, "ZGuard.lib")
 #elif !defined(ZPORT_LINKONREQUEST)
@@ -25,10 +28,11 @@
 #include <Utils.h>
 #include "DataStructs.h"
 #include "Exceptions.h"
-#include "SearchDevice.h"
-#include "Connection.h"
-#include "ListListener.h"
-//#include "FindDevices.h"
+//#include "Exceptions.h"
+//#include "SearchDevice.h"
+//#include "Connection.h"
+//#include "ListListener.h"
+
 
 
 
