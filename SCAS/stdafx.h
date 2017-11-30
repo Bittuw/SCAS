@@ -8,12 +8,13 @@
 #include "targetver.h"
 
 #include <exception>
-#include <list>
 #include <iostream>
 #include <memory>
 #include <stdio.h>
 #include <tchar.h>
 #include <vector>
+#include <set>
+#include <list>
 #include <locale.h>
 #include <thread>
 #include <mutex>
@@ -28,10 +29,6 @@
 #include <Utils.h>
 #include "DataStructs.h"
 #include "Exceptions.h"
-//#include "Exceptions.h"
-//#include "SearchDevice.h"
-//#include "Connection.h"
-//#include "ListListener.h"
 
 
 

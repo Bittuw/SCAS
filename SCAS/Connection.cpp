@@ -2,20 +2,12 @@
 #include "stdafx.h"
 #include "Connection.h"
 
-
-//Connection::Connection(const _ZG_ENUM_IPCVT_INFO convertorInfo, const std::vector<_ZP_PORT_INFO> convertorPorts, const ZP_PORT_TYPE portType) :
-//	_convertorInfo(convertorInfo),
-//	_convertorPorts(convertorPorts),
-//	_portType(portType){}
-
-//Connection::Connection(MainInfo* const mainInfo) :
-//	_convertorInfo(mainInfo->converterInfo),
-//	_convertorPorts(mainInfo->converterPorts),
-//	_portType(mainInfo->portType),
-//	_mainInfo(mainInfo){} 
 Connection::Connection() {}
 
-Connection::Connection(std::unique_ptr<AvailableConnection> availableConnection) {
+Connection::Connection(std::unique_ptr<AvailableConnection> availableConnection) :
+_e_newInfo(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
+_e_destroyed(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL)))
+{
 	if (
 			availableConnection->converterPorts == nullptr ||
 			availableConnection->converterInfo == nullptr ||
@@ -38,7 +30,7 @@ Connection::~Connection()
 	_hConvector, _hController = nullptr;
 }
 
-void Connection::setPtr(std::unique_ptr<AvailableConnection> pointer) {
+void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> pointer) {
 	_connectionData = std::move(pointer);
 }
 

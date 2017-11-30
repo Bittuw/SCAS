@@ -12,11 +12,10 @@ public:
 	bool openConnection();
 	void closeConnection();
 	void scanControllers();
-	bool openController(int);
+	bool openController(int); 
 	void closeController();
-	void setPtr(std::unique_ptr<AvailableConnection>);
-	//bool prepareForNewData(std::unique_ptr<AvailableConnection>); // TODO переиспользование экземпл€ра
-	//static Connection getAutoConnected(); // јвтосоединение либо через конструктор
+	void setNewConnactionInfo(std::unique_ptr<AvailableConnection>);
+
 #ifdef _DEBUG 
 	static bool StaticTest();
 #endif
@@ -26,8 +25,10 @@ public:
 	std::vector<_ZG_FIND_CTR_INFO>* const get_controllersInfo();
 
 	std::unique_ptr<AvailableConnection> _connectionData;
-private:
+	std::shared_ptr<HANDLE> _e_newInfo = nullptr; //—обытие перезаписи данных
+	std::shared_ptr<HANDLE> _e_destroyed = nullptr; // —обытие уничтожени€ объекта
 
+private:
 	bool isOpenConvertor = false;
 	bool isOpenController = false;
 	int _addrOfOpenController;

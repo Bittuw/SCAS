@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "Connection.h"
 #include "SearchDevice.h"
+#include "SpecialList.h"
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
 
@@ -192,13 +193,11 @@ void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 
-	//rNS.nIpDevTypes = ZP_PORT_IP;
-
 	while (1) {
 		PRINT("Enter commant: \n");
 		PRINT("1 - Test Connection\n");
 		PRINT("2 - Test SearchDevice\n");
-		PRINT("3 - \n");
+		PRINT("3 - TestSpecialList\n");
 		PRINT("4 - \n");
 		PRINT("0 - quit\n");
 	
@@ -223,13 +222,10 @@ void MainLoop() {
 				catch (SearchError error) {
 					std::cout << error.what() << "\n";
 				}
-
-				/*if (!CheckZGError(ZG_SetNotification(&g_hNotify, &rNS, FALSE, TRUE), _T("ZG_SetNotification")))
-					return;
-
-				StartNotifyThread();*/
 				break;
 			case 3: // TODO Собрать логи
+				SpecialList::StaticTest();
+				//temp.setList(std::move(*(new std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<Connection>>))));
 				break;
 			case 4: // TODO 
 				break;
