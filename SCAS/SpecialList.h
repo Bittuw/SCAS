@@ -1,5 +1,5 @@
 #pragma once
-class SpecialList {
+class SpecialList { 
 public:
 	SpecialList(/*std::unique_ptr<std::list<std::shared_ptr<T>>> wrappedList*/) : /*_wrappedList(std::move(wrappedList)),*/
 		_m_access(new std::mutex),
@@ -43,7 +43,7 @@ public:
 	static void StaticTest() {
 		/*SpecialList<Connection> temp;
 		temp.setList(std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<T>>));*/
-	};
+	}; 
 #endif // _DEBUG
 	
 	std::shared_ptr<HANDLE> _e_pushing;
