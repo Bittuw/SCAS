@@ -1,12 +1,13 @@
 #pragma once
 #include "stdafx.h"
 #include "Connection.h"
-
+#include "DataStructs.h"
 //Connection::Connection() {}
 
 Connection::Connection(std::unique_ptr<AvailableConnection> availableConnection) :
 _e_newInfo(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
-_e_destroyed(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL)))
+_e_destroyed(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
+_hControllersList(std::make_unique<std::vector<HANDLE>>(*(new std::vector<HANDLE>)))
 {
 	if (
 			availableConnection->converterPorts == nullptr ||
@@ -23,11 +24,11 @@ Connection::~Connection()
 {// TODO log trace
 	SetEvent(*_e_destroyed); // TODO проверить, успеет ли дойти событие до уведомляемого потока
 
-	if (!_hControllersList.empty()) {
-		for (size_t i = 0; i < _hControllersList.size(); i++)
-			ZG_CloseHandle(*(_hControllersList[i]));
+	if (!_hControllersList->empty()) {
+		for (size_t i = 0; i < _hControllersList->size(); i++)
+			ZG_CloseHandle((*_hControllersList)[i]);
 
-		_hControllersList.clear();
+		_hControllersList->clear();
 	}
 
 	if (_hConvector != nullptr)
@@ -35,9 +36,23 @@ Connection::~Connection()
 
 	_hConvector = nullptr;
 }
+void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> pointer) { // Нужна проверка
+	_connectionData = std::move(pointer);
+	if (!initialConnections());
+		// TODO Throw connection
+	// TODO обнуление всех значений и сигнал евентом
+}
+
+int Connection::addController(_ZG_FIND_CTR_INFO controller) {
+	return 0;
+}
+
+void Connection::removeController(const int) {
+
+}
 
 bool Connection::initialConnections() {
-	if (openConnection()) {
+	if (openConverter()) {
 		scanControllers();
 		openControllers();
 		SetEvent(*_e_newInfo);
@@ -46,12 +61,9 @@ bool Connection::initialConnections() {
 	return false;
 }
 
-void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> pointer) {
-	_connectionData = std::move(pointer);
-	// TODO обнуление всех значений и сигнал евентом
-}
 
-bool Connection::openConnection() {
+
+bool Connection::openConverter() {
 	_ZG_CVT_OPEN_PARAMS openConvectorParams;
 	ZeroMemory(&openConvectorParams, sizeof(openConvectorParams));
 
@@ -74,7 +86,7 @@ bool Connection::openConnection() {
 	return false;
 }
 
-void Connection::closeConnection() {
+void Connection::closeConverter() {
 	closeControllers();
 	ZG_CloseHandle(*_hConvector);
 	_connectionData->isConverterJoinable = false;
@@ -100,20 +112,6 @@ void Connection::scanControllers() {
 		throw SearchError(std::string("Error while search controllers"));
 }
 
-//bool Connection::openController(const int controllerAddress) {
-//	// TODO log trace
-//	auto temp_hController = std::unique_ptr<HANDLE> (new HANDLE);
-//	_ZG_CTR_INFO rCtrInfo;
-//	ZeroMemory(&rCtrInfo, sizeof(rCtrInfo));
-//
-//	if (!CheckZGError(ZG_Ctr_Open(&*_hController, &*_hConvector, controllerAddress, 0, &rCtrInfo, ZG_CTR_UNDEF), _T("ZG_Ctr_Open")))
-//		throw OpenFailed(std::string("Connection controller address: " + controllerAddress), std::string("Controller"));
-//
-//	isOpenController = true;
-//	_addrOfOpenController = controllerAddress;
-//	return true;
-//}
-
 void Connection::openControllers() {
 	for each (_ZG_FIND_CTR_INFO controller in *(_connectionData->controllersInfo))
 	{
@@ -123,36 +121,50 @@ void Connection::openControllers() {
 
 		ZeroMemory(&rCtrInfo, sizeof(rCtrInfo));
 
-		if (!CheckZGError(ZG_Ctr_Open(&*temp_hController, &*_hConvector, controller.nAddr, 0, &rCtrInfo, ZG_CTR_UNDEF), _T("ZG_Ctr_Open"))) 
+		if (!CheckZGError(ZG_Ctr_Open(&*temp_hController, *_hConvector, controller.nAddr, 0, &rCtrInfo, ZG_CTR_UNDEF), _T("ZG_Ctr_Open")))
 			throw OpenFailed(std::string("Connection controller address: " + controller.nAddr), std::string("Controller"));
 
-		if (!CheckZGError(ZG_Ctr_ReadEventIdxs(&*temp_hController, &writeIndex, &readIndex), _T("ZG_Ctr_ReadEventIdxs")))
+		if (!CheckZGError(ZG_Ctr_ReadEventIdxs(*temp_hController, &writeIndex, &readIndex), _T("ZG_Ctr_ReadEventIdxs")))
 			throw OpenFailed(std::string("Connection controller address: " + controller.nAddr), std::string("Controller"));
 		
-		_hControllersList.push_back(std::move(temp_hController));
+		_hControllersList->push_back(*temp_hController);
 		_connectionData->controllersDetailInfo->push_back(rCtrInfo);
 		_connectionData->controlersIndexWriteRead->push_back(std::make_pair(writeIndex, readIndex));
 	}
 }
 
-//void Connection::closeController() {
-//	ZG_CloseHandle(*_hController);
-//	isOpenController = false;
-//	//_addrOfOpenController = 0;
-//	// TODO log trace
-//}
-
 void Connection::closeControllers() {
-	if (!_hControllersList.empty()) {
-		for (size_t i = 0; i < _hControllersList.size(); i++)
-			ZG_CloseHandle(*(_hControllersList[i]));
-		_hControllersList.clear();
+	if (!_hControllersList->empty()) {
+		for (size_t i = 0; i < _hControllersList->size(); i++)
+			ZG_CloseHandle((*_hControllersList)[i]);
+		_hControllersList->clear();
 	}
+}
+
+void Connection::openController(const int position) {
+	//auto result = std::find(_connectionData->controllersInfo->begin(), _connectionData->controllersInfo->end(), controller);
+
+	//if (result == _connectionData->controllersInfo->end())
+	//	
+	//else {
+	//	// TODO error
+	//}
+
+
 }
 
 void Connection::cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS notifySetting ) {
 	_connectionData->connectionMutex->lock();
-	if (!CheckZGError(ZG_Cvt_SetNotification(&*_hConvector, &notifySetting), _T("ZG_Cvt_SetNotification"))) {
+	if (!CheckZGError(ZG_Cvt_SetNotification(*_hConvector, &notifySetting), _T("ZG_Cvt_SetNotification"))) {
+		_connectionData->connectionMutex->unlock();
+		throw CommandError(std::string("ZG_Cvt_SetNotification"));
+	}
+	_connectionData->connectionMutex->unlock();
+}
+
+void Connection::cvt_SetNotification() {
+	_connectionData->connectionMutex->lock();
+	if (!CheckZGError(ZG_Cvt_SetNotification(&*_hConvector, NULL), _T("ZG_Cvt_SetNotification"))) {
 		_connectionData->connectionMutex->unlock();
 		throw CommandError(std::string("ZG_Cvt_SetNotification"));
 	}
@@ -161,12 +173,30 @@ void Connection::cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS notifySetting ) {
 
 void Connection::ctr_SetNotification(const int position, _ZG_CTR_NOTIFY_SETTINGS notifySetting) {
 	_connectionData->connectionMutex->lock();
-	if (!CheckZGError(ZG_Ctr_SetNotification(&*_hControllersList[position], &notifySetting), _T("ZG_Cvt_SetNotification"))) {
+	if (!CheckZGError(ZG_Ctr_SetNotification(&(*_hControllersList)[position], &notifySetting), _T("ZG_Cvt_SetNotification"))) {
 		_connectionData->connectionMutex->unlock();
 		throw CommandError(std::string("ZG_Ctr_SetNotification at: " + position));
 	}
 	_connectionData->connectionMutex->unlock();
 }
+
+void Connection::ctr_SetNotification(const int position) {
+	_connectionData->connectionMutex->lock();
+	if (!CheckZGError(ZG_Ctr_SetNotification(&(*_hControllersList)[position], NULL), _T("ZG_Cvt_SetNotification"))) {
+		_connectionData->connectionMutex->unlock();
+		throw CommandError(std::string("ZG_Ctr_SetNotification at: " + position));
+	}
+	_connectionData->connectionMutex->unlock();
+}
+
+HRESULT Connection::cvt_GetNextMessage() {
+	return NULL;
+}
+
+HRESULT Connection::ctr_GetNextMessage(const int) {
+	return NULL;
+}
+
 
 HANDLE* const Connection::get_hConvertor() {
 	if (_hConvector == nullptr)
@@ -174,17 +204,13 @@ HANDLE* const Connection::get_hConvertor() {
 	return &*_hConvector;
 } 
 
-std::shared_ptr<std::vector<std::unique_ptr<HANDLE>>> Connection::get_hController() {
-	if (_hControllersList.empty())
-		throw std::runtime_error("Null pointer: maybe you forgot to open connection!");
-	return std::shared_ptr<std::vector<std::unique_ptr<HANDLE>>> (&_hControllersList);
+std::shared_ptr<std::vector<HANDLE>> Connection::get_hController() {
+	//if (_hControllersList.empty())
+	//	throw std::runtime_error("Null pointer: maybe you forgot to open connection!");
+	
+	return std::make_shared<std::vector<HANDLE>>((*_hControllersList));
 }
 
-//std::vector<_ZG_FIND_CTR_INFO>* const Connection::get_controllersInfo() {
-//	if (_connectionData->controllersInfo->empty())
-//		throw std::runtime_error("Info vector is empty, scanControllers!");
-//	return &(*(_connectionData->controllersInfo));
-//}
 
 #ifdef _DEBUG
 bool Connection::StaticTest() {
@@ -197,18 +223,18 @@ bool Connection::StaticTest() {
 	_ZG_CVT_OPEN_PARAMS _searchParams;
 	ZeroMemory(&_searchParams, sizeof(_searchParams));
 	std::unique_ptr<AvailableConnection> tempAvailableConnection(new AvailableConnection);
-	*(tempAvailableConnection->portType) = ZP_PORT_IP;
 
 	if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
 	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(tempAvailableConnection->converterInfo), tempAvailableConnection->converterPorts, _countof(tempAvailableConnection->converterPorts), &nPortCount)) == S_OK) {
 		try {
+			*(tempAvailableConnection->portType) = ZP_PORT_IP;
 			tempConnection = std::unique_ptr<Connection> (new Connection(std::move(tempAvailableConnection)));
 			tempConnection->initialConnections();
 			_convertorsInfoList->push_back(std::move(tempConnection));
 		}
-		catch (std::exception error) {
+		catch (const std::exception& error) {
 			// TODO log trace and to log base
 			std::cout << error.what() << "\n";
 			//throw SearchError(std::string(error.what()));

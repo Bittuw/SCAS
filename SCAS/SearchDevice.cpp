@@ -1,9 +1,13 @@
 #include "stdafx.h"
 #include "SearchDevice.h"
+#include "Connection.h"
+#include "DataStructs.h"
 
-SearchDevice::SearchDevice(std::unique_ptr<_ZP_SEARCH_PARAMS> searchParams) :
-	_searchParams(std::move(searchParams)) {
-	ZeroMemory(&*_searchParams, sizeof(*_searchParams));
+SearchDevice::SearchDevice(_ZG_CVT_OPEN_PARAMS searchParams) :
+	_searchParams(searchParams) 
+{
+	ZeroMemory(&_searchParams, sizeof(_searchParams));
+	_connectionData = std::unique_ptr<AvailableConnection>(new AvailableConnection);
 }
 
 
@@ -12,28 +16,28 @@ SearchDevice::~SearchDevice(){}
 
 void SearchDevice::scanNetwork() {
 
-	_hSearch = std::unique_ptr<HANDLE>(new HANDLE);
+	_hSearch = std::make_unique<HANDLE>(new HANDLE);
 	_localConverterList.clear();
 	HRESULT hrSearch;
 	INT_PTR nPortCount;
 	
-	if (!CheckZGError(ZG_SearchDevices(&*_hSearch, &((_ZP_SEARCH_PARAMS &)this->_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
+	if (!CheckZGError(ZG_SearchDevices(&*_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
 	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(_connectionData->converterInfo), _connectionData->converterPorts, _countof(_connectionData->converterPorts), &nPortCount)) == S_OK) {
-		
+		*(_connectionData->portType) = ZP_PORT_IP;
 		_currentConnection = std::unique_ptr<Connection>(new Connection(std::move(_connectionData)));
 		try {
 			_currentConnection->initialConnections();
-			//_currentConnection->get_controllersInfo();
 			_localConverterList.push_back(std::move(_currentConnection));
 		}
-		catch (ConnectionError error) {
+		catch (const ConnectionError& error) {
 			// TODO log trace and to log base
 			std::cout << error.what();
 			throw SearchError(std::string("Error in search"));
 		}
 		_localAvaliableConnectionsSet.insert(std::move(_connectionData));
+		_connectionData = std::unique_ptr<AvailableConnection>(new AvailableConnection);
 	}
 
 	auto list = _localConverterList;
@@ -44,6 +48,8 @@ void SearchDevice::scanNetwork() {
 
 #ifdef _DEBUG 
 bool SearchDevice::StaticTest() {
+	(new SearchDevice(*(new _ZG_CVT_OPEN_PARAMS)))->scanNetwork();
+	_converterInfoListTest->clear();
 	return true;
 }
 #endif

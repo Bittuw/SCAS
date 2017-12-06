@@ -6,7 +6,7 @@ class SearchDevice // in Thread
 
 	//TODO ZG_SearchDevice
 public:
-	SearchDevice(std::unique_ptr<_ZP_SEARCH_PARAMS>);
+	SearchDevice(_ZG_CVT_OPEN_PARAMS);
 	~SearchDevice();
 
 	void scanNetwork();
@@ -26,6 +26,6 @@ private:
 	std::unique_ptr<HANDLE> _hSearch; // Дескриптор поиска
 	std::unique_ptr<AvailableConnection> _connectionData; // Текущий найденный конвертер
 	std::unique_ptr<Connection> _currentConnection; // Текущий подключенный конвертер
-	std::unique_ptr<_ZP_SEARCH_PARAMS> _searchParams; // Параметры поиска
+	_ZG_CVT_OPEN_PARAMS _searchParams; // Параметры поиска
 };
 

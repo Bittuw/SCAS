@@ -4,6 +4,7 @@
 #include "Connection.h"
 #include "SearchDevice.h"
 #include "SpecialList.h"
+#include "NotifyThreads.h"
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
 
@@ -193,12 +194,14 @@ void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 
+	std::thread Scanning, Notify;
+
 	while (1) {
 		PRINT("Enter commant: \n");
 		PRINT("1 - Test Connection\n");
 		PRINT("2 - Test SearchDevice\n");
 		PRINT("3 - TestSpecialList\n");
-		PRINT("4 - \n");
+		PRINT("4 - Test Notified Threads\n");
 		PRINT("0 - quit\n");
 	
 		TCHAR szBuf[128];
@@ -210,7 +213,7 @@ void MainLoop() {
 				try {
 					Connection::StaticTest();
 				}
-				catch (SearchError error) {
+				catch (const SearchError& error) {
 					std::cout << error.what() << "\n";
 				}
 				//EnumControllers();
@@ -219,7 +222,7 @@ void MainLoop() {
 				try {
 					SearchDevice::StaticTest();
 				}
-				catch (SearchError error) {
+				catch (const SearchError& error) {
 					std::cout << error.what() << "\n";
 				}
 				break;
@@ -228,6 +231,14 @@ void MainLoop() {
 				//temp.setList(std::move(*(new std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<Connection>>))));
 				break;
 			case 4: // TODO 
+				Scanning = std::thread([]() {
+					(new SearchDevice(*new _ZG_CVT_OPEN_PARAMS))->scanNetwork();
+				});
+				Notify = std::thread([]() {
+					(new NotifyThreads())->beginListning();
+				});
+				Scanning.join();
+				Notify.join();
 				break;
 			case 0:
 				return;

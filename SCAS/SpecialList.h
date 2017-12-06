@@ -1,7 +1,9 @@
 #pragma once
+class Connection;
+
 class SpecialList { 
 public:
-	SpecialList(/*std::unique_ptr<std::list<std::shared_ptr<T>>> wrappedList*/) : /*_wrappedList(std::move(wrappedList)),*/
+	SpecialList() :
 		_m_access(new std::mutex),
 		_e_newlist(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
 		_e_clearing(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
