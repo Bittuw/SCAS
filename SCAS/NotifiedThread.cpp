@@ -80,7 +80,7 @@ bool NotifiedThread::createNotifies() {
 		try {
 			temp_localConnection->cvt_SetNotification(_converterNotifySettings);
 			
-			for (size_t i = 0; i < temp_hControllers->size(); i++) {
+			for (size_t i = 0; i < temp_hControllers->size(); i++) { // TODO ERROR
 
 				_controllerNotifySettings.nReadEvIdx = temp_localConnection->_connectionData->controlersIndexWriteRead->at(i).first; // TODO ERROR
 				auto controllerEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
