@@ -43,6 +43,17 @@ public:
 	}
 };
 
+class CommandError : public std::exception {
+private:
+	std::string _message;
+
+public:
+	CommandError(const std::string& message) : _message(std::string("Error while performing command: ") + message){}
+	virtual const char* what() const throw() {
+		return _message.c_str();
+	}
+};
+
 class OpenFailed : public ConnectionError {
 private:
 	std::string _message;
