@@ -255,6 +255,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//rNS.nNMask = ZP_NF_EXIST | ZP_NF_CHANGE | ZP_NF_IPDEVICE;
 	//rNS.hEvent = g_hEvent;
 
+
 	MainLoop();
 
     return 0;

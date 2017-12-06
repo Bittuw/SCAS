@@ -39,6 +39,13 @@ public:
 		return temp;
 	};
 
+	int size() {
+		_m_access->lock();
+		auto temp = _wrappedList->size();
+		_m_access->unlock();
+		return temp;
+	}
+
 #ifdef _DEBUG
 	static void StaticTest() {
 		/*SpecialList<Connection> temp;
@@ -55,5 +62,6 @@ public:
 private:
 	std::unique_ptr<std::vector<std::shared_ptr<Connection>>> _wrappedList; // ќборачиваемый список
 	std::shared_ptr<std::mutex> _m_access; // ћьютекс доступа к списку
+
 };
 

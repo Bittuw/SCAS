@@ -21,11 +21,11 @@ public:
 
 private:
 	
-	std::unique_ptr<std::set<std::shared_ptr<AvailableConnection>>> _localAvaliableConnectionsSet;
-	std::unique_ptr<std::vector<std::shared_ptr<Connection>>> _localConverterList = std::unique_ptr<std::vector<std::shared_ptr<Connection>>>(new std::vector<std::shared_ptr<Connection>>);
-	std::unique_ptr<HANDLE> _hSearch;
-	std::unique_ptr<AvailableConnection> _connectionData;
-	std::unique_ptr<Connection> _currentConnection;
-	std::unique_ptr<_ZP_SEARCH_PARAMS> _searchParams;
+	std::set<std::shared_ptr<AvailableConnection>> _localAvaliableConnectionsSet; // Локальный список найденных конверторов
+	std::vector<std::shared_ptr<Connection>> _localConverterList; // Локальный список подключенных конверторов
+	std::unique_ptr<HANDLE> _hSearch; // Дескриптор поиска
+	std::unique_ptr<AvailableConnection> _connectionData; // Текущий найденный конвертер
+	std::unique_ptr<Connection> _currentConnection; // Текущий подключенный конвертер
+	std::unique_ptr<_ZP_SEARCH_PARAMS> _searchParams; // Параметры поиска
 };
 
