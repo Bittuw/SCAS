@@ -1,22 +1,22 @@
 #include "stdafx.h"
 #include "NotifiedThread.h"
-
+#include "Connection.h"
+#include "DataStructs.h"
 
 NotifiedThread::NotifiedThread(std::shared_ptr<Connection> connection, std::shared_ptr<HANDLE> e_localExitThread) :
 	_localConnection(connection),
 	_e_localExitThread(e_localExitThread),
-	_e_getConverterNotify(std::make_unique<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL)))
+	_e_getConverterNotify(std::make_unique<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
+	_waitingArray(std::make_unique<std::vector<HANDLE>>(*(new std::vector<HANDLE>)))
 {
 	if (auto temp_localConnection = _localConnection.lock()) {
-		_hConverter = std::make_shared<HANDLE>(temp_localConnection->get_hConvertor());
-		_hConctrollers = temp_localConnection->get_hController();
 		_e_newInfo = temp_localConnection->_e_newInfo;
 		_e_destroyed = temp_localConnection->_e_destroyed;
-		_waitingFirstArray = { *_globalExitThread, *_e_localExitThread, *temp_localConnection->_e_newInfo, *temp_localConnection->_e_destroyed };
-		_waitingSecondArray = _waitingFirstArray;
+		getNewPointers(temp_localConnection);
+		refreshWaitingArray();
 	}
 	else {
-		// TODO throw connection
+		// Throw connection
 	}
 }
 
@@ -28,51 +28,40 @@ NotifiedThread::~NotifiedThread()
 
 void NotifiedThread::startListining() {
 	while (!_localConnection.expired()) {
-		auto const& const_waitingFirstArray = _waitingFirstArray;
-		auto eventFirst = WaitForMultipleObjects(const_waitingFirstArray.size(), const_waitingFirstArray.data(), FALSE, INFINITY);
+		
+		auto event = WaitForMultipleObjects(_waitingArray->size(), _waitingArray->data(), FALSE, INFINITE);
 
-		switch (eventFirst)
-		{
-		case 0:
-			// TODO log trace
+		switch (event) {
+		case 0: // —ценарий 1
 			ExitThread(0);
 			break;
-		case 1:
-			// TODO log trace
+		case 1: // —ценарий 2
+			ExitThread(0); 
+			break;
+		case 2: // —ценарий 3: ”ничтожение Connection
+			ResetEvent(_waitingArray->at(event));
 			ExitThread(0);
 			break;
-		case 2:
-			ResetEvent(_waitingFirstArray.at(2));
-			createNotify();
+		case 3: // —ценарий 4: Ќовые данные Connection
+			clearNotifyList();
+			getNewPointers(_localConnection.lock());
+			createNotifies();
+			ResetEvent(_waitingArray->at(event));
+			refreshWaitingArray();
 			break;
 		default:
-			// TODO log trace
-			break;
+			if(4 <= event <= 4 + _waitingArray->size()) // —ценарий 5
+
+				break;
+			else { // —ценарий 6
+				// TODO throw exception
+				break;
+			}
 		}
-
-		_waitingSecondArray.push_back(*_e_getConverterNotify);
-		_waitingSecondArray.insert(_waitingSecondArray.end(), _e_getControllersNotifyList.begin(), _e_getControllersNotifyList.end());
-		auto const& const_waitingSecondArray = _waitingSecondArray;
-
-		auto eventSecond = WaitForMultipleObjects(const_waitingSecondArray.size(), const_waitingSecondArray.data(), FALSE, INFINITY);
-
-		}
-	//while (!_localConnection.expired()) {
-	//	if (auto temp_localConnection = _localConnection.lock()) {
-
-	//		auto const& const_waitingFirstArray = _waitingFirstArray;
-	//		auto eventFirst = WaitForMultipleObjects(_waitingFirstArray.size(), _waitingFirstArray.data(), FALSE, INFINITY);
-
-	//		switchFirstEvent(eventFirst);
-	//		
-	//	}
-	//	else {
-	//		// TODO log trace срочно завтра проверить
-	//	}
-	//}
+	}
 }
 
-bool NotifiedThread::createNotify() {
+bool NotifiedThread::createNotifies() {
 	if (auto temp_localConnection = _localConnection.lock()) {
 
 		auto temp_hConverter = _hConverter.lock();
@@ -93,7 +82,7 @@ bool NotifiedThread::createNotify() {
 			
 			for (size_t i = 0; i < temp_hControllers->size(); i++) {
 
-				_controllerNotifySettings.nReadEvIdx = temp_localConnection->_connectionData->controlersIndexWriteRead->at(i).first;
+				_controllerNotifySettings.nReadEvIdx = temp_localConnection->_connectionData->controlersIndexWriteRead->at(i).first; // TODO ERROR
 				auto controllerEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 				_controllerNotifySettings.hEvent = &controllerEvent;
 
@@ -115,53 +104,50 @@ bool NotifiedThread::createNotify() {
 	return true;
 }
 
-void NotifiedThread::waitFirstEvent() {
-	auto const& const_waitingFirstArray = _waitingFirstArray;
-	auto eventFirst = WaitForMultipleObjects(const_waitingFirstArray.size(), const_waitingFirstArray.data(), FALSE, INFINITY);
+//void NotifiedThread::closeNotifies() {
+//	try {
+//		auto temp_localConnection = _localConnection.lock();
+//		auto temp_hControllers = _hConctrollers.lock();
+//
+//		_e_getConverterNotify = nullptr;
+//		_e_getControllersNotifyList.clear();
+//
+//		temp_localConnection->cvt_SetNotification();
+//
+//		for (size_t i = 0; i < temp_hControllers->size(); i++) {
+//			temp_localConnection->ctr_SetNotification(i);
+//		}
+//	}
+//	catch (const std::exception& error) {
+//		std::cout << error.what() << "\n";
+//	}
+//
+//	refreshWaitingArray();
+//}
 
-	switch (eventFirst)
-	{
-	case 0:
-		// TODO log trace
-		ExitThread(0);
-		break;
-	case 1:
-		// TODO log trace
-		ExitThread(0);
-		break;
-	case 2:
-		ResetEvent(_waitingFirstArray.at(2));
-		createNotify();
-		waitSecondEvent();
-		break;
-	default:
-		// TODO log trace
-		break;
-	}
+
+void NotifiedThread::refreshWaitingArray() {
+	_waitingVariableArray.clear();
+	_waitingArray->clear();
+
+	if (!_e_getConverterNotify)
+		_waitingVariableArray.push_back(*_e_getConverterNotify);
+
+	if (!_e_getControllersNotifyList.empty())
+		_waitingVariableArray.insert(_waitingVariableArray.end(), _e_getControllersNotifyList.begin(), _e_getControllersNotifyList.end());
+
+	*_waitingArray = _waitingConstArray;
+	_waitingArray->insert(_waitingArray->end(), _waitingVariableArray.begin(), _waitingVariableArray.end());
 }
 
-void NotifiedThread::waitSecondEvent() {
-	_waitingSecondArray.push_back(*_e_getConverterNotify);
-	_waitingSecondArray.insert(_waitingSecondArray.end(), _e_getControllersNotifyList.begin(), _e_getControllersNotifyList.end());
-	auto const& const_waitingSecondArray = _waitingSecondArray;
+void NotifiedThread::getNewPointers(std::shared_ptr<Connection>& temp_localConnection) {
+	_hConverter = std::make_shared<HANDLE>(temp_localConnection->get_hConvertor());
+	_hConctrollers = temp_localConnection->get_hController();
+	_waitingConstArray = { *_globalExitThread, *_e_localExitThread, *temp_localConnection->_e_destroyed, *temp_localConnection->_e_newInfo, };
+	_waitingVariableArray = _waitingConstArray;
+}
 
-	while(!_waitingFirstArray.at(2)) {
-		auto eventSecond = WaitForMultipleObjects(const_waitingSecondArray.size(), const_waitingSecondArray.data(), FALSE, INFINITY);
-
-		switch (eventSecond)
-		{
-		case 0:
-			// TODO log trace
-			ExitThread(0);
-			break;
-		case 1:
-			// TODO log trace
-			ExitThread(0);
-			break;
-		case 2:
-			break;
-		default:
-			break;
-		}
-	}
+void NotifiedThread::clearNotifyList() {
+	_e_getConverterNotify = nullptr;
+	_e_getControllersNotifyList.clear();
 }

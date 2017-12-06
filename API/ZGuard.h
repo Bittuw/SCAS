@@ -207,6 +207,14 @@ typedef struct _ZG_FIND_CTR_INFO
 	INT nMaxEvents;				// Максимум событий
 	ZG_CTRI_FLAGS nFlags;		// Флаги контроллера (ZG_CTR_F_...)
 	ZG_CTR_SUB_TYPE nSubType;	// Подтип контроллера
+
+	bool operator< (const _ZG_FIND_CTR_INFO& right) {
+		return nAddr < right.nAddr;
+	}
+
+	bool operator== (const _ZG_FIND_CTR_INFO& rigth) {
+		return nSn == rigth.nSn;
+	}
 } *PZG_FIND_CTR_INFO;
 
 // Информация о контроллере, возвращаемая функциями: ZG_Ctr_Open и ZG_Ctr_GetInformation
@@ -227,6 +235,10 @@ typedef struct _ZG_CTR_INFO
 	ZG_CTR_SUB_TYPE nSubType;	// Подтип контроллера
 	INT nOptReadItems;			// Количество элементов, которое может быть считано одним запросом контроллеру 
 	INT nOptWriteItems;			// Количество элементов, которое может быть записано одним запросом контроллеру
+
+	bool operator< (const _ZG_CTR_INFO &right) {
+		return nAddr < right.nAddr;
+	}
 } *PZG_CTR_INFO;
 
 // Режим прохода контроллера

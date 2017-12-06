@@ -1,6 +1,5 @@
 #pragma once
-#include "Connection.h"
-#include "SpecialList.h"
+
 class Connection;
 
 struct AvailableConnection {
@@ -49,14 +48,7 @@ struct AvailableConnection {
 	}
 };
 
-#ifndef _converterInfoListTest
-static const auto _convertorsInfoList = std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<Connection>>);
-static const auto _converterInfoListTest = std::unique_ptr<SpecialList>(&*(new SpecialList));
-static const auto _globalExitThread = std::make_unique<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL));
-static const auto _globalNotifiedThreadReset = std::make_unique<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL));
-#endif // _converterInfoListTest
-
-//static const auto _convertorsInfoList = std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<Connection>>);
-//static const auto _converterInfoListTest = std::unique_ptr<SpecialList>(&*(new SpecialList));
-//static const auto _globalExitThread = std::make_unique<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL));
-//static const auto _globalNotifiedThreadReset = std::make_unique<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL));
+extern const std::unique_ptr<std::list<std::shared_ptr<Connection>>> _convertorsInfoList;
+extern const std::unique_ptr<SpecialList> _converterInfoListTest;
+extern const std::unique_ptr<HANDLE> _globalExitThread;
+extern const std::unique_ptr<HANDLE> _globalNotifiedThreadReset;

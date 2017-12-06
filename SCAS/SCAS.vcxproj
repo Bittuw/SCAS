@@ -164,6 +164,7 @@
     <ClCompile Include="..\API\ZGuard.cpp" />
     <ClCompile Include="..\API\ZPort.cpp" />
     <ClCompile Include="Connection.cpp" />
+    <ClCompile Include="DataStructs.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="NotifiedThread.cpp" />
     <ClCompile Include="NotifyThreads.cpp" />

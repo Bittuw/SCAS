@@ -26,10 +26,8 @@
 #pragma comment(lib, "ZGuard.lib")
 #endif // !ZGUARD_LINKONREQUEST
 #include <Utils.h>
-#include "DataStructs.h"
 #include "Exceptions.h"
-
-
+#include "SpecialList.h"
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы

@@ -1,13 +1,14 @@
 #include "stdafx.h"
 #include "NotifyThreads.h"
-
+#include "NotifiedThread.h"
+#include "DataStructs.h"
 
 NotifyThreads::NotifyThreads() :
 	_e_clearing(_converterInfoListTest->_e_clearing),
 	_e_newlist(_converterInfoListTest->_e_newlist),
 	_e_localExitThread(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL)))
 {
-	_localConverterList = _converterInfoListTest->getCopyList();
+	//_localConverterList = _converterInfoListTest->getCopyList();
 }
 
 
@@ -18,18 +19,17 @@ NotifyThreads::~NotifyThreads()
 
 
 void NotifyThreads::beginListning() {
-	const HANDLE _waitongArray[] = {*_globalExitThread, *_e_newlist};
+	std::vector<HANDLE> _waitingArray = {*_globalExitThread, *_e_newlist };
 
-	while (!*_globalExitThread) {
+	while (*_globalExitThread) {
 
-		auto event = WaitForMultipleObjects(_countof(_waitongArray), _waitongArray, FALSE, INFINITY);
+		auto event = (unsigned long)WaitForMultipleObjects(_waitingArray.size(), _waitingArray.data(), FALSE, INFINITE);
 
-		unsigned long temp = event;
 		switch (event) {
-		case WAIT_OBJECT_0 + 0:
+		case 0:
 			ExitThread(0);
 			break;
-		case WAIT_OBJECT_0 + 1:
+		case 1:
 			createNotifiedThreads();
 			break;
 		default:
@@ -45,16 +45,20 @@ void NotifyThreads::createNotifiedThreads() {
 	if (_notifiedThreadsList.empty()) {
 		createThreads(_converterInfoListTest->size());
 	}
-	else {
+	/*else { // TODO сделать
 		if ( _needSize > _notifiedThreadsList.size()) {
 			createThreads(_needSize - _notifiedThreadsList.size());
 		}
-	}
+	}*/
 }
  
 void NotifyThreads::createThreads(const int count) { // TODO make thread
-	for (int i = 0; i <= count; i++) {
-	//	auto pointer = std::unique_ptr<std::thread>(); // TODO сделать создание потока NotifiedThread
-	//	_notifiedThreadsList.push_back(pointer);
+	for (int i = 0; i < count; i++) {
+
+		auto temp = _converterInfoListTest->at(i);
+		auto pointer = std::unique_ptr<std::thread>(new std::thread([&temp, this]()  {
+			(new NotifiedThread(temp, _e_localExitThread))->startListining();
+		}));
+		pointer->join();
 	}
 }

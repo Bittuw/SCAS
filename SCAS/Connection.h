@@ -1,4 +1,5 @@
 #pragma once
+
 struct AvailableConnection;
 
 class Connection
@@ -11,14 +12,16 @@ public:
 
 	///////////////
 	void setNewConnactionInfo(std::unique_ptr<AvailableConnection>);
-	void addController(_ZG_CTR_INFO);
+	int addController(_ZG_FIND_CTR_INFO); // TODO сделать условие
 	void removeController(const int);
 	bool initialConnections();
 	///////////////
 
 	///////////////
 	void cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS);
+	void cvt_SetNotification();
 	void ctr_SetNotification(const int, _ZG_CTR_NOTIFY_SETTINGS);
+	void ctr_SetNotification(const int);
 	HRESULT cvt_GetNextMessage(); // TODO cvt_GetNextMessage
 	HRESULT ctr_GetNextMessage(const int); // TODO ctr_GetNextMessage
 	///////////////
@@ -29,7 +32,7 @@ public:
 
 	///////////////
 	HANDLE* const get_hConvertor();
-	std::shared_ptr<std::vector<std::unique_ptr<HANDLE>>> get_hController();
+	std::shared_ptr<std::vector<HANDLE>> get_hController();
 	//std::vector<_ZG_FIND_CTR_INFO>* const get_controllersInfo();
 	///////////////
 
@@ -43,15 +46,17 @@ private:
 	//int _addrOfOpenController;
 	 
 	std::unique_ptr<HANDLE> _hConvector = nullptr;
-	std::vector<std::unique_ptr<HANDLE>> _hControllersList;
+	std::unique_ptr<std::vector<HANDLE>> _hControllersList;
 
-	bool openConnection();
-	void closeConnection();
-	void scanControllers();
-	//bool openController(int); 
+	bool openConverter();
+	void closeConverter();
+	void scanControllers(); 
 	void openControllers();
-	//void closeController();
 	void closeControllers();
-	//void clearInfo();
+
+	///////////////
+	void openController(const int);
+	void closeController(const int);
+	///////////////
 };
 
