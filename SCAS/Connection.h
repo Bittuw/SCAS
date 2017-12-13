@@ -2,11 +2,9 @@
 
 struct AvailableConnection;
 
-class Connection
+class Connection // TODO добавить поле статуса соединения
 {
 public:
-	//Connection(const _ZG_ENUM_IPCVT_INFO, const std::vector<_ZP_PORT_INFO>, const ZP_PORT_TYPE);
-	//Connection();
 	Connection(std::unique_ptr<AvailableConnection>);
 	~Connection();
 
@@ -17,7 +15,8 @@ public:
 	bool initialConnections();
 	///////////////
 
-	///////////////
+	/////////////// оборачиваемые функции библиотеки SDK Guard
+	void _SetNotification();
 	void cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS);
 	void cvt_SetNotification();
 	void ctr_SetNotification(const int, _ZG_CTR_NOTIFY_SETTINGS);
@@ -33,29 +32,28 @@ public:
 	///////////////
 	HANDLE* const get_hConvertor();
 	std::shared_ptr<std::vector<HANDLE>> get_hController();
-	//std::vector<_ZG_FIND_CTR_INFO>* const get_controllersInfo();
 	///////////////
 
 	///////////////
-	std::unique_ptr<AvailableConnection> _connectionData;
-	std::shared_ptr<HANDLE> _e_newInfo = nullptr; //Событие перезаписи данных
-	std::shared_ptr<HANDLE> _e_destroyed = nullptr; // Событие уничтожения объекта
+	std::unique_ptr<AvailableConnection> _data; // Принимает новый ресур
+	std::shared_ptr<HANDLE> _e_newInfo = nullptr; // Событие перезаписи данных **оставить
+	std::shared_ptr<HANDLE> _e_destroyed = nullptr; // Событие уничтожения объекта **оставить
 	///////////////
 
 private:
 	//int _addrOfOpenController;
-	 
-	std::unique_ptr<HANDLE> _hConvector = nullptr;
-	std::unique_ptr<std::vector<HANDLE>> _hControllersList;
-
-	bool openConverter();
+	
+	std::vector<HANDLE> _hControllersList;
+	HANDLE _hConvector;
+	
 	void closeConverter();
 	void scanControllers(); 
 	void openControllers();
 	void closeControllers();
 
-	///////////////
+	/////////////// Низкоуровневые функции подключения
 	void openController(const int);
+	void openConverter();
 	void closeController(const int);
 	///////////////
 };

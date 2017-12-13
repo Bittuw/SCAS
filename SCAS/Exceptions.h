@@ -60,7 +60,7 @@ private:
 
 public:
 	OpenFailed(const std::string& message, const std::string& device) :
-		_message(std::string("Connection failed with : ") + device + std::string(";\n your message: ") + message) {}
+		_message(std::string("Connection failed with: ") + device + std::string(";\n your description: ") + message) {}
 	
 	virtual const char* what() const throw() {
 		return _message.c_str();
