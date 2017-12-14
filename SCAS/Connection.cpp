@@ -40,16 +40,16 @@ void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> point
 	// TODO обнуление всех значений и сигнал евентом
 }
 
-int Connection::addController(_ZG_FIND_CTR_INFO controller) {
-	return 0;
-}
-
-void Connection::removeController(const int) {
-
-}
+//int Connection::addController(_ZG_FIND_CTR_INFO controller) {
+//	return 0;
+//}
+//
+//void Connection::removeController(const int) {
+//
+//}
 
 /////////////// Открытые сценарии
-ErrorCode Connection::initialConnections() {
+ErrorCode Connection::initialConnections() noexcept {
 	auto result = NotDefined;
 
 	try {
@@ -61,22 +61,54 @@ ErrorCode Connection::initialConnections() {
 		}
 	}
 	catch (const std::exception& error) {
-		std::cout << error.what();
 		result = errorStatus;
+		std::cout << error.what();
 	}
 	
 	return result;
 }
 
-ErrorCode Connection::closeConnections() {
+ErrorCode Connection::closeConnections() noexcept  {
+	auto result = NotDefined;
+
 	try {
 		tryCloseConverter();
-		errorStatus = Success;
+		result = Success;
 	}
 	catch (const std::exception& error) {
+		result = errorStatus;
 		std::cout << error.what();
 	}
-	return errorStatus;
+	return result;
+}
+
+ErrorCode Connection::reconnect() noexcept {
+	auto result = NotDefined;
+
+	try {
+		result = Success;
+	}
+	catch(const std::exception& error) {
+		result = errorStatus;
+		std::cout << error.what();
+	}
+
+	return result;
+}
+
+ErrorCode Connection::getConnectionStatus() noexcept {
+	auto result = NotDefined;
+
+	try {
+		getStatus();
+		result = Success;
+	}
+	catch(const std::exception& error) {
+		result = errorStatus;
+		std::cout << error.what();
+	}
+
+	return result;
 }
 /////////////// Открытые сценарии
 
@@ -158,7 +190,7 @@ void Connection::openControllers() {
 void Connection::closeControllers() {
 	if (!_hControllersList.empty()) {
 		for (size_t i = 0; i < _hControllersList.size(); i++) {
-			updateControllerInfo(REMOVE, i);
+			updateControllerInfo(CLOSE, i);
 		}
 		_hControllersList.clear();
 	}
@@ -188,7 +220,7 @@ void Connection::updateControllerInfo(Action action, int number ) {
 		_data->controllersIndexWriteRead->push_back(temp_controlersIndexWriteRead);
 		_data->controllersStatus->push_back(true);
 		break;
-	case REMOVE:
+	case CLOSE:
 		if (number) {
 			ZG_CloseHandle(_hControllersList.at(number));
 			_data->controllersStatus->at(number) = false;
@@ -230,6 +262,23 @@ void Connection::openConverter() {
 	_data->mutex->unlock();
 }
 
+void Connection::closeConverter() {
+	if (!_hControllersList.empty())
+		closeControllers();
+	updateConverterInfo(false);
+}
+
+ZP_CONNECTION_STATUS Connection::getStatus() {
+	ZP_CONNECTION_STATUS status;
+	_data->mutex->lock();
+	if (ZG_Cvt_GetConnectionStatus(_hConvector, &status) != S_OK) {
+		_data->mutex->unlock();
+		throw CommandError(std::string("getStatus"));
+	}
+	_data->mutex->unlock();
+	return status;
+}
+
 void Connection::openController(const int number) {
 	auto address = (unsigned int)_data->controllersInfo->at(number).nAddr;
 	_data->mutex->lock();
@@ -252,14 +301,8 @@ void Connection::readControllerIdxs(const int number) {
 	_data->mutex->unlock();
 }
 
-void Connection::closeConverter() {
-	if (!_hControllersList.empty())
-		closeControllers();
-	updateConverterInfo(false);
-}
-
 void Connection::closeController(const int number) {
-	updateControllerInfo(REMOVE, number);
+	updateControllerInfo(CLOSE, number);
 }
 /////////////// Низкоуровневые функции подключения
 

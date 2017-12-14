@@ -5,7 +5,7 @@ enum ErrorCode;
 
 enum Action {
 	ADD = 1,
-	REMOVE = 2,
+	CLOSE = 2,
 	CLEAR = 3
 };
 
@@ -17,11 +17,13 @@ public:
 
 	/////////////// Сценарии
 	void setNewConnactionInfo(std::unique_ptr<AvailableConnection>);
-	int addController(_ZG_FIND_CTR_INFO); // TODO сделать условие
-	void removeController(const int);
-	ErrorCode initialConnections(); // Отрытие конвертора и создание/открытие контроллеров DONE
-	ErrorCode closeConnections();
-	//bool reconnect();
+	//int addController(_ZG_FIND_CTR_INFO); // TODO сделать условие
+	//void removeController(const int);
+	ErrorCode initialConnections() noexcept; // Отрытие конвертора и создание/открытие контроллеров DONE
+	ErrorCode closeConnections() noexcept;
+	ErrorCode reconnect() noexcept;
+	ErrorCode getConnectionStatus() noexcept;
+	//ErrorCode reconnect();
 	//AvailableConnection storeData();
 	//AvailableConnection restoreData();
 	///////////////
@@ -72,10 +74,12 @@ private:
 	///////////////
 
 	/////////////// Низкоуровневые функции подключения
-	void openController(const int); // DONE
+	
 	void openConverter(); // DONE
-	void readControllerIdxs(const int); // DONE
 	void closeConverter(); // DONE
+	ZP_CONNECTION_STATUS getStatus();
+	void openController(const int); // DONE
+	void readControllerIdxs(const int); // DONE
 	void closeController(const int);  // DONE
 	///////////////
 };
