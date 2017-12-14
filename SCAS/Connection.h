@@ -22,6 +22,8 @@ public:
 	ErrorCode initialConnections(); // Отрытие конвертора и создание/открытие контроллеров DONE
 	ErrorCode closeConnections();
 	//bool reconnect();
+	//AvailableConnection storeData();
+	//AvailableConnection restoreData();
 	///////////////
 
 	/////////////// Оборачиваемые функции библиотеки SDK Guard
@@ -38,8 +40,8 @@ public:
 	static bool StaticTest();
 #endif
 
-	///////////////
-	std::unique_ptr<AvailableConnection> _data; // Принимает новый ресур
+	/////////////// 
+	std::unique_ptr<AvailableConnection> _data; // Принимает структура хранения информации
 	std::shared_ptr<HANDLE> _e_newInfo = nullptr; // Событие перезаписи данных **оставить
 	std::shared_ptr<HANDLE> _e_destroyed = nullptr; // Событие уничтожения объекта **оставить
 	///////////////
@@ -50,19 +52,18 @@ private:
 	
 	std::vector<HANDLE> _hControllersList;
 	HANDLE _hConvector = NULL;
-	
+	_ZG_CVT_OPEN_PARAMS temp_Params;
+
 	/////////////// Временная информация о текущем контроллере
 	int temp_writeIndex = 0, temp_readIndex = 0;
-
 	HANDLE temp_hController = NULL;
 	_ZG_CTR_INFO temp_controllersDetailInfo;
-	_ZG_CVT_OPEN_PARAMS temp_Params;
 	std::pair<int, int> temp_controlersIndexWriteRead;
 	///////////////
 
 	/////////////// Приватные сценарии
-	bool tryOpenConverter();
-	void tryCloseConverter();
+	bool tryOpenConverter(); // Попытка открытия конвертора DONE
+	void tryCloseConverter(); // Попытка закрытия конвертора DONE
 	void scanControllers(); // Сканирование контроллеров DONE
 	void openControllers(); // Подключение контроллерров DONE
 	void closeControllers(); // Закртыие контрллеров DONE
