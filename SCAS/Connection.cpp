@@ -40,14 +40,6 @@ void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> point
 	// TODO обнуление всех значений и сигнал евентом
 }
 
-//int Connection::addController(_ZG_FIND_CTR_INFO controller) {
-//	return 0;
-//}
-//
-//void Connection::removeController(const int) {
-//
-//}
-
 /////////////// Открытые сценарии
 ErrorCode Connection::initialConnections() noexcept {
 	auto result = NotDefined;
@@ -86,6 +78,12 @@ ErrorCode Connection::reconnect() noexcept {
 	auto result = NotDefined;
 
 	try {
+		tryCloseConverter();
+		if (tryOpenConverter()) {
+			scanControllers();
+			openControllers();
+			SetEvent(*_e_newInfo);
+		}
 		result = Success;
 	}
 	catch(const std::exception& error) {
@@ -96,12 +94,13 @@ ErrorCode Connection::reconnect() noexcept {
 	return result;
 }
 
-ErrorCode Connection::getConnectionStatus() noexcept {
+ErrorCode Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
 	auto result = NotDefined;
 
 	try {
-		getStatus();
+		auto temp = getStatus();
 		result = Success;
+		(temp != ZP_CS_DISCONNECTED)? connection = true : connection = false;
 	}
 	catch(const std::exception& error) {
 		result = errorStatus;
@@ -122,12 +121,8 @@ bool Connection::tryOpenConverter() {
 			openConverter();
 		}
 		catch (const std::exception& error) {
-			if (typeid(error) == typeid(OpenFailed))
-				if (i < _data->converterPorts->size())
-					continue;
-				else {
-					break;
-				}
+			if (typeid(error) == typeid(OpenFailed) && i < _data->converterPorts->size() - 1)
+				continue;
 			else {
 				std::cout << error.what();
 			}
@@ -203,11 +198,12 @@ void Connection::updateConverterInfo(bool connection) {
 		break;
 	case false:
 		ZG_CloseHandle(_hConvector);
+		_hConvector = NULL;
 		_data->converterStatus = connection;
 		break;
-	default:
+	/*default:
 		errorStatus = ConnectionCommandFail;
-		throw CommandError(std::string("updateConverterInfo: not avaliable parametr"));
+		throw CommandError(std::string("updateConverterInfo: not avaliable parametr"));*/
 	}
 }
 
@@ -344,39 +340,38 @@ HRESULT Connection::ctr_GetNextMessage(const int) {
 
 #ifdef _DEBUG
 bool Connection::StaticTest() {
+	for (int i = 0; i < 20; i++) {
+		HANDLE *_hSearch = new HANDLE;
+		HRESULT hrSearch;
+		INT_PTR nPortCount;
+		std::unique_ptr<Connection> tempConnection = nullptr;
+		ZP_PORT_TYPE portType = ZP_PORT_IP;
+		_ZG_CVT_OPEN_PARAMS _searchParams;
+		ZeroMemory(&_searchParams, sizeof(_searchParams));
+		std::unique_ptr<AvailableConnection> tempAvailableConnection(new AvailableConnection);
 
-	HANDLE *_hSearch = new HANDLE;
-	HRESULT hrSearch;
-	INT_PTR nPortCount;
-	std::unique_ptr<Connection> tempConnection = nullptr;
-	ZP_PORT_TYPE portType = ZP_PORT_IP;
-	_ZG_CVT_OPEN_PARAMS _searchParams;
-	ZeroMemory(&_searchParams, sizeof(_searchParams));
-	std::unique_ptr<AvailableConnection> tempAvailableConnection(new AvailableConnection);
+		if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
+			throw SearchError(std::string("Error in search")); // TODO log trace
 
-	if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
-		throw SearchError(std::string("Error in search")); // TODO log trace
-
-	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(tempAvailableConnection->converterInfo), &(*tempAvailableConnection->converterPorts)[0], tempAvailableConnection->converterPorts->size(), &nPortCount)) == S_OK) {
-		try {
+		while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(tempAvailableConnection->converterInfo), &(*tempAvailableConnection->converterPorts)[0], tempAvailableConnection->converterPorts->size(), &nPortCount)) == S_OK) {
+			auto temp = bool();
 			tempAvailableConnection->portType = ZP_PORT_IP;
-			tempConnection = std::unique_ptr<Connection> (new Connection(std::move(tempAvailableConnection)));
+			tempConnection = std::unique_ptr<Connection>(new Connection(std::move(tempAvailableConnection)));
 			tempConnection->initialConnections();
+			tempConnection->reconnect();
+			tempConnection->getConnectionStatus(temp);
+			tempConnection->closeConnections();
+			tempConnection->getConnectionStatus(temp);
 			_convertorsInfoList->push_back(std::move(tempConnection));
-		}
-		catch (const std::exception& error) {
-			// TODO log trace and to log base
-			std::cout << error.what() << "\n";
-			//throw SearchError(std::string(error.what()));
-		}
 
-		_tprintf(TEXT("1 convertor found\n"));
-		
-		tempAvailableConnection = std::move(std::unique_ptr<AvailableConnection>(new AvailableConnection));
+			_tprintf(TEXT("1 convertor found\n"));
+
+			tempAvailableConnection = std::move(std::unique_ptr<AvailableConnection>(new AvailableConnection));
+		}
+		ZG_CloseHandle(*_hSearch);
+		_convertorsInfoList->clear();
+		delete _hSearch;
 	}
-	ZG_CloseHandle(*_hSearch);
-	_convertorsInfoList->clear();
-	delete _hSearch;
 	return true;
 }
 #endif

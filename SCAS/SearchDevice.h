@@ -19,6 +19,8 @@ public:
 	static bool StaticTest();
 #endif
 
+	static void CreateThread();
+
 private:
 	
 	std::set<std::shared_ptr<AvailableConnection>> _localAvaliableConnectionsSet; // Локальный список найденных конверторов

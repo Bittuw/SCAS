@@ -193,7 +193,7 @@ void StopNotifyThread()
 void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
-
+	
 	//std::thread Scanning, Notify;
 
 	while (1) {

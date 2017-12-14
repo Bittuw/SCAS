@@ -8,15 +8,21 @@ NotifyThreads::NotifyThreads() :
 	_e_newlist(_converterInfoListTest->_e_newlist),
 	_e_localExitThread(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL)))
 {
-	//_localConverterList = _converterInfoListTest->getCopyList();
+	std::thread NotifyThread(&NotifyThreads::beginListning, this);
+	NotifyThread.detach();
 }
 
 
-NotifyThreads::~NotifyThreads()
-{
+NotifyThreads::~NotifyThreads(){}
 
+void NotifyThreads::runListening() {
+	if (!isRunning) {
+		NotifyThreads notifies();
+	}
+	else {
+		
+	}
 }
-
 
 void NotifyThreads::beginListning() {
 	std::vector<HANDLE> _waitingArray = {*_globalExitThread, *_e_newlist };
@@ -62,3 +68,4 @@ void NotifyThreads::createThreads(const int count) { // TODO make thread
 		pointer->join();
 	}
 }
+

@@ -48,8 +48,8 @@ void SearchDevice::scanNetwork() {
 
 #ifdef _DEBUG 
 bool SearchDevice::StaticTest() {
-	(new SearchDevice(*(new _ZG_CVT_OPEN_PARAMS)))->scanNetwork();
-	_converterInfoListTest->clear();
+	/*(new SearchDevice(*(new _ZG_CVT_OPEN_PARAMS)))->scanNetwork();
+	_converterInfoListTest->clear();*/
 	return true;
 }
 #endif

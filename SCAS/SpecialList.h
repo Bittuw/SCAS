@@ -3,55 +3,26 @@ class Connection;
 
 class SpecialList { 
 public:
-	SpecialList() :
-		_m_access(new std::mutex),
-		_e_newlist(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
-		_e_clearing(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
-		_e_at(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL)))
-	{}; // TODO создать евенты _e_pushing и _e_poping
+	SpecialList(); // TODO создать евенты _e_pushing и _e_poping
+	~SpecialList();
 
-	~SpecialList() {};
+	/////////////// Общие функции
+	std::shared_ptr<std::mutex> getMutex();
+	std::vector<std::shared_ptr<Connection>> getCopyList();
+	void setNewList(std::unique_ptr<std::vector<std::shared_ptr<Connection>>>);
+	/////////////// 
 
-	std::shared_ptr<std::mutex> getMutex() { return _m_access; };
-
-	std::vector<std::shared_ptr<Connection>> getCopyList() { 
-		auto temp = *_wrappedList;
-		return temp; 
-	};
-
-	void setNewList(std::unique_ptr<std::vector<std::shared_ptr<Connection>>> wrappedList) {
-		_m_access->lock();
-		_wrappedList = std::move(wrappedList);
-		_m_access->unlock();
-		SetEvent(*_e_newlist);
-	};
-
-	void clear() {
-		_m_access->lock();
-		_wrappedList->clear();
-		_m_access->unlock();
-		SetEvent(*_e_clearing);
-	};
-
-	std::shared_ptr<Connection> at(const int position) {
-		_m_access->lock();
-		auto temp = _wrappedList->at(position);
-		_m_access->unlock();
-		SetEvent(*_e_at);
-		return temp;
-	};
-
-	int size() {
-		_m_access->lock();
-		auto temp = _wrappedList->size();
-		_m_access->unlock();
-		return temp;
-	}
+	/////////////// Оборачиваемые функции
+	//void push(std::shared_ptr<Connection>); // Положить
+	//std::shared_ptr<Connection> pop(); // Достать (с удаление)
+	std::shared_ptr<Connection> at(const int);
+	int size();
+	void clear();
+	/////////////// 
 
 #ifdef _DEBUG
-	static void StaticTest() {
-		/*SpecialList<Connection> temp;
-		temp.setList(std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<T>>));*/
+	static void StaticTest() { // TODO нужен тест
+		
 	}; 
 #endif // _DEBUG
 	

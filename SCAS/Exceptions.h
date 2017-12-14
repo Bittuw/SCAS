@@ -2,31 +2,34 @@
 #include <exception>
 
 class ConnectionError : public std::exception {
+protected:
+	std::string _message;
 
 public:
+	ConnectionError(const std::string& message) : _message(message) {}
+
 	virtual const char* what() const throw() {
-		return "Connection Exception";
+		return "Connection Exception: ";
 	}
 };
 
-class InitializationSearchError : public ConnectionError {
-private:
-	std::string _message;
+class ThreadAlradyExists : public std::exception {
 
+
+};
+
+class InitializationSearchError : public ConnectionError {
 public :
 	InitializationSearchError(const std::string& message) :
-	_message(std::string("Error to initial search: ") + message){}
+		ConnectionError((std::string("Error to initial search: ") + message + "\n")){}
 	virtual const char* what() const throw() {
 		return _message.c_str();
 	}
 };
 
 class SearchError : public ConnectionError {
-private :
-	std::string _message;
-
 public:
-	SearchError(const std::string& message) : _message(std::string("Search ended with an error: ") + message) {}
+	SearchError(const std::string& message) : ConnectionError(std::string("Search ended with an error: ") + message) {}
 	virtual const char* what() const throw() {
 		return _message.c_str();
 	}
@@ -48,23 +51,19 @@ private:
 	std::string _message;
 
 public:
-	CommandError(const std::string& message) : _message(std::string("Error while performing command: ") + message){}
+	CommandError(const std::string& message) : _message(std::string("Error while performing command: ") + message + "\n"){}
 	virtual const char* what() const throw() {
 		return _message.c_str();
 	}
 };
 
 class OpenFailed : public ConnectionError {
-private:
-	std::string _message;
-
 public:
 	OpenFailed(const std::string& message, const std::string& device) :
-		_message(std::string("Connection failed with: ") + device + std::string(";\n your description: ") + message) {}
-	
+		ConnectionError(std::string("Connection failed with: ") + device + std::string(";\n your description: ") + message + "\n") {}
+
 	virtual const char* what() const throw() {
 		return _message.c_str();
 	}
-
 };
 

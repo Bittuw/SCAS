@@ -4,6 +4,7 @@ class NotifiedThread
 {
 public:
 	NotifiedThread(std::shared_ptr<Connection>, std::shared_ptr<HANDLE>);
+	NotifiedThread() {};
 	~NotifiedThread();
 	///////////////
 	void startListining();

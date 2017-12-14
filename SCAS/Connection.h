@@ -20,9 +20,11 @@ public:
 	//int addController(_ZG_FIND_CTR_INFO); // TODO сделать условие
 	//void removeController(const int);
 	ErrorCode initialConnections() noexcept; // Отрытие конвертора и создание/открытие контроллеров DONE
-	ErrorCode closeConnections() noexcept;
-	ErrorCode reconnect() noexcept;
-	ErrorCode getConnectionStatus() noexcept;
+	ErrorCode closeConnections() noexcept; // Закрыть все подключения DONE
+	ErrorCode reconnect() noexcept; // 
+	ErrorCode getConnectionStatus(_Out_ bool&) noexcept; // Статус подключения конвертора
+	//ErrorCode addController(_ZG_FIND_CTR_INFO); // Добавить контроллер
+	//ErrorCode removeController(); // Удалить контроллер (полностью)
 	//ErrorCode reconnect();
 	//AvailableConnection storeData();
 	//AvailableConnection restoreData();
@@ -34,8 +36,6 @@ public:
 	void cvt_SetNotification();
 	void ctr_SetNotification(const int, _ZG_CTR_NOTIFY_SETTINGS);
 	void ctr_SetNotification(const int);
-	HRESULT cvt_GetNextMessage(); // TODO cvt_GetNextMessage
-	HRESULT ctr_GetNextMessage(const int); // TODO ctr_GetNextMessage
 	///////////////
 
 #ifdef _DEBUG 
@@ -73,11 +73,15 @@ private:
 	void updateControllerInfo(Action, int = 0); // Обновление информации о контроллере DONE
 	///////////////
 
+	/////////////// Низкоуровневые функции команды
+	HRESULT cvt_GetNextMessage(); // TODO cvt_GetNextMessage
+	HRESULT ctr_GetNextMessage(const int); // TODO ctr_GetNextMessage
+	/////////////// 
+
 	/////////////// Низкоуровневые функции подключения
-	
 	void openConverter(); // DONE
 	void closeConverter(); // DONE
-	ZP_CONNECTION_STATUS getStatus();
+	ZP_CONNECTION_STATUS getStatus(); // DONE
 	void openController(const int); // DONE
 	void readControllerIdxs(const int); // DONE
 	void closeController(const int);  // DONE
