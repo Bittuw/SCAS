@@ -8,14 +8,15 @@ public:
 	Connection(std::unique_ptr<AvailableConnection>);
 	~Connection();
 
-	///////////////
+	/////////////// Сценарии
 	void setNewConnactionInfo(std::unique_ptr<AvailableConnection>);
 	int addController(_ZG_FIND_CTR_INFO); // TODO сделать условие
 	void removeController(const int);
-	bool initialConnections();
+	bool initialConnections(); //
+	bool reconnect();
 	///////////////
 
-	/////////////// оборачиваемые функции библиотеки SDK Guard
+	/////////////// Оборачиваемые функции библиотеки SDK Guard
 	void _SetNotification();
 	void cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS);
 	void cvt_SetNotification();
@@ -46,10 +47,12 @@ private:
 	std::vector<HANDLE> _hControllersList;
 	HANDLE _hConvector;
 	
+	/////////////// Приватные сценарии
 	void closeConverter();
 	void scanControllers(); 
 	void openControllers();
 	void closeControllers();
+	///////////////
 
 	/////////////// Низкоуровневые функции подключения
 	void openController(const int);

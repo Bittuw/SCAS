@@ -82,7 +82,7 @@ bool NotifiedThread::createNotifies() {
 			
 			for (size_t i = 0; i < temp_hControllers->size(); i++) { // TODO ERROR
 
-				_controllerNotifySettings.nReadEvIdx = temp_localConnection->_connectionData->controlersIndexWriteRead->at(i).first; // TODO ERROR
+				_controllerNotifySettings.nReadEvIdx = temp_localConnection->_data->controlersIndexWriteRead->at(i).first; // TODO ERROR
 				auto controllerEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 				_controllerNotifySettings.hEvent = &controllerEvent;
 

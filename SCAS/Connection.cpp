@@ -112,7 +112,7 @@ void Connection::closeController(const int number) {
 
 void Connection::closeConverter() {
 	closeControllers();
-	ZG_CloseHandle(*_hConvector);
+	ZG_CloseHandle(_hConvector);
 	_data->isConverterJoinable = false;
 }
 
