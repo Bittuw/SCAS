@@ -25,7 +25,7 @@ void SearchDevice::scanNetwork() {
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
 	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(_connectionData->converterInfo), _connectionData->converterPorts->data(), _connectionData->converterPorts->size(), &nPortCount)) == S_OK) {
-		*(_connectionData->portType) = ZP_PORT_IP;
+		_connectionData->portType = ZP_PORT_IP;
 		_currentConnection = std::unique_ptr<Connection>(new Connection(std::move(_connectionData)));
 		try {
 			_currentConnection->initialConnections();

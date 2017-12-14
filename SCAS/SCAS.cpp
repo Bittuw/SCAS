@@ -194,7 +194,7 @@ void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 
-	std::thread Scanning, Notify;
+	//std::thread Scanning, Notify;
 
 	while (1) {
 		PRINT("Enter commant: \n");
@@ -227,18 +227,18 @@ void MainLoop() {
 				}
 				break;
 			case 3: // TODO Собрать логи
-				SpecialList::StaticTest();
+			//	SpecialList::StaticTest();
 				//temp.setList(std::move(*(new std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<Connection>>))));
 				break;
 			case 4: // TODO 
-				Scanning = std::thread([]() {
-					(new SearchDevice(*new _ZG_CVT_OPEN_PARAMS))->scanNetwork();
-				});
-				Notify = std::thread([]() {
-					(new NotifyThreads())->beginListning();
-				});
-				Scanning.join();
-				Notify.join();
+				//Scanning = std::thread([]() {
+				//	(new SearchDevice(*new _ZG_CVT_OPEN_PARAMS))->scanNetwork();
+				//});
+				//Notify = std::thread([]() {
+				//	(new NotifyThreads())->beginListning();
+				//});
+				//Scanning.join();
+				//Notify.join();
 				break;
 			case 0:
 				return;

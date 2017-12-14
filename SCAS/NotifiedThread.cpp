@@ -78,18 +78,18 @@ bool NotifiedThread::createNotifies() {
 		_controllerNotifySettings.nCheckStatePeriod = 500;
 
 		try {
-			temp_localConnection->cvt_SetNotification(_converterNotifySettings);
-			
-			for (size_t i = 0; i < temp_hControllers->size(); i++) { // TODO ERROR
+			//temp_localConnection->cvt_SetNotification(_converterNotifySettings);
+			//
+			//for (size_t i = 0; i < temp_hControllers->size(); i++) { // TODO ERROR
 
-				_controllerNotifySettings.nReadEvIdx = temp_localConnection->_data->controlersIndexWriteRead->at(i).first; // TODO ERROR
-				auto controllerEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-				_controllerNotifySettings.hEvent = &controllerEvent;
+			//	_controllerNotifySettings.nReadEvIdx = temp_localConnection->_data->controlersIndexWriteRead->at(i).first; // TODO ERROR
+			//	auto controllerEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+			//	_controllerNotifySettings.hEvent = &controllerEvent;
 
-				temp_localConnection->ctr_SetNotification(i, _controllerNotifySettings);
+			//	temp_localConnection->ctr_SetNotification(i, _controllerNotifySettings);
 
-				_e_getControllersNotifyList.push_back(std::move(controllerEvent));
-			}
+			//	_e_getControllersNotifyList.push_back(std::move(controllerEvent));
+			//}
 		}
 		catch (CommandError e) {
 			std::cout << e.what() << "\n";
@@ -141,10 +141,10 @@ void NotifiedThread::refreshWaitingArray() {
 }
 
 void NotifiedThread::getNewPointers(std::shared_ptr<Connection>& temp_localConnection) {
-	_hConverter = std::make_shared<HANDLE>(temp_localConnection->get_hConvertor());
-	_hConctrollers = temp_localConnection->get_hController();
-	_waitingConstArray = { *_globalExitThread, *_e_localExitThread, *temp_localConnection->_e_destroyed, *temp_localConnection->_e_newInfo, };
-	_waitingVariableArray = _waitingConstArray;
+	//_hConverter = std::make_shared<HANDLE>(temp_localConnection->get_hConvertor());
+	//_hConctrollers = temp_localConnection->get_hController();
+	//_waitingConstArray = { *_globalExitThread, *_e_localExitThread, *temp_localConnection->_e_destroyed, *temp_localConnection->_e_newInfo, };
+	//_waitingVariableArray = _waitingConstArray;
 }
 
 void NotifiedThread::clearNotifyList() {
