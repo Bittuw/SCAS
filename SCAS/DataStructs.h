@@ -13,6 +13,7 @@ enum ErrorCode {
 };
 
 struct AvailableConnection {
+
 	std::shared_ptr<_ZG_ENUM_IPCVT_INFO> converterInfo = nullptr; // Общая информация  о конверторе
 	std::shared_ptr<_ZG_CVT_INFO> converterDetailInfo = nullptr; // Информация после открытия соединения
 	std::shared_ptr<std::vector<_ZP_PORT_INFO>> converterPorts = nullptr; // Список портов конвертора
@@ -42,6 +43,7 @@ struct AvailableConnection {
 		converterInfo->cbSize = sizeof(_ZG_ENUM_IPCVT_INFO);
 		converterPorts->resize(2);
 	}
+
 	~AvailableConnection() {
 		converterInfo = nullptr;
 		converterDetailInfo = nullptr;

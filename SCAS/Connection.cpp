@@ -17,21 +17,26 @@ errorStatus(NotDefined)
 		throw ConstructError(std::string("Bad initialize data!"));
 
 	_data = std::move(availableConnection);
+
+	commonConverterSettings = { 0 };
+	commonConverterSettings.nNMask = ZG_NF_CVT_CTR_EXIST | ZG_CVTNF_CONNECTION_CHANGE | ZG_NF_CVT_CTR_DBL_CHECK;
+	commonConverterSettings.nScanCtrsPeriod = 2000;
+
+	commonControllerSettings = { 0 };
+	commonControllerSettings.nNMask = ZG_NF_CTR_NEW_EVENT | ZG_NF_CTR_CLOCK | ZG_NF_CTR_ADDR_CHANGE | ZG_NF_CTR_KEY_TOP;
+	commonControllerSettings.nCheckStatePeriod = 1500;
+	commonControllerSettings.nClockOffs = 30;
 }
 
 Connection::~Connection()
 {// TODO log trace
-	if (!_hControllersList.empty()) {
-		for (size_t i = 0; i < _hControllersList.size(); i++)
-			ZG_CloseHandle(_hControllersList[i]);
-
-		_hControllersList.clear();
+	SetEvent(*_e_destroyed);
+	try {
+		tryCloseConverter();
 	}
-
-	if (_hConvector != NULL)
-			ZG_CloseHandle(_hConvector);
-
-	_hConvector = NULL;
+	catch (std::exception& error) {
+		std::cout << error.what();
+	}
 }
 
 void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> pointer) { // Нужна проверка
@@ -104,6 +109,21 @@ ErrorCode Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
 		(temp != ZP_CS_DISCONNECTED)? connection = true : connection = false;
 	}
 	catch(const std::exception& error) {
+		result = errorStatus;
+		std::cout << error.what();
+	}
+
+	return result;
+}
+
+ErrorCode Connection::setNotifications(_Out_ std::vector<HANDLE>& waitingArray) noexcept {
+	auto result = NotDefined;
+
+	try {
+		trySetNotifications(waitingArray);
+		result = Success;
+	}
+	catch (const std::exception& error) {
 		result = errorStatus;
 		std::cout << error.what();
 	}
@@ -235,6 +255,8 @@ void Connection::updateControllerInfo(Action action, int number ) {
 		ZeroMemory(&temp_controllersDetailInfo, sizeof(temp_controllersDetailInfo));
 		ZeroMemory(&temp_controlersIndexWriteRead, sizeof(temp_controlersIndexWriteRead));
 		break;
+	case CHANGE: // TODO
+		break;
 	default:
 		errorStatus = ConnectionCommandFail;
 		throw CommandError(std::string("updateControllerInfo number: " + number + ' ' + action));
@@ -245,6 +267,31 @@ void Connection::updateControllerInfo(Action action, int number ) {
 	temp_hController = NULL;
 	ZeroMemory(&temp_controllersDetailInfo, sizeof(temp_controllersDetailInfo));
 	ZeroMemory(&temp_controlersIndexWriteRead, sizeof(temp_controlersIndexWriteRead));
+}
+
+void Connection::trySetNotifications(_Out_ std::vector<HANDLE>& waitingArray) {
+	waitingArray.clear();
+
+	auto temp_commonConverterSettings  = commonConverterSettings;
+	auto eventConverter = CreateEvent(NULL, TRUE, FALSE, NULL);
+	temp_commonConverterSettings.hEvent = &eventConverter;
+	cvt_SetNotification(temp_commonConverterSettings);
+	waitingArray.push_back(eventConverter);
+
+	for (unsigned i = _hControllersList.size(); i <= _hControllersList.size(); i++) {
+		try {
+			auto temp_commonControllerSettings = commonControllerSettings;
+			auto eventController = CreateEvent(NULL, TRUE, FALSE, NULL);
+			temp_commonControllerSettings.hEvent = &eventController;
+			temp_commonControllerSettings.nReadEvIdx = _data->controllersIndexWriteRead->at(i).first;
+			ctr_SetNotification(i, temp_commonControllerSettings);
+			waitingArray.push_back(eventController);
+		}
+		catch (const std::exception& error) {
+			errorStatus = ControllerCommandFail;
+			std::cout << error.what() << "\n";
+		}
+	}
 }
 /////////////// Приватные сценарии
 
@@ -270,6 +317,7 @@ ZP_CONNECTION_STATUS Connection::getStatus() {
 	_data->mutex->lock();
 	if (ZG_Cvt_GetConnectionStatus(_hConvector, &status) != S_OK) {
 		_data->mutex->unlock();
+		errorStatus = ConnectionCommandFail;
 		throw CommandError(std::string("getStatus"));
 	}
 	_data->mutex->unlock();
@@ -303,32 +351,27 @@ void Connection::closeController(const int number) {
 }
 /////////////// Низкоуровневые функции подключения
 
-void Connection::cvt_SetNotification() {
-	//_data->mutex->lock();
-	//if (!CheckZGError(ZG_Cvt_SetNotification(&*_hConvector, NULL), _T("ZG_Cvt_SetNotification"))) {
-	//	_data->mutex->unlock();
-	//	throw CommandError(std::string("ZG_Cvt_SetNotification"));
-	//}
-	//_data->mutex->unlock();
+/////////////// Низкоуровневые функции команды
+void Connection::cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS settings) {
+	_data->mutex->lock();
+	if (ZG_Cvt_SetNotification(_hConvector, &settings) != S_OK) {
+		_data->mutex->unlock();
+		errorStatus = ConverterCommandFail;
+		throw CommandError(std::string("ZG_Cvt_SetNotification"));
+	}
+	_data->mutex->unlock();
 }
 
-void Connection::ctr_SetNotification(const int position, _ZG_CTR_NOTIFY_SETTINGS notifySetting) {
-	//_data->mutex->lock();
-	//if (!CheckZGError(ZG_Ctr_SetNotification(&(*_hControllersList)[position], &notifySetting), _T("ZG_Cvt_SetNotification"))) {
-	//	_data->mutex->unlock();
-	//	throw CommandError(std::string("ZG_Ctr_SetNotification at: " + position));
-	//}
-	//_data->mutex->unlock();
+void Connection::ctr_SetNotification(const int position, _ZG_CTR_NOTIFY_SETTINGS settings) {
+	_data->mutex->lock();
+	if (ZG_Ctr_SetNotification(_hControllersList[position], &settings) != S_OK) {
+		_data->mutex->unlock();
+		errorStatus = ControllerCommandFail;
+		throw CommandError(std::string("ZG_Ctr_SetNotification at: " + std::to_string(position)));
+	}
+	_data->mutex->unlock();
 }
-
-void Connection::ctr_SetNotification(const int position) {
-	//_data->mutex->lock();
-	//if (!CheckZGError(ZG_Ctr_SetNotification(&(*_hControllersList)[position], NULL), _T("ZG_Cvt_SetNotification"))) {
-	//	_data->mutex->unlock();
-	//	throw CommandError(std::string("ZG_Ctr_SetNotification at: " + position));
-	//}
-	//_data->mutex->unlock();
-}
+/////////////// Низкоуровневые функции команды
 
 HRESULT Connection::cvt_GetNextMessage() {
 	return NULL;

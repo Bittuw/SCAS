@@ -3,7 +3,6 @@
 class NotifiedThread
 {
 public:
-	NotifiedThread(std::shared_ptr<Connection>, std::shared_ptr<HANDLE>);
 	NotifiedThread() {};
 	~NotifiedThread();
 	///////////////
@@ -13,7 +12,11 @@ public:
 	//void closeNotifies();
 	///////////////
 
+	static void runListening(std::shared_ptr<Connection>, std::shared_ptr<HANDLE>);
+
 private:
+	NotifiedThread(std::shared_ptr<Connection>, std::shared_ptr<HANDLE>);
+
 	std::vector<HANDLE> _waitingConstArray;
 	std::vector<HANDLE> _waitingVariableArray;
 	std::unique_ptr<std::vector<HANDLE>> _waitingArray;
@@ -26,8 +29,8 @@ private:
 	std::shared_ptr<HANDLE> _e_newInfo; // Событие перезаписи данных
 	std::shared_ptr<HANDLE> _e_destroyed; // Событие уничтожения
 
-	std::unique_ptr<HANDLE> _e_getConverterNotify; // Локальный евент события конвертора
-	std::vector<HANDLE> _e_getControllersNotifyList; // Массив евентов контроллерова
+	//std::unique_ptr<HANDLE> _e_getConverterNotify; // Локальный евент события конвертора
+	std::vector<HANDLE> _e_NotifiesList; // Массив евентов контроллерова
 
 	void readConvertorNotify();
 	void readControllerNotify();

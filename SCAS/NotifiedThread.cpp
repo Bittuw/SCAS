@@ -6,8 +6,7 @@
 NotifiedThread::NotifiedThread(std::shared_ptr<Connection> connection, std::shared_ptr<HANDLE> e_localExitThread) :
 	_localConnection(connection),
 	_e_localExitThread(e_localExitThread),
-	_e_getConverterNotify(std::make_unique<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
-	_waitingArray(std::make_unique<std::vector<HANDLE>>(*(new std::vector<HANDLE>)))
+	_waitingArray(std::make_unique<std::vector<HANDLE>>())
 {
 	if (auto temp_localConnection = _localConnection.lock()) {
 		_e_newInfo = temp_localConnection->_e_newInfo;
@@ -25,10 +24,20 @@ NotifiedThread::~NotifiedThread()
 {
 }
 
+void NotifiedThread::runListening(std::shared_ptr<Connection> connection, std::shared_ptr<HANDLE> localEvent) {
+	try {
+		std::thread NotifiedThread(&NotifiedThread::startListining, new NotifiedThread(connection, localEvent));
+		NotifiedThread.detach();
+	}
+	catch (const std::exception& error) {
+		std::cout << error.what();
+	}
+}
 
 void NotifiedThread::startListining() {
 	while (!_localConnection.expired()) {
-		
+		auto connection = _localConnection.lock();
+
 		auto event = WaitForMultipleObjects(_waitingArray->size(), _waitingArray->data(), FALSE, INFINITE);
 
 		switch (event) {
@@ -50,7 +59,7 @@ void NotifiedThread::startListining() {
 			refreshWaitingArray();
 			break;
 		default:
-			if(4 <= event <= 4 + _waitingArray->size()) // —ценарий 5
+			if((size_t)4 <= (size_t)event <= (size_t)4 + _waitingArray->size()) // —ценарий 5
 
 				break;
 			else { // —ценарий 6
@@ -64,18 +73,7 @@ void NotifiedThread::startListining() {
 bool NotifiedThread::createNotifies() {
 	if (auto temp_localConnection = _localConnection.lock()) {
 
-		auto temp_hConverter = _hConverter.lock();
-		auto temp_hControllers = _hConctrollers.lock();
-
-		_ZG_CVT_NOTIFY_SETTINGS _converterNotifySettings = { 0 };
-		_ZG_CTR_NOTIFY_SETTINGS _controllerNotifySettings = { 0 };
-
-		_converterNotifySettings.nNMask = ZG_NF_CVT_CTR_EXIST | ZG_NF_CVT_CTR_CHANGE | ZG_CVTN_CONNECTION_CHANGE | ZG_NF_CVT_ERROR;
-		_converterNotifySettings.hEvent = &*_e_getConverterNotify;
-		_converterNotifySettings.nScanCtrsPeriod = 2000; // ѕериод сканировани€ контроллеров
-
-		_controllerNotifySettings.nNMask = ZG_NF_CTR_NEW_EVENT | ZG_NF_CTR_CLOCK | ZG_NF_CTR_KEY_TOP;
-		_controllerNotifySettings.nCheckStatePeriod = 500;
+		switch (temp_localConnection->setNotifications(_e_NotifiesList))
 
 		try {
 			//temp_localConnection->cvt_SetNotification(_converterNotifySettings);
@@ -129,15 +127,13 @@ bool NotifiedThread::createNotifies() {
 void NotifiedThread::refreshWaitingArray() {
 	_waitingVariableArray.clear();
 	_waitingArray->clear();
-
-	if (!_e_getConverterNotify)
-		_waitingVariableArray.push_back(*_e_getConverterNotify);
-
-	if (!_e_getControllersNotifyList.empty())
-		_waitingVariableArray.insert(_waitingVariableArray.end(), _e_getControllersNotifyList.begin(), _e_getControllersNotifyList.end());
+	
+	if (!_e_NotifiesList.empty()) {
+		std::copy(_e_NotifiesList.begin(), _e_NotifiesList.end(), _waitingVariableArray.begin());
+	}
 
 	*_waitingArray = _waitingConstArray;
-	_waitingArray->insert(_waitingArray->end(), _waitingVariableArray.begin(), _waitingVariableArray.end());
+	std::copy(_waitingVariableArray.begin(), _waitingVariableArray.end(), _waitingArray->end());
 }
 
 void NotifiedThread::getNewPointers(std::shared_ptr<Connection>& temp_localConnection) {
@@ -148,6 +144,6 @@ void NotifiedThread::getNewPointers(std::shared_ptr<Connection>& temp_localConne
 }
 
 void NotifiedThread::clearNotifyList() {
-	_e_getConverterNotify = nullptr;
-	_e_getControllersNotifyList.clear();
+	//_e_getConverterNotify = nullptr;
+	_e_NotifiesList.clear();
 }

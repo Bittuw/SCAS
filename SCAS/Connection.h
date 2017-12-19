@@ -6,7 +6,8 @@ enum ErrorCode;
 enum Action {
 	ADD = 1,
 	CLOSE = 2,
-	CLEAR = 3
+	CLEAR = 3,
+	CHANGE = 4
 };
 
 class Connection // TODO добавить поле статуса соединения
@@ -21,8 +22,9 @@ public:
 	//void removeController(const int);
 	ErrorCode initialConnections() noexcept; // Отрытие конвертора и создание/открытие контроллеров DONE
 	ErrorCode closeConnections() noexcept; // Закрыть все подключения DONE
-	ErrorCode reconnect() noexcept; // 
+	ErrorCode reconnect() noexcept; // Пересоздать соединение DONE
 	ErrorCode getConnectionStatus(_Out_ bool&) noexcept; // Статус подключения конвертора DONE
+	ErrorCode setNotifications(_Out_ std::vector<HANDLE>&) noexcept; // Установка уведомлений
 	//ErrorCode addController(_ZG_FIND_CTR_INFO); // Добавить контроллер
 	//ErrorCode removeController(); // Удалить контроллер (полностью)
 	//ErrorCode reconnect();
@@ -33,9 +35,9 @@ public:
 	/////////////// Оборачиваемые функции библиотеки SDK Guard
 	//void _SetNotification();
 	//void cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS);
-	void cvt_SetNotification();
-	void ctr_SetNotification(const int, _ZG_CTR_NOTIFY_SETTINGS);
-	void ctr_SetNotification(const int);
+	//void cvt_SetNotification();
+	//void ctr_SetNotification(const int, _ZG_CTR_NOTIFY_SETTINGS);
+	//void ctr_SetNotification(const int);
 	///////////////
 
 #ifdef _DEBUG 
@@ -55,6 +57,8 @@ private:
 	std::vector<HANDLE> _hControllersList;
 	HANDLE _hConvector = NULL;
 	_ZG_CVT_OPEN_PARAMS temp_Params;
+	_ZG_CVT_NOTIFY_SETTINGS commonConverterSettings;
+	_ZG_CTR_NOTIFY_SETTINGS commonControllerSettings;
 
 	/////////////// Временная информация о текущем контроллере
 	int temp_writeIndex = 0, temp_readIndex = 0;
@@ -63,17 +67,20 @@ private:
 	std::pair<int, int> temp_controlersIndexWriteRead;
 	///////////////
 
-	/////////////// Приватные сценарии
-	bool tryOpenConverter(); // Попытка открытия конвертора DONE
+	/////////////// Приватные сценарии // TODO обработка исключений для итераций вызовов и вызов новых исключений
+	bool tryOpenConverter(); // Попытка открытия конвертора DONE / итерация обработана
 	void tryCloseConverter(); // Попытка закрытия конвертора DONE
-	void scanControllers(); // Сканирование контроллеров DONE
-	void openControllers(); // Подключение контроллерров DONE
+	void scanControllers(); // Сканирование контроллеров DONE / итерация (возможно)
+	void openControllers(); // Подключение контроллерров DONE / итерация
 	void closeControllers(); // Закртыие контрллеров DONE
 	void updateConverterInfo(bool); // Обновление информации о конверторе DONE
 	void updateControllerInfo(Action, int = 0); // Обновление информации о контроллере DONE
+	void trySetNotifications(_Out_ std::vector<HANDLE>&); // Установка уведомлений / итерация
 	///////////////
 
-	/////////////// Низкоуровневые функции команды
+	/////////////// Низкоуровневые функции-команды
+	void cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS);
+	void ctr_SetNotification(const int, _ZG_CTR_NOTIFY_SETTINGS);
 	HRESULT cvt_GetNextMessage(); // TODO cvt_GetNextMessage
 	HRESULT ctr_GetNextMessage(const int); // TODO ctr_GetNextMessage
 	/////////////// 

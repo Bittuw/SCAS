@@ -1,6 +1,7 @@
 // SCAS.cpp: определяет точку входа для консольного приложения.
 //
 #include "stdafx.h"
+#include "DataStructs.h"
 #include "Connection.h"
 #include "SearchDevice.h"
 #include "SpecialList.h"
@@ -200,8 +201,9 @@ void MainLoop() {
 		PRINT("Enter commant: \n");
 		PRINT("1 - Test Connection\n");
 		PRINT("2 - Test SearchDevice\n");
-		PRINT("3 - TestSpecialList\n");
+		PRINT("3 - Test NotifyThreads\n");
 		PRINT("4 - Test Notified Threads\n");
+		PRINT("10 - GlobalExit\n");
 		PRINT("0 - quit\n");
 	
 		TCHAR szBuf[128];
@@ -222,13 +224,17 @@ void MainLoop() {
 				try {
 					SearchDevice::StaticTest();
 				}
-				catch (const SearchError& error) {
+				catch (const std::exception& error) {
 					std::cout << error.what() << "\n";
 				}
 				break;
 			case 3: // TODO Собрать логи
-			//	SpecialList::StaticTest();
-				//temp.setList(std::move(*(new std::unique_ptr<std::list<std::shared_ptr<Connection>>>(new std::list<std::shared_ptr<Connection>>))));
+				try {
+					NotifyThreads::StaticTest();
+				}
+				catch (const std::exception& error) {
+					std::cout << error.what() << "\n";
+				}
 				break;
 			case 4: // TODO 
 				//Scanning = std::thread([]() {
@@ -239,6 +245,9 @@ void MainLoop() {
 				//});
 				//Scanning.join();
 				//Notify.join();
+				break;
+			case  10:
+				SetEvent(*_globalExitThread);
 				break;
 			case 0:
 				return;

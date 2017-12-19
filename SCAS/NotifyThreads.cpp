@@ -3,29 +3,41 @@
 #include "NotifiedThread.h"
 #include "DataStructs.h"
 
+bool NotifyThreads::isRunning = false;
+
 NotifyThreads::NotifyThreads() :
 	_e_clearing(_converterInfoListTest->_e_clearing),
 	_e_newlist(_converterInfoListTest->_e_newlist),
+	_e_pushing(_converterInfoListTest->_e_pushing),
 	_e_localExitThread(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL)))
 {
-	std::thread NotifyThread(&NotifyThreads::beginListning, this);
-	NotifyThread.detach();
+	/*std::thread NotifyThread(&NotifyThreads::beginListning, this);
+	NotifyThread.detach();*/
 }
 
 
-NotifyThreads::~NotifyThreads(){}
+NotifyThreads::~NotifyThreads(){
+	isRunning = false;
+}
 
 void NotifyThreads::runListening() {
 	if (!isRunning) {
-		NotifyThreads notifies;
+		try {
+			std::thread NotifyThread(&NotifyThreads::beginListning, new NotifyThreads);
+			NotifyThread.detach();
+			isRunning = true;
+		}
+		catch (const std::exception& error) {
+			std::cout << error.what();
+		}
 	}
 	else {
-		
+		// TODO Throw log trace
 	}
 }
 
 void NotifyThreads::beginListning() {
-	std::vector<HANDLE> _waitingArray = {*_globalExitThread, *_e_newlist };
+	std::vector<HANDLE> _waitingArray = {*_globalExitThread, *_e_newlist , *_e_pushing};
 
 	while (*_globalExitThread) {
 
@@ -33,9 +45,15 @@ void NotifyThreads::beginListning() {
 
 		switch (event) {
 		case 0:
+			SetEvent(*_e_localExitThread);
 			ExitThread(0);
 			break;
 		case 1:
+			// TODO log trace
+			createNotifiedThreads();
+			break;
+		case 2:
+			// TODO log trace
 			createNotifiedThreads();
 			break;
 		default:
@@ -46,26 +64,20 @@ void NotifyThreads::beginListning() {
 }
 
 void NotifyThreads::createNotifiedThreads() {
-	auto _needSize = (size_t)_converterInfoListTest->size();
-
-	if (_notifiedThreadsList.empty()) {
-		createThreads(_converterInfoListTest->size());
-	}
-	/*else { // TODO сделать
-		if ( _needSize > _notifiedThreadsList.size()) {
-			createThreads(_needSize - _notifiedThreadsList.size());
-		}
-	}*/
+	createThreads(_converterInfoListTest->untreatedConnections);
 }
  
 void NotifyThreads::createThreads(const int count) { // TODO make thread
-	for (int i = 0; i < count; i++) {
+	auto indexOfUntreated = _converterInfoListTest->size() - count;
+	for (int i = indexOfUntreated; i < count; i++) {
 
 		auto temp = _converterInfoListTest->at(i);
-		auto pointer = std::unique_ptr<std::thread>(new std::thread([&temp, this]()  {
-			(new NotifiedThread(temp, _e_localExitThread))->startListining();
-		}));
-		pointer->join();
+		NotifiedThread::runListening( temp, _e_localExitThread);
+		_converterInfoListTest->untreatedConnections--;
 	}
 }
 
+void NotifyThreads::StaticTest() {
+	runListening();
+	runListening();
+}
