@@ -6,18 +6,18 @@
 #pragma once
 
 #include "targetver.h"
+#include <algorithm>
 #include <exception>
 #include <iostream>
 #include <memory>
 #include <stdio.h>
 #include <tchar.h>
 #include <vector>
-#include <set>
 #include <list>
+#include <set>
 #include <locale.h>
 #include <thread>
 #include <mutex>
-#include <thread>
 #include <ZGuard.h>
 #include <ZPort.h>
 #if !defined(ZGUARD_LINKONREQUEST)

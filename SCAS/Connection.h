@@ -22,7 +22,7 @@ public:
 	ErrorCode initialConnections() noexcept; // Отрытие конвертора и создание/открытие контроллеров DONE
 	ErrorCode closeConnections() noexcept; // Закрыть все подключения DONE
 	ErrorCode reconnect() noexcept; // 
-	ErrorCode getConnectionStatus(_Out_ bool&) noexcept; // Статус подключения конвертора
+	ErrorCode getConnectionStatus(_Out_ bool&) noexcept; // Статус подключения конвертора DONE
 	//ErrorCode addController(_ZG_FIND_CTR_INFO); // Добавить контроллер
 	//ErrorCode removeController(); // Удалить контроллер (полностью)
 	//ErrorCode reconnect();
@@ -43,7 +43,7 @@ public:
 #endif
 
 	/////////////// 
-	std::unique_ptr<AvailableConnection> _data; // Принимает структура хранения информации
+	std::unique_ptr<AvailableConnection> _data; // Принимает структуру хранения информации
 	std::shared_ptr<HANDLE> _e_newInfo = nullptr; // Событие перезаписи данных **оставить
 	std::shared_ptr<HANDLE> _e_destroyed = nullptr; // Событие уничтожения объекта **оставить
 	///////////////

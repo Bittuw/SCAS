@@ -33,6 +33,7 @@ Connection::~Connection()
 
 	_hConvector = NULL;
 }
+
 void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> pointer) { // Нужна проверка
 	_data = std::move(pointer);
 	if (!initialConnections());
@@ -340,38 +341,38 @@ HRESULT Connection::ctr_GetNextMessage(const int) {
 
 #ifdef _DEBUG
 bool Connection::StaticTest() {
-	for (int i = 0; i < 20; i++) {
-		HANDLE *_hSearch = new HANDLE;
-		HRESULT hrSearch;
-		INT_PTR nPortCount;
-		std::unique_ptr<Connection> tempConnection = nullptr;
-		ZP_PORT_TYPE portType = ZP_PORT_IP;
-		_ZG_CVT_OPEN_PARAMS _searchParams;
-		ZeroMemory(&_searchParams, sizeof(_searchParams));
-		std::unique_ptr<AvailableConnection> tempAvailableConnection(new AvailableConnection);
+	
+	HANDLE *_hSearch = new HANDLE;
+	HRESULT hrSearch;
+	INT_PTR nPortCount;
+	std::unique_ptr<Connection> tempConnection = nullptr;
+	ZP_PORT_TYPE portType = ZP_PORT_IP;
+	_ZG_CVT_OPEN_PARAMS _searchParams;
+	ZeroMemory(&_searchParams, sizeof(_searchParams));
+	std::unique_ptr<AvailableConnection> tempAvailableConnection(new AvailableConnection);
 
-		if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
-			throw SearchError(std::string("Error in search")); // TODO log trace
+	if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
+		throw SearchError(std::string("Error in search")); // TODO log trace
 
-		while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(tempAvailableConnection->converterInfo), &(*tempAvailableConnection->converterPorts)[0], tempAvailableConnection->converterPorts->size(), &nPortCount)) == S_OK) {
-			auto temp = bool();
-			tempAvailableConnection->portType = ZP_PORT_IP;
-			tempConnection = std::unique_ptr<Connection>(new Connection(std::move(tempAvailableConnection)));
-			tempConnection->initialConnections();
-			tempConnection->reconnect();
-			tempConnection->getConnectionStatus(temp);
-			tempConnection->closeConnections();
-			tempConnection->getConnectionStatus(temp);
-			_convertorsInfoList->push_back(std::move(tempConnection));
+	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(tempAvailableConnection->converterInfo), &(*tempAvailableConnection->converterPorts)[0], tempAvailableConnection->converterPorts->size(), &nPortCount)) == S_OK) {
+		auto temp = bool();
+		tempAvailableConnection->portType = ZP_PORT_IP;
+		tempConnection = std::make_unique<Connection>(std::move(tempAvailableConnection));
+		tempConnection->initialConnections();
+		tempConnection->reconnect();
+		tempConnection->getConnectionStatus(temp);
+		tempConnection->closeConnections();
+		tempConnection->getConnectionStatus(temp);
+		_converterInfoListTest->push_back(std::move(tempConnection));
 
-			_tprintf(TEXT("1 convertor found\n"));
+		_tprintf(TEXT("1 convertor found\n"));
 
-			tempAvailableConnection = std::move(std::unique_ptr<AvailableConnection>(new AvailableConnection));
-		}
-		ZG_CloseHandle(*_hSearch);
-		_convertorsInfoList->clear();
-		delete _hSearch;
+		tempAvailableConnection = std::move(std::unique_ptr<AvailableConnection>(new AvailableConnection));
 	}
+	ZG_CloseHandle(*_hSearch);
+	_converterInfoListTest->clear();
+	delete _hSearch;
+	
 	return true;
 }
 #endif

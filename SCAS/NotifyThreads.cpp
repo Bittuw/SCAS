@@ -17,7 +17,7 @@ NotifyThreads::~NotifyThreads(){}
 
 void NotifyThreads::runListening() {
 	if (!isRunning) {
-		NotifyThreads notifies();
+		NotifyThreads notifies;
 	}
 	else {
 		
