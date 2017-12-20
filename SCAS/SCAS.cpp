@@ -198,11 +198,13 @@ void MainLoop() {
 	//std::thread Scanning, Notify;
 
 	while (1) {
+		ResetEvent(*_globalExitThread);
 		PRINT("Enter commant: \n");
 		PRINT("1 - Test Connection\n");
 		PRINT("2 - Test SearchDevice\n");
 		PRINT("3 - Test NotifyThreads\n");
 		PRINT("4 - Test Notified Threads\n");
+		PRINT("5 - Test Notify Converter\n");
 		PRINT("10 - GlobalExit\n");
 		PRINT("0 - quit\n");
 	
@@ -245,6 +247,11 @@ void MainLoop() {
 				//});
 				//Scanning.join();
 				//Notify.join();
+				break;
+			case 5:
+				_converterInfoListTest->clear();
+				NotifyThreads::runListening();
+				Connection::StaticTest();
 				break;
 			case  10:
 				SetEvent(*_globalExitThread);

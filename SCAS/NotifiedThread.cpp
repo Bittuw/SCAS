@@ -3,15 +3,19 @@
 #include "Connection.h"
 #include "DataStructs.h"
 
-NotifiedThread::NotifiedThread(std::shared_ptr<Connection> connection, std::shared_ptr<HANDLE> e_localExitThread) :
+NotifiedThread::NotifiedThread(std::shared_ptr<Connection> connection) :
 	_localConnection(connection),
-	_e_localExitThread(e_localExitThread),
-	_waitingArray(std::make_unique<std::vector<HANDLE>>())
+	_e_localExitThread(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
+	_waitingArray(std::make_unique<std::vector<HANDLE>>()),
+	_e_NotifiesList({}),
+	_converterMessagesList({}),
+	_controllerMessagesList({}),
+	_controllerEventList({})
 {
 	if (auto temp_localConnection = _localConnection.lock()) {
 		_e_newInfo = temp_localConnection->_e_newInfo;
 		_e_destroyed = temp_localConnection->_e_destroyed;
-		getNewPointers(temp_localConnection);
+		_waitingConstArray = { *_globalExitThread, *_e_localExitThread, *_e_destroyed, *_e_newInfo };
 		refreshWaitingArray();
 	}
 	else {
@@ -24,9 +28,9 @@ NotifiedThread::~NotifiedThread()
 {
 }
 
-void NotifiedThread::runListening(std::shared_ptr<Connection> connection, std::shared_ptr<HANDLE> localEvent) {
+void NotifiedThread::runListening(std::shared_ptr<Connection> connection) {
 	try {
-		std::thread NotifiedThread(&NotifiedThread::startListining, new NotifiedThread(connection, localEvent));
+		std::thread NotifiedThread(&NotifiedThread::startListining, new NotifiedThread(connection));
 		NotifiedThread.detach();
 	}
 	catch (const std::exception& error) {
@@ -36,15 +40,17 @@ void NotifiedThread::runListening(std::shared_ptr<Connection> connection, std::s
 
 void NotifiedThread::startListining() {
 	while (!_localConnection.expired()) {
-		auto connection = _localConnection.lock();
 
 		auto event = WaitForMultipleObjects(_waitingArray->size(), _waitingArray->data(), FALSE, INFINITE);
 
-		switch (event) {
-		case 0: // Сценарий 1
+		switch (event) { 
+		case 0: // Сценарий 1 global Закрыть уведомления
+			temp_localConnection = _localConnection.lock();
+			temp_localConnection->closeConnections();
+			temp_localConnection = nullptr;
 			ExitThread(0);
 			break;
-		case 1: // Сценарий 2
+		case 1: // Сценарий 2 local
 			ExitThread(0); 
 			break;
 		case 2: // Сценарий 3: Уничтожение Connection
@@ -52,16 +58,17 @@ void NotifiedThread::startListining() {
 			ExitThread(0);
 			break;
 		case 3: // Сценарий 4: Новые данные Connection
-			clearNotifyList();
-			getNewPointers(_localConnection.lock());
 			createNotifies();
 			ResetEvent(_waitingArray->at(event));
 			refreshWaitingArray();
 			break;
-		default:
-			if((size_t)4 <= (size_t)event <= (size_t)4 + _waitingArray->size()) // Сценарий 5
-
-				break;
+		case WAIT_TIMEOUT:
+			break;
+		default: // Остальные 
+			if ((size_t)4 <= (size_t)event <= _waitingArray->size()) { // Сценарий 5
+				ResetEvent(_waitingArray->at(event));
+				switchDevice(event - 4);
+			}
 			else { // Сценарий 6
 				// TODO throw exception
 				break;
@@ -70,80 +77,85 @@ void NotifiedThread::startListining() {
 	}
 }
 
+/////////////// Приватные сценарии
 bool NotifiedThread::createNotifies() {
-	if (auto temp_localConnection = _localConnection.lock()) {
-
-		switch (temp_localConnection->setNotifications(_e_NotifiesList))
-
-		try {
-			//temp_localConnection->cvt_SetNotification(_converterNotifySettings);
-			//
-			//for (size_t i = 0; i < temp_hControllers->size(); i++) { // TODO ERROR
-
-			//	_controllerNotifySettings.nReadEvIdx = temp_localConnection->_data->controlersIndexWriteRead->at(i).first; // TODO ERROR
-			//	auto controllerEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-			//	_controllerNotifySettings.hEvent = &controllerEvent;
-
-			//	temp_localConnection->ctr_SetNotification(i, _controllerNotifySettings);
-
-			//	_e_getControllersNotifyList.push_back(std::move(controllerEvent));
-			//}
-		}
-		catch (CommandError e) {
-			std::cout << e.what() << "\n";
-			return false;
-		}
+	if (temp_localConnection = _localConnection.lock()) {
+		temp_localConnection->setNotifications(_e_NotifiesList); // TODO пока без проверки на ошибки
 	}
 	else {
 		// TODO если weak_ptr пуст
 		return false;
 	}
-
+	temp_localConnection = nullptr;
 	return true;
 }
 
-//void NotifiedThread::closeNotifies() {
-//	try {
-//		auto temp_localConnection = _localConnection.lock();
-//		auto temp_hControllers = _hConctrollers.lock();
-//
-//		_e_getConverterNotify = nullptr;
-//		_e_getControllersNotifyList.clear();
-//
-//		temp_localConnection->cvt_SetNotification();
-//
-//		for (size_t i = 0; i < temp_hControllers->size(); i++) {
-//			temp_localConnection->ctr_SetNotification(i);
-//		}
-//	}
-//	catch (const std::exception& error) {
-//		std::cout << error.what() << "\n";
-//	}
-//
-//	refreshWaitingArray();
-//}
-
-
-void NotifiedThread::refreshWaitingArray() {
-	_waitingVariableArray.clear();
-	_waitingArray->clear();
-	
-	if (!_e_NotifiesList.empty()) {
-		std::copy(_e_NotifiesList.begin(), _e_NotifiesList.end(), _waitingVariableArray.begin());
+void NotifiedThread::switchDevice(const int event) {
+	temp_localConnection = _localConnection.lock();
+	if (temp_localConnection) {
+		if (event == 0) { // Конвертер
+			_converterMessagesList.clear();
+			temp_localConnection->readConverterNotifies(_converterMessagesList);
+			// TODO расшифровка сообщения
+			// TODO реакция
+		}
+		else { // Контроллеры
+			_controllerMessagesList.clear();
+			temp_localConnection->readControllerNotifies(event - 1, _controllerMessagesList);
+			parseControllerNotify();
+			// TODO расшифровка сообщения
+			// TODO реакция
+		}
 	}
+}
+/////////////// Приватные сценарии
+void NotifiedThread::refreshWaitingArray() {
+	try {
+		_waitingVariableArray.clear();
+		_waitingArray->clear();
 
-	*_waitingArray = _waitingConstArray;
-	std::copy(_waitingVariableArray.begin(), _waitingVariableArray.end(), _waitingArray->end());
+		if (!_e_NotifiesList.empty()) {
+			_waitingVariableArray.resize(_e_NotifiesList.size());
+			std::copy(_e_NotifiesList.begin(), _e_NotifiesList.end(), _waitingVariableArray.begin());
+		}
+
+		*_waitingArray = _waitingConstArray;
+		_waitingArray->resize(_waitingArray->size() + _waitingVariableArray.size());
+		std::copy(_waitingVariableArray.begin(), _waitingVariableArray.end(), _waitingArray->end() - _waitingVariableArray.size());
+	}
+	catch (const std::exception& error) {
+		std::cout << error.what();
+	}
 }
 
-void NotifiedThread::getNewPointers(std::shared_ptr<Connection>& temp_localConnection) {
-	//_hConverter = std::make_shared<HANDLE>(temp_localConnection->get_hConvertor());
-	//_hConctrollers = temp_localConnection->get_hController();
-	//_waitingConstArray = { *_globalExitThread, *_e_localExitThread, *temp_localConnection->_e_destroyed, *temp_localConnection->_e_newInfo, };
-	//_waitingVariableArray = _waitingConstArray;
-}
+void NotifiedThread::parseControllerNotify() {
 
-void NotifiedThread::clearNotifyList() {
-	//_e_getConverterNotify = nullptr;
-	_e_NotifiesList.clear();
+	size_t i = 0;
+
+	for each (auto message in _controllerMessagesList) {
+		switch (message.first) {
+		case ZG_NF_CTR_NEW_EVENT:
+			temp_localConnection->readControllerEvent(i, _controllerEventList);
+			// TODO считывание событий
+			// TODO вывод куда хочу
+			break;
+		case ZG_NF_CTR_CLOCK: 
+			// TODO вызов функции установки текущего времени
+			break;
+		case ZG_NF_CTR_KEY_TOP: 
+			// TODO хз
+			break;
+		case ZG_NF_CTR_ADDR_CHANGE: 
+			// TODO обновить информацию о контроллере
+			break;
+		case ZG_NF_CTR_ERROR:
+			// TODO ошибки
+			break;
+		default:
+			// TODO критические ошибки
+			break;
+		}
+
+		i++;
+	}
 }

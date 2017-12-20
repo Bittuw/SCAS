@@ -3,27 +3,22 @@
 class NotifiedThread
 {
 public:
-	NotifiedThread() {};
 	~NotifiedThread();
 	///////////////
 	void startListining();
-	bool createNotifies();
-	void createNotify(PZG_FIND_CTR_INFO);
-	//void closeNotifies();
 	///////////////
 
-	static void runListening(std::shared_ptr<Connection>, std::shared_ptr<HANDLE>);
+	static void runListening(std::shared_ptr<Connection>);
 
 private:
-	NotifiedThread(std::shared_ptr<Connection>, std::shared_ptr<HANDLE>);
+	NotifiedThread(std::shared_ptr<Connection>);
 
 	std::vector<HANDLE> _waitingConstArray;
 	std::vector<HANDLE> _waitingVariableArray;
 	std::unique_ptr<std::vector<HANDLE>> _waitingArray;
 
 	std::weak_ptr<Connection> _localConnection; // Weak_ptr на Connection
-	std::weak_ptr<HANDLE> _hConverter; // HANDLE конвертора
-	std::weak_ptr<std::vector<HANDLE>> _hConctrollers; // Массива HANDLE контроллеров
+	std::shared_ptr<Connection> temp_localConnection;
 
 	std::shared_ptr<HANDLE> _e_localExitThread; // Локальный евент выхода
 	std::shared_ptr<HANDLE> _e_newInfo; // Событие перезаписи данных
@@ -31,16 +26,18 @@ private:
 
 	//std::unique_ptr<HANDLE> _e_getConverterNotify; // Локальный евент события конвертора
 	std::vector<HANDLE> _e_NotifiesList; // Массив евентов контроллерова
-
-	void readConvertorNotify();
-	void readControllerNotify();
-
-	void parceConverterNotify();
-	void parceControllerNotify();
-
+	std::vector<std::pair<UINT, LPARAM>> _converterMessagesList;
+	std::vector<std::pair<UINT, LPARAM>> _controllerMessagesList;
+	std::vector<_ZG_CTR_EVENT> _controllerEventList;
+	/////////////// Приватные сценарии
+	bool createNotifies();
+	void switchDevice(const int);
 	///////////////
-	void clearNotifyList();
-	void getNewPointers(std::shared_ptr<Connection>&);
+
+	//void parceConverterNotify();
+	void parseControllerNotify();
+
+	/////////////// Утилиты
 	void refreshWaitingArray();
 	///////////////
 };

@@ -50,10 +50,12 @@ void NotifyThreads::beginListning() {
 			break;
 		case 1:
 			// TODO log trace
+			ResetEvent(_waitingArray.at(event));
 			createNotifiedThreads();
 			break;
 		case 2:
 			// TODO log trace
+			ResetEvent(_waitingArray.at(event));
 			createNotifiedThreads();
 			break;
 		default:
@@ -69,10 +71,10 @@ void NotifyThreads::createNotifiedThreads() {
  
 void NotifyThreads::createThreads(const int count) { // TODO make thread
 	auto indexOfUntreated = _converterInfoListTest->size() - count;
-	for (int i = indexOfUntreated; i < count; i++) {
+	for (int i = indexOfUntreated; i < _converterInfoListTest->size(); i++) {
 
 		auto temp = _converterInfoListTest->at(i);
-		NotifiedThread::runListening( temp, _e_localExitThread);
+		NotifiedThread::runListening(temp);
 		_converterInfoListTest->untreatedConnections--;
 	}
 }
