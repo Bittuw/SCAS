@@ -59,6 +59,7 @@ ErrorCode Connection::initialConnections() noexcept {
 			scanControllers();
 			openControllers();
 			SetEvent(*_e_newInfo);
+			updateControllerInfo(CLEAR);
 			result = Success;
 		}
 	}
@@ -75,6 +76,7 @@ ErrorCode Connection::closeConnections() noexcept  {
 
 	try {
 		tryCloseConverter();
+		updateControllerInfo(CLEAR);
 		result = Success;
 	}
 	catch (const std::exception& error) {
@@ -94,6 +96,7 @@ ErrorCode Connection::reconnect() noexcept {
 			openControllers();
 			SetEvent(*_e_newInfo);
 		}
+		updateControllerInfo(CLEAR);
 		result = Success;
 	}
 	catch(const std::exception& error) {
@@ -108,9 +111,9 @@ ErrorCode Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
 	auto result = NotDefined;
 
 	try {
-		auto temp = getStatus();
+		(getStatus() != ZP_CS_DISCONNECTED) ? connection = true : connection = false;
+		updateControllerInfo(CLEAR);
 		result = Success;
-		(temp != ZP_CS_DISCONNECTED)? connection = true : connection = false;
 	}
 	catch(const std::exception& error) {
 		result = errorStatus;
@@ -125,6 +128,7 @@ ErrorCode Connection::setNotifications(_Out_ std::vector<HANDLE>& waitingArray) 
 
 	try {
 		trySetNotifications(waitingArray);
+		updateControllerInfo(CLEAR);
 		result = Success;
 	}
 	catch (const std::exception& error) {
@@ -140,6 +144,7 @@ ErrorCode Connection::closeNotifications() {
 
 	try {
 		tryCloseNotifications();
+		updateControllerInfo(CLEAR);
 		result = Success;
 	}
 	catch (const std::exception& error) {
@@ -155,6 +160,7 @@ ErrorCode Connection::readConverterNotifies(std::vector<std::pair<UINT, LPARAM>>
 
 	try {
 		readConverterNotify(converterMessageList);
+		updateControllerInfo(CLEAR);
 		result = Success;
 	}
 	catch (const std::exception& error) {
@@ -169,6 +175,7 @@ ErrorCode Connection::readControllerNotifies(const int controller, _Out_ std::ve
 
 	try {
 		readControllerNotify(controller, controllerMessageList);
+		updateControllerInfo(CLEAR);
 		result = Success;
 	}
 	catch (const std::exception& error) {
@@ -183,6 +190,7 @@ ErrorCode Connection::readControllerEvent(const int controller, _Out_ std::vecto
 
 	try {
 		ReadControllerEvents(controller, controllerEventsList);
+		updateControllerInfo(CLEAR);
 		result = Success;
 	}
 	catch (const std::exception& error) {
@@ -233,7 +241,7 @@ void Connection::scanControllers() {
 	_ZG_FIND_CTR_INFO mControllerInfo;
 	_data->controllersInfo->clear(); 
 
-	if (!CheckZGError(ZG_Cvt_SearchControllers(_hConvector, MaxCount, NULL), _T("ZG_Cvt_SearchControllers")))
+	if (ZG_Cvt_SearchControllers(_hConvector, MaxCount, NULL) != S_OK)
 		throw SearchError(std::string("Error while search controllers"));
 
 	while ((hrController = ZG_Cvt_FindNextController(_hConvector, &(_ZG_FIND_CTR_INFO&)mControllerInfo)) == S_OK) {
@@ -257,8 +265,7 @@ void Connection::openControllers() {
 			updateControllerInfo(ADD);
 		}
 		catch (const std::exception& error) {
-			updateControllerInfo(ADD);
-			throw error;
+			updateControllerInfo(ADDERR);
 		}
 		i++;
 	}
@@ -266,9 +273,7 @@ void Connection::openControllers() {
 
 void Connection::closeControllers() {
 	if (!_hControllersList.empty()) {
-		for (size_t i = 0; i < _hControllersList.size(); i++) {
-			updateControllerInfo(CLOSE, i);
-		}
+		updateControllerInfo(REBASE);
 		_hControllersList.clear();
 	}
 }
@@ -299,13 +304,19 @@ void Connection::updateControllerInfo(Action action, int number ) {
 		_data->controllersIndexWriteRead->push_back(temp_controlerIndexWriteRead);
 		_data->controllersStatus->push_back(true);
 		break;
+	case ADDERR:
+		_hControllersList.push_back(temp_hController);
+		_data->controllersDetailInfo->push_back(temp_controllersDetailInfo);
+		_data->controllersIndexWriteRead->push_back(temp_controlerIndexWriteRead);
+		_data->controllersStatus->push_back(false);
+		break;
 	case CLOSE:
 		if (number >= 0) {
 			ZG_CloseHandle(_hControllersList.at(number));
 			_data->controllersStatus->at(number) = false;
-			_data->controllersDetailInfo->erase(_data->controllersDetailInfo->begin() + number);
-			_data->controllersStatus->erase(_data->controllersStatus->begin() + number);
-			_data->controllersIndexWriteRead->erase(_data->controllersIndexWriteRead->begin() + number);
+			ZeroMemory(&_data->controllersDetailInfo->at(number), sizeof(_data->controllersDetailInfo->at(number)));
+			ZeroMemory(&_data->controllersStatus->at(number), sizeof(_data->controllersStatus->at(number)));
+			ZeroMemory(&_data->controllersIndexWriteRead->at(number), sizeof(&_data->controllersIndexWriteRead->at(number)));
 		}
 		else {
 			errorStatus = ConnectionCommandFail;
@@ -313,26 +324,31 @@ void Connection::updateControllerInfo(Action action, int number ) {
 		}
 		break;
 	case CLEAR:
-		temp_writeIndex = temp_readIndex = 0;
-		if (temp_hController != NULL)
-			ZG_CloseHandle(temp_hController);
+		temp_writeIndex = temp_readIndex = currentControllerNumber = NULL;
 		temp_hController = NULL;
+		ZeroMemory(&temp_Params, sizeof(temp_Params));
 		ZeroMemory(&temp_controllersDetailInfo, sizeof(temp_controllersDetailInfo));
 		ZeroMemory(&temp_controlerIndexWriteRead, sizeof(temp_controlerIndexWriteRead));
-		temp_controllerEvents.clear();
+		_converterMessageList.clear();
+		_controllerMessageList.clear();
 		break;
 	case CHANGE: // TODO
+		break;
+	case REBASE:
+		for each (auto controller in _hControllersList)
+		{
+			ZG_CloseHandle(controller);
+		}
+		_data->controllersStatus->clear();
+		_data->controllersDetailInfo->clear();
+		_data->controllersStatus->clear();
+		_data->controllersIndexWriteRead->clear();
 		break;
 	default:
 		errorStatus = ConnectionCommandFail;
 		throw CommandError(std::string("updateControllerInfo number: " + number + ' ' + action));
 		break;
 	}
-
-	temp_writeIndex = temp_readIndex = 0;
-	temp_hController = NULL;
-	ZeroMemory(&temp_controllersDetailInfo, sizeof(temp_controllersDetailInfo));
-	ZeroMemory(&temp_controlerIndexWriteRead, sizeof(temp_controlerIndexWriteRead));
 }
 
 void Connection::trySetNotifications(_Out_ std::vector<HANDLE>& waitingArray) {
@@ -345,18 +361,20 @@ void Connection::trySetNotifications(_Out_ std::vector<HANDLE>& waitingArray) {
 	waitingArray.push_back(eventConverter);
 
 	for (size_t i = 0; i < _hControllersList.size(); i++) {
-		try {
-			auto temp_commonControllerSettings = commonControllerSettings;
-			auto eventController = CreateEvent(NULL, TRUE, FALSE, NULL);
-			temp_commonControllerSettings.hEvent = eventController;
-			temp_commonControllerSettings.nReadEvIdx = _data->controllersIndexWriteRead->at(i).first;
-			ctr_SetNotification(i, temp_commonControllerSettings);
-			waitingArray.push_back(eventController);
-		}
-		catch (const std::exception& error) {
-			errorStatus = ControllerCommandFail;
-			std::cout << error.what() << "\n";
-		}
+		if (_data->controllersStatus->at(i) == true)
+			try {
+				auto temp_commonControllerSettings = commonControllerSettings;
+				auto eventController = CreateEvent(NULL, TRUE, FALSE, NULL);
+				temp_commonControllerSettings.hEvent = eventController;
+				temp_commonControllerSettings.nReadEvIdx = _data->controllersIndexWriteRead->at(i).first;
+				temp_hController = _hControllersList.at(i);
+				ctr_SetNotification(temp_commonControllerSettings);
+				waitingArray.push_back(eventController);
+			}
+			catch (const std::exception& error) {
+				errorStatus = ControllerCommandFail;
+				std::cout << error.what() << "\n";
+			}
 	}
 
 }
@@ -366,7 +384,8 @@ void Connection::tryCloseNotifications() {
 
 	try {
 		for (size_t i = 0; i < _hControllersList.size(); i++) {
-			ctr_SetNotification(i);
+			temp_hController = _hControllersList.at(i);
+			ctr_SetNotification();
 			updateControllerInfo(CLOSE, i);
 		}
 	}
@@ -382,7 +401,9 @@ void Connection::readConverterNotify(_Out_ std::vector<std::pair<UINT, LPARAM>>&
 }
 
 void Connection::readControllerNotify(const int controller, std::vector<std::pair<UINT, LPARAM>>& controllerMessageList) {
-	ctr_GetNextMessage(controller);
+	temp_hController = _hControllersList.at(controller);
+	currentControllerNumber = controller;
+	ctr_GetNextMessage();
 	controllerMessageList = _controllerMessageList;
 }
 /////////////// Приватные сценарии
@@ -425,45 +446,61 @@ void Connection::openController(const int controller) {
 		throw OpenFailed(std::string("ZG_Ctr_Open"), std::string("Controller: " + std::to_string(_data->controllersInfo->at(controller).nAddr) + std::string(" at Converter: ") + std::to_string(_data->converterInfo->nSn)));
 	}
 	_data->mutex->unlock();
+}
+
+void Connection::readControllerIdxs() {
+	_data->mutex->lock();
+	if (ZG_Ctr_ReadEventIdxs(temp_hController, &temp_writeIndex, &temp_readIndex) != S_OK) {
+		_data->mutex->lock();
+		errorStatus = ControllerCommandFail;
+		throw OpenFailed(std::string("Connection controller address: " + std::to_string(_data->controllersDetailInfo->at(currentControllerNumber).nAddr)), std::string("Controller"));
+	}
+	_data->mutex->unlock();
 	temp_controlerIndexWriteRead = std::make_pair(temp_writeIndex, temp_readIndex);
 }
 
-void Connection::readControllerIdxs(int controller) {
-	if (controller >= 0) {
-		_data->mutex->lock();
-		if (!CheckZGError(ZG_Ctr_ReadEventIdxs(_hControllersList.at(controller), &temp_writeIndex, &temp_readIndex), _T("ZG_Ctr_ReadEventIdxs"))) {
-			_data->mutex->lock();
-			errorStatus = ControllerCommandFail;
-			throw OpenFailed(std::string("Connection controller address: " + std::to_string(_data->controllersDetailInfo->at(controller).nAddr)), std::string("Controller"));
-		}
-		_data->mutex->unlock();
-	}
-	else {
-		_data->mutex->lock();
-		if (!CheckZGError(ZG_Ctr_ReadEventIdxs(temp_hController, &temp_writeIndex, &temp_readIndex), _T("ZG_Ctr_ReadEventIdxs"))) {
-			_data->mutex->lock();
-			errorStatus = ControllerCommandFail;
-			throw OpenFailed(std::string("Connection controller address: " + std::to_string(_data->controllersDetailInfo->at(controller).nAddr)), std::string("Controller"));
-		}
-		_data->mutex->unlock();
-	}
-}
-
-int Connection::ReadEvents(const int controller, const int startFrom) {
+int Connection::readEvents(int& startFrom, const int read, const int needToReed) {
+	bool transfusion = false;
+	temp_controllerEvents.resize(5);
 	int reading = temp_controllerEvents.size();
 
-	if (startFrom + 5 > _data->controllersDetailInfo->at(controller).nMaxEvents)
-		reading = _data->controllersDetailInfo->at(controller).nMaxEvents - startFrom;
+	if (startFrom + 5 > _data->controllersDetailInfo->at(currentControllerNumber).nMaxEvents) {
+		transfusion = true;
+		reading = _data->controllersDetailInfo->at(currentControllerNumber).nMaxEvents - startFrom;
+		startFrom = _data->controllersDetailInfo->at(currentControllerNumber).nMaxEvents - reading;
+		temp_controllerEvents.resize(reading);
+	}
+	if (startFrom + 5 > (startFrom + needToReed - read)) {
+		reading = (startFrom + reading) - ((startFrom + reading) - needToReed);
+		temp_controllerEvents.resize(reading);
+	}
 
 	_data->mutex->lock();
-	if (ZG_Ctr_ReadEvents(_hControllersList.at(controller), startFrom, temp_controllerEvents.data(), reading, NULL, NULL) != S_OK) {
+	if (ZG_Ctr_ReadEvents(temp_hController, startFrom, temp_controllerEvents.data(), reading, NULL, NULL) != S_OK) {
 		_data->mutex->unlock();
 		errorStatus = ControllerCommandFail;
 		throw CommandError(std::string("ZG_Ctr_ReadEvents at: " + std::to_string(_data->converterDetailInfo->nSn)));
 	}
 	_data->mutex->unlock();
 
+	if (transfusion) {
+		transfusion = false;
+		startFrom = 0;
+	}
+	else {
+		startFrom += reading;
+	}
+
 	return reading;
+}
+
+void Connection::updateControllerReadIndex(const int newIndex) {
+	_data->mutex->lock();
+	if (ZG_Ctr_WriteEventIdxs(temp_hController, 0x2, 0, newIndex) != S_OK) {
+		_data->mutex->unlock();
+		throw CommandError(std::string("Some error"));
+	}
+	_data->mutex->unlock();
 }
 
 void Connection::closeController(const int number) {
@@ -482,12 +519,12 @@ void Connection::cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS settings) {
 	_data->mutex->unlock();
 }
 
-void Connection::ctr_SetNotification(const int position, _ZG_CTR_NOTIFY_SETTINGS settings) {
+void Connection::ctr_SetNotification(_ZG_CTR_NOTIFY_SETTINGS settings) {
 	_data->mutex->lock();
-	if (ZG_Ctr_SetNotification(_hControllersList[position], &settings) != S_OK) {
+	if (ZG_Ctr_SetNotification(temp_hController, &settings) != S_OK) {
 		_data->mutex->unlock();
 		errorStatus = ControllerCommandFail;
-		throw CommandError(std::string("ZG_Ctr_SetNotification at: " + std::to_string(position)));
+		throw CommandError(std::string("ZG_Ctr_SetNotification at: " + std::to_string(currentControllerNumber)));
 	}
 	_data->mutex->unlock();
 }
@@ -514,14 +551,14 @@ HRESULT Connection::cvt_GetNextMessage() {
 	return result;
 }
 
-HRESULT Connection::ctr_GetNextMessage(const int controller) {
+HRESULT Connection::ctr_GetNextMessage() {
 	HRESULT result;
 	UINT messageType;
 	LPARAM temp_controllerMessage;
 	_controllerMessageList.clear();
 
 	_data->mutex->lock();
-	while ((result = ZG_Ctr_GetNextMessage(_hControllersList.at(controller), &messageType, &temp_controllerMessage)) == S_OK) {
+	while ((result = ZG_Ctr_GetNextMessage(temp_hController, &messageType, &temp_controllerMessage)) == S_OK) {
 		_controllerMessageList.push_back(std::make_pair(messageType, temp_controllerMessage));
 	}
 	_data->mutex->unlock();
@@ -536,24 +573,29 @@ HRESULT Connection::ctr_GetNextMessage(const int controller) {
 }
 
 void Connection::ReadControllerEvents(const int controller, _Out_ std::vector<_ZG_CTR_EVENT>& controllerEventList) {
-	readControllerIdxs(controller);
-	int countOfEvents;
-
-	if (temp_controlerIndexWriteRead.first > temp_controlerIndexWriteRead.second)
-		countOfEvents = temp_controlerIndexWriteRead.first - temp_controlerIndexWriteRead.second;
-
-	if (temp_controlerIndexWriteRead.first <= temp_controlerIndexWriteRead.second) {
-		countOfEvents = _data->controllersDetailInfo->at(controller).nMaxEvents - temp_controlerIndexWriteRead.second + temp_controlerIndexWriteRead.first;
-	}
-
+	temp_hController = _hControllersList.at(controller);
+	currentControllerNumber = controller;
+	readControllerIdxs();
+	_data->controllersIndexWriteRead->at(controller) = temp_controlerIndexWriteRead;
 	int i = 0;
+	int countOfEvents;
+	int read = 0;
+	int startFrom = temp_readIndex;
 
-	while (i < countOfEvents) {
-		auto read = ReadEvents(controller, temp_controlerIndexWriteRead.second);
-		i += read;
+	if (temp_writeIndex > temp_readIndex)
+		countOfEvents = temp_writeIndex - temp_readIndex;
+
+	if (temp_writeIndex <= temp_readIndex) 
+		countOfEvents = _data->controllersDetailInfo->at(controller).nMaxEvents - temp_readIndex + temp_writeIndex;
+	
+
+	while (read < countOfEvents) {
+		read += readEvents(startFrom, read, countOfEvents);
+		//i = (read - temp_readIndex);
 		auto lastSize = controllerEventList.size();
-		controllerEventList.resize(lastSize + read);
-		controllerEventList.insert(controllerEventList.begin() + lastSize, temp_controllerEvents.begin(), temp_controllerEvents.begin() + read);
+		//controllerEventList.resize(lastSize + read);
+		controllerEventList.insert(controllerEventList.end(), temp_controllerEvents.begin(), temp_controllerEvents.end());
+		updateControllerReadIndex(startFrom);
 	}
 }
 /////////////// Низкоуровневые функции команды

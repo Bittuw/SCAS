@@ -8,7 +8,8 @@ enum Action {
 	CLOSE = 2, // Закрыть контроллер (+ очистка части, func->erase)
 	CLEAR = 3, // Очистка буферов 
 	CHANGE = 4, // Изменение ,
-	REBASE = 5 // Переоткрытие или закрытие соединения
+	REBASE = 5, // Переоткрытие или закрытие соединения
+	ADDERR = 6
 };
 
 class Connection // TODO добавить поле статуса соединения
@@ -64,7 +65,7 @@ private:
 	_ZG_CTR_NOTIFY_SETTINGS commonControllerSettings; // Общие найстройки уведомлений от контоллеров
 
 	/////////////// Временная информация о текущем контроллере
-	int temp_writeIndex = 0, temp_readIndex = 0;
+	int temp_writeIndex = 0, temp_readIndex = 0, currentControllerNumber = 0;
 	HANDLE temp_hController = NULL;
 	_ZG_CTR_INFO temp_controllersDetailInfo;
 	std::pair<int, int> temp_controlerIndexWriteRead;
@@ -87,9 +88,9 @@ private:
 
 	/////////////// Низкоуровневые функции-команды
 	void cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS = {}); // Установка уведомления для конвертора DONE
-	void ctr_SetNotification(const int, _ZG_CTR_NOTIFY_SETTINGS = {}); // Установка уведомления для контроллера DONE
+	void ctr_SetNotification(_ZG_CTR_NOTIFY_SETTINGS = {}); // Установка уведомления для контроллера DONE
 	HRESULT cvt_GetNextMessage(); // TODO cvt_GetNextMessage
-	HRESULT ctr_GetNextMessage(const int); // TODO ctr_GetNextMessage
+	HRESULT ctr_GetNextMessage(); // TODO ctr_GetNextMessage
 	void ReadControllerEvents(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий
 	/////////////// Низкоуровневые функции-команды
 
@@ -98,8 +99,9 @@ private:
 	void closeConverter(); // DONE
 	ZP_CONNECTION_STATUS getStatus(); // DONE
 	void openController(const int); // DONE
-	void readControllerIdxs(int = -1); // DONE
-	int ReadEvents(const int, const int); // Читай до 5 событий за рас
+	void readControllerIdxs(); // DONE
+	int readEvents(int&, const int, const int = 0); // Читай до 5 событий за рас
+	void updateControllerReadIndex(const int);
 	void closeController(const int);  // DONE
 	///////////////
 

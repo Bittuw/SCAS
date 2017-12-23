@@ -136,6 +136,8 @@ void NotifiedThread::parseControllerNotify() {
 		switch (message.first) {
 		case ZG_NF_CTR_NEW_EVENT:
 			temp_localConnection->readControllerEvent(i, _controllerEventList);
+			//testList->insert(testList->end(), _controllerEventList.begin(), _controllerEventList.end());
+			*testList = _controllerEventList;
 			// TODO считывание событий
 			// TODO вывод куда хочу
 			break;
