@@ -65,3 +65,37 @@ extern const std::unique_ptr<SpecialList> _converterInfoListTest;
 extern const std::unique_ptr<HANDLE> _globalExitThread;
 extern const std::unique_ptr<HANDLE> _globalNotifiedThreadReset;
 extern const std::unique_ptr<std::vector<_ZG_CTR_EVENT>> testList;
+
+extern LPCTSTR EventTypeList[];
+//
+extern LPCTSTR DirectList[];
+//
+//LPCTSTR ModeList[] = {
+//	TEXT(""),
+//	TEXT("Norm"),				// Норма
+//	TEXT("Block"),				// Блокировка
+//	TEXT("Free"),				// Свободный
+//	TEXT("Wait")				// Ожидание
+//};
+//
+//LPCTSTR HModeStrs[] = {
+//	TEXT(""),
+//	TEXT("Norm"),				// Норма
+//	TEXT("Block"),				// Блокировка
+//	TEXT("Free"),				// Свободный
+//	TEXT("???")					// Зарезервировано
+//};
+//
+//LPCTSTR HotelSubEvStrs[] = {
+//	TEXT(""),
+//	TEXT("FreeCard"),			// Карта открытия
+//	TEXT("BlockCard"),			// Карта блокирующая
+//	TEXT("DopFunc"),			// Дополнительная функция
+//	TEXT("NewRCard"),			// создана резервная карта
+//	TEXT("Network"),
+//	TEXT("Timezone"),
+//	TEXT("Counter"),			// обновлен счетчик
+//	TEXT("CryptoKey"),			// обновлен криптоключ
+//	TEXT("Pulse Z"),			// измененение защелки в течении 2х секунд
+//	TEXT("State Change")		// состояние защелки -если нажали ручку и отпустили более чем через 2 секунды 
+//};

@@ -73,6 +73,8 @@ void NotifiedThread::startListining() {
 				// TODO throw exception
 				break;
 			}
+
+			refreshWaitingArray();
 		}
 	}
 }
@@ -96,13 +98,14 @@ void NotifiedThread::switchDevice(const int event) {
 		if (event == 0) { // Конвертер
 			_converterMessagesList.clear();
 			temp_localConnection->readConverterNotifies(_converterMessagesList);
+			parseConverterNotify();
 			// TODO расшифровка сообщения
 			// TODO реакция
 		}
 		else { // Контроллеры
 			_controllerMessagesList.clear();
 			temp_localConnection->readControllerNotifies(event - 1, _controllerMessagesList);
-			parseControllerNotify();
+			parseControllerNotify(event - 1);
 			// TODO расшифровка сообщения
 			// TODO реакция
 		}
@@ -128,7 +131,41 @@ void NotifiedThread::refreshWaitingArray() {
 	}
 }
 
-void NotifiedThread::parseControllerNotify() {
+void NotifiedThread::parseConverterNotify() {
+	size_t i = 0;
+	PZG_FIND_CTR_INFO tempController;
+
+	for each (auto message in _converterMessagesList) {
+		switch (message.first) {
+		case ZG_N_CVT_CTR_INSERT:
+			tempController = (PZG_FIND_CTR_INFO)(message.second);
+			auto add = *(_ZG_FIND_CTR_INFO*)tempController;
+			temp_localConnection->addController(add);
+			_tprintf(TEXT("Controller added: %d\r\n"), add.nSn);
+			createNotifies();
+			break;
+		case ZG_N_CVT_CTR_REMOVE:
+			tempController = (PZG_FIND_CTR_INFO)(message.second);
+			auto remove = *(_ZG_FIND_CTR_INFO*)tempController;
+			temp_localConnection->removeController(remove);
+			_tprintf(TEXT("Controller removed: %d\r\n"), remove.nSn);
+			createNotifies();
+			break;
+		case ZG_N_CVT_CTR_CHANGE:
+			break;
+		case ZG_N_CVT_ERROR:
+			break;
+		case ZG_CVTN_CONNECTION_CHANGE:
+			break;
+		default:
+			// TODO критические ошибки
+			break;
+		}
+		i++;
+	}
+}
+
+void NotifiedThread::parseControllerNotify(const int& controller) {
 
 	size_t i = 0;
 
@@ -136,12 +173,14 @@ void NotifiedThread::parseControllerNotify() {
 		switch (message.first) {
 		case ZG_NF_CTR_NEW_EVENT:
 			temp_localConnection->readControllerEvent(i, _controllerEventList);
-			//testList->insert(testList->end(), _controllerEventList.begin(), _controllerEventList.end());
-			*testList = _controllerEventList;
+			parseCotrollerEvents(controller);
+			//*testList = _controllerEventList;
 			// TODO считывание событий
 			// TODO вывод куда хочу
+			_controllerEventList.clear();
 			break;
 		case ZG_NF_CTR_CLOCK: 
+			temp_localConnection->setControllerTime(controller);
 			// TODO вызов функции установки текущего времени
 			break;
 		case ZG_NF_CTR_KEY_TOP: 
@@ -157,7 +196,64 @@ void NotifiedThread::parseControllerNotify() {
 			// TODO критические ошибки
 			break;
 		}
-
 		i++;
+	}
+}
+
+void NotifiedThread::parseCotrollerEvents(const int& controller) {
+	PZG_CTR_EVENT tempEvent;
+
+	for each (auto event in _controllerEventList)
+	{
+		tempEvent = &event;
+		_ZG_EV_TIME time;
+		ZG_CTR_DIRECT direct;
+		INT nKeyIdx, nKeyBank;
+
+		switch (tempEvent->nType)
+		{
+		case ZG_EV_BUT_OPEN:
+			ZG_Ctr_DecodePassEvent(temp_localConnection->getControllerHandle(controller), tempEvent->aData, &time, &direct, &nKeyIdx, &nKeyBank);
+			_tprintf(TEXT("%.2d.%.2d %.2d:%.2d:%.2d %s %s (key_idx: %d, bank#: %d)\n"),
+				time.nDay, time.nMonth,
+				time.nHour, time.nMinute, time.nSecond,
+				DirectList[direct],
+				EventTypeList[tempEvent->nType],
+				nKeyIdx, nKeyBank);
+			break;
+		case ZG_EV_KEY_NOT_FOUND:
+			ZG_Ctr_DecodePassEvent(temp_localConnection->getControllerHandle(controller), tempEvent->aData, &time, &direct, &nKeyIdx, &nKeyBank);
+			_tprintf(TEXT("%.2d.%.2d %.2d:%.2d:%.2d %s %s (key_idx: %d, bank#: %d)\n"),
+				time.nDay, time.nMonth,
+				time.nHour, time.nMinute, time.nSecond,
+				DirectList[direct],
+				EventTypeList[tempEvent->nType],
+				nKeyIdx, nKeyBank);
+			break;
+		case ZG_EV_KEY_OPEN:
+			ZG_Ctr_DecodePassEvent(temp_localConnection->getControllerHandle(controller), tempEvent->aData, &time, &direct, &nKeyIdx, &nKeyBank);
+			_tprintf(TEXT("%.2d.%.2d %.2d:%.2d:%.2d %s %s (key_idx: %d, bank#: %d)\n"),
+				time.nDay, time.nMonth,
+				time.nHour, time.nMinute, time.nSecond,
+				DirectList[direct],
+				EventTypeList[tempEvent->nType],
+				nKeyIdx, nKeyBank);
+			break;
+		case ZG_EV_PASSAGE:
+			ZG_Ctr_DecodePassEvent(temp_localConnection->getControllerHandle(controller), tempEvent->aData, &time, &direct, &nKeyIdx, &nKeyBank);
+			_tprintf(TEXT("%.2d.%.2d %.2d:%.2d:%.2d %s %s (key_idx: %d, bank#: %d)\n"),
+				time.nDay, time.nMonth,
+				time.nHour, time.nMinute, time.nSecond,
+				DirectList[direct],
+				EventTypeList[tempEvent->nType],
+				nKeyIdx, nKeyBank);
+			break;
+		case ZG_EV_KEY_ACCESS:
+			break;
+		case ZG_EV_NO_OPEN:
+			break;
+		default:
+			break;
+		}
 	}
 }

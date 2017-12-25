@@ -9,10 +9,20 @@ enum Action {
 	CLEAR = 3, // Очистка буферов 
 	CHANGE = 4, // Изменение ,
 	REBASE = 5, // Переоткрытие или закрытие соединения
-	ADDERR = 6
+	ADDERR = 6,
+	CHANGEERR = 7
 };
 
-class Connection // TODO добавить поле статуса соединения
+static std::string ActionList[]{
+	std::string("ADD"),
+	std::string("CLOSE"),
+	std::string("CLEAR"),
+	std::string("CHANGE"),
+	std::string("REBASE"),
+	std::string("ADDERR")
+};
+
+class Connection // TODO необходиом обрабатывать ErrorCode
 {
 public:
 	Connection(std::unique_ptr<AvailableConnection>);
@@ -29,8 +39,11 @@ public:
 	ErrorCode setNotifications(_Out_ std::vector<HANDLE>&) noexcept; // Установка уведомлений
 	ErrorCode closeNotifications(); // Закрыть уведомления DONE
 	ErrorCode readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомлений конвертора DONE
+	ErrorCode addController(_ZG_FIND_CTR_INFO);
+	ErrorCode removeController(_ZG_FIND_CTR_INFO);
 	ErrorCode readControllerNotifies(const int, _Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомления контроллера DONE
 	ErrorCode readControllerEvent(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий контроллера
+	ErrorCode setControllerTime(const int); // Установка времени контроллера DONE
 	//ErrorCode addController(_ZG_FIND_CTR_INFO); // Добавить контроллер
 	//ErrorCode removeController(); // Удалить контроллер (полностью)
 	//ErrorCode reconnect();
@@ -38,8 +51,8 @@ public:
 	//AvailableConnection restoreData();
 	///////////////
 
-	/////////////// Оборачиваемые функции библиотеки SDK Guard
-
+	/////////////// Утилиты
+	const HANDLE& getControllerHandle(const int);
 	///////////////
 
 #ifdef _DEBUG 
@@ -77,6 +90,8 @@ private:
 	void tryCloseConverter(); // Попытка закрытия конвертора DONE
 	void scanControllers(); // Сканирование контроллеров DONE / итерация (возможно)
 	void openControllers(); // Подключение контроллерров DONE / итерация
+	void openController(_ZG_FIND_CTR_INFO&); // Подключение контроллера 1
+	void deactivateController(_ZG_FIND_CTR_INFO&); // отключение контроллера
 	void closeControllers(); // Закртыие контрллеров DONE
 	void updateConverterInfo(bool); // Обновление информации о конверторе DONE
 	void updateControllerInfo(Action, int = 0); // Обновление информации о контроллере DONE
@@ -84,14 +99,15 @@ private:
 	void tryCloseNotifications(); // Закрыть все уведомления DONE
 	void readConverterNotify(_Out_ std::vector<std::pair<UINT, LPARAM>>&); // Считать уведомление контроллера
 	void readControllerNotify(const int, _Out_ std::vector<std::pair<UINT, LPARAM>>&); // Считать уведомление конвертора
+	void setControllerCurrentTime(const int); // Установка времени
 	///////////////
 
 	/////////////// Низкоуровневые функции-команды
 	void cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS = {}); // Установка уведомления для конвертора DONE
 	void ctr_SetNotification(_ZG_CTR_NOTIFY_SETTINGS = {}); // Установка уведомления для контроллера DONE
-	HRESULT cvt_GetNextMessage(); // TODO cvt_GetNextMessage
-	HRESULT ctr_GetNextMessage(); // TODO ctr_GetNextMessage
-	void ReadControllerEvents(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий
+	HRESULT cvt_GetNextMessage(); // TODO cvt_GetNextMessage DONE	
+	HRESULT ctr_GetNextMessage(); // TODO ctr_GetNextMessage DONE
+	void ReadControllerEvents(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий, DONE
 	/////////////// Низкоуровневые функции-команды
 
 	/////////////// Низкоуровневые функции
@@ -101,7 +117,8 @@ private:
 	void openController(const int); // DONE
 	void readControllerIdxs(); // DONE
 	int readEvents(int&, const int, const int = 0); // Читай до 5 событий за рас
-	void updateControllerReadIndex(const int);
+	void updateControllerReadIndex(const int); // DONE
+	void setTime(_ZG_CTR_CLOCK&);
 	void closeController(const int);  // DONE
 	///////////////
 

@@ -29,14 +29,16 @@ private:
 	std::vector<std::pair<UINT, LPARAM>> _converterMessagesList;
 	std::vector<std::pair<UINT, LPARAM>> _controllerMessagesList;
 	std::vector<_ZG_CTR_EVENT> _controllerEventList;
+	
 	/////////////// Приватные сценарии
 	bool createNotifies();
 	void switchDevice(const int);
 	///////////////
 
 	//void parceConverterNotify();
-	void parseControllerNotify();
-
+	void parseConverterNotify();
+	void parseControllerNotify(const int&);
+	void parseCotrollerEvents(const int&);
 	/////////////// Утилиты
 	void refreshWaitingArray();
 	///////////////
