@@ -25,19 +25,19 @@ void SearchDevice::scanNetwork() {
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
 	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(_connectionData->converterInfo), _connectionData->converterPorts->data(), _connectionData->converterPorts->size(), &nPortCount)) == S_OK) {
-		_connectionData->portType = ZP_PORT_IP;
-		_currentConnection = std::unique_ptr<Connection>(new Connection(std::move(_connectionData)));
-		try {
-			_currentConnection->initialConnections();
-			_localConverterList.push_back(std::move(_currentConnection));
-		}
-		catch (const ConnectionError& error) {
-			// TODO log trace and to log base
-			std::cout << error.what();
-			throw SearchError(std::string("Error in search"));
-		}
-		_localAvaliableConnectionsSet.insert(std::move(_connectionData));
-		_connectionData = std::unique_ptr<AvailableConnection>(new AvailableConnection);
+		//_connectionData->portType = ZP_PORT_IP;
+		//_currentConnection = std::unique_ptr<Connection>(new Connection(std::move(_connectionData)));
+		//try {
+		//	_currentConnection->initialConnections();
+		//	_localConverterList.push_back(std::move(_currentConnection));
+		//}
+		//catch (const ConnectionError& error) {
+		//	// TODO log trace and to log base
+		//	std::cout << error.what();
+		//	throw SearchError(std::string("Error in search"));
+		//}
+		////_localAvaliableConnectionsSet.insert(std::move(_connectionData));
+		//_connectionData = std::unique_ptr<AvailableConnection>(new AvailableConnection);
 	}
 
 	auto list = _localConverterList;

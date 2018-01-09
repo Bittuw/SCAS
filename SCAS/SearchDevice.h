@@ -23,7 +23,7 @@ public:
 
 private:
 	
-	std::set<std::shared_ptr<AvailableConnection>> _localAvaliableConnectionsSet; // Локальный список найденных конверторов
+	//std::set<std::shared_ptr<AvailableConnection>> _localAvaliableConnectionsSet; // Локальный список найденных конверторов
 	std::vector<std::shared_ptr<Connection>> _localConverterList; // Локальный список подключенных конверторов
 	std::unique_ptr<HANDLE> _hSearch; // Дескриптор поиска
 	std::unique_ptr<AvailableConnection> _connectionData; // Текущий найденный конвертер

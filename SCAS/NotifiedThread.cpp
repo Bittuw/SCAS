@@ -34,7 +34,7 @@ void NotifiedThread::runListening(std::shared_ptr<Connection> connection) {
 		NotifiedThread.detach();
 	}
 	catch (const std::exception& error) {
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 }
 
@@ -112,24 +112,6 @@ void NotifiedThread::switchDevice(const int event) {
 	}
 }
 /////////////// Приватные сценарии
-void NotifiedThread::refreshWaitingArray() {
-	try {
-		_waitingVariableArray.clear();
-		_waitingArray->clear();
-
-		if (!_e_NotifiesList.empty()) {
-			_waitingVariableArray.resize(_e_NotifiesList.size());
-			std::copy(_e_NotifiesList.begin(), _e_NotifiesList.end(), _waitingVariableArray.begin());
-		}
-
-		*_waitingArray = _waitingConstArray;
-		_waitingArray->resize(_waitingArray->size() + _waitingVariableArray.size());
-		std::copy(_waitingVariableArray.begin(), _waitingVariableArray.end(), _waitingArray->end() - _waitingVariableArray.size());
-	}
-	catch (const std::exception& error) {
-		std::cout << error.what();
-	}
-}
 
 void NotifiedThread::parseConverterNotify() {
 	size_t i = 0;
@@ -141,14 +123,15 @@ void NotifiedThread::parseConverterNotify() {
 			tempController = (PZG_FIND_CTR_INFO)(message.second);
 			auto add = *(_ZG_FIND_CTR_INFO*)tempController;
 			temp_localConnection->addController(add);
-			_tprintf(TEXT("Controller added: %d\r\n"), add.nSn);
+			//_tprintf(TEXT("Controller added: %d\r\n"), add.nSn);
+			Log(EVENT) << std::string("Constroller added: " + std::to_string(add.nSn));
 			createNotifies();
 			break;
 		case ZG_N_CVT_CTR_REMOVE:
 			tempController = (PZG_FIND_CTR_INFO)(message.second);
 			auto remove = *(_ZG_FIND_CTR_INFO*)tempController;
 			temp_localConnection->removeController(remove);
-			_tprintf(TEXT("Controller removed: %d\r\n"), remove.nSn);
+			Log(EVENT) << std::string("Constroller removed: " + std::to_string(remove.nSn));
 			createNotifies();
 			break;
 		case ZG_N_CVT_CTR_CHANGE:
@@ -257,3 +240,24 @@ void NotifiedThread::parseCotrollerEvents(const int& controller) {
 		}
 	}
 }
+
+/////////////// Утилиты
+void NotifiedThread::refreshWaitingArray() {
+	try {
+		_waitingVariableArray.clear();
+		_waitingArray->clear();
+
+		if (!_e_NotifiesList.empty()) {
+			_waitingVariableArray.resize(_e_NotifiesList.size());
+			std::copy(_e_NotifiesList.begin(), _e_NotifiesList.end(), _waitingVariableArray.begin());
+		}
+
+		*_waitingArray = _waitingConstArray;
+		_waitingArray->resize(_waitingArray->size() + _waitingVariableArray.size());
+		std::copy(_waitingVariableArray.begin(), _waitingVariableArray.end(), _waitingArray->end() - _waitingVariableArray.size());
+	}
+	catch (const std::exception& error) {
+		std::cout << error.what();
+	}
+}
+/////////////// Утилиты

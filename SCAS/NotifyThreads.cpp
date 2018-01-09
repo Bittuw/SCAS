@@ -23,12 +23,12 @@ NotifyThreads::~NotifyThreads(){
 void NotifyThreads::runListening() {
 	if (!isRunning) {
 		try {
-			std::thread NotifyThread(&NotifyThreads::beginListning, new NotifyThreads);
+			std::thread NotifyThread(&NotifyThreads::beginListning, NotifyThreads());
 			NotifyThread.detach();
 			isRunning = true;
 		}
 		catch (const std::exception& error) {
-			std::cout << error.what();
+			Log(ERR) << error.what();
 		}
 	}
 	else {
@@ -38,7 +38,7 @@ void NotifyThreads::runListening() {
 
 void NotifyThreads::beginListning() {
 	std::vector<HANDLE> _waitingArray = {*_globalExitThread, *_e_newlist , *_e_pushing};
-
+	//Log(DEBUG, std::string("hello in notifythread"));
 	while (*_globalExitThread) {
 
 		auto event = (unsigned long)WaitForMultipleObjects(_waitingArray.size(), _waitingArray.data(), FALSE, INFINITE);

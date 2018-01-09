@@ -2,9 +2,9 @@
 #include "stdafx.h"
 #include "Connection.h"
 #include "DataStructs.h"
-//Connection::Connection() {}
+#include "Logger.h"
 
-Connection::Connection(std::unique_ptr<AvailableConnection> availableConnection) :
+Connection::Connection(std::unique_ptr<AvailableConnection>& availableConnection) :
 _e_newInfo(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
 _e_destroyed(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
 errorStatus(NotDefined),
@@ -39,7 +39,7 @@ Connection::~Connection()
 		tryCloseConverter();
 	}
 	catch (std::exception& error) {
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 }
 
@@ -65,7 +65,7 @@ ErrorCode Connection::initialConnections() noexcept {
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 	
 	return result;
@@ -81,7 +81,7 @@ ErrorCode Connection::closeConnections() noexcept  {
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 	return result;
 }
@@ -101,7 +101,7 @@ ErrorCode Connection::reconnect() noexcept {
 	}
 	catch(const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 
 	return result;
@@ -117,7 +117,7 @@ ErrorCode Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
 	}
 	catch(const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 
 	return result;
@@ -133,7 +133,7 @@ ErrorCode Connection::setNotifications(_Out_ std::vector<HANDLE>& waitingArray) 
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 
 	return result;
@@ -149,13 +149,13 @@ ErrorCode Connection::closeNotifications() {
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 
 	return result;
 }
 
-ErrorCode Connection::readConverterNotifies(std::vector<std::pair<UINT, LPARAM>>& converterMessageList) noexcept {
+ErrorCode Connection::readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>& converterMessageList) noexcept {
 	auto result = NotDefined;
 
 	try {
@@ -165,7 +165,7 @@ ErrorCode Connection::readConverterNotifies(std::vector<std::pair<UINT, LPARAM>>
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 	return result;
 }
@@ -180,7 +180,7 @@ ErrorCode Connection::addController(_ZG_FIND_CTR_INFO controllerInfo) {
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 	return result;
 }
@@ -195,7 +195,7 @@ ErrorCode Connection::removeController(_ZG_FIND_CTR_INFO controllerInfo) {
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 	return result;
 }
@@ -210,7 +210,7 @@ ErrorCode Connection::readControllerNotifies(const int controller, _Out_ std::ve
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 	return result;
 }
@@ -225,7 +225,7 @@ ErrorCode Connection::readControllerEvent(const int controller, _Out_ std::vecto
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 	return result;
 }
@@ -240,7 +240,7 @@ ErrorCode Connection::setControllerTime(const int controller) {
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 	return result;
 }
@@ -266,7 +266,7 @@ bool Connection::tryOpenConverter() {
 			if (typeid(error) == typeid(OpenFailed) && i < _data->converterPorts->size() - 1)
 				continue;
 			else {
-				std::cout << error.what();
+				Log(ERR) << error.what();
 			}
 		}
 		if (_hConvector != NULL) {
@@ -409,7 +409,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 		}
 		break;
 	case CLEAR:
-		temp_writeIndex = temp_readIndex = currentControllerNumber = NULL;
+		temp_writeIndex = temp_readIndex = currentControllerNumber = temp_controllerReadMax = NULL;
 		temp_hController = NULL;
 		ZeroMemory(&temp_Params, sizeof(temp_Params));
 		ZeroMemory(&temp_controllersDetailInfo, sizeof(temp_controllersDetailInfo));
@@ -480,7 +480,7 @@ void Connection::trySetNotifications(_Out_ std::vector<HANDLE>& waitingArray) {
 			}
 			catch (const std::exception& error) {
 				errorStatus = ControllerCommandFail;
-				std::cout << error.what() << "\n";
+				Log(ERR) << error.what();
 			}
 	}
 
@@ -497,7 +497,7 @@ void Connection::tryCloseNotifications() {
 		}
 	}
 	catch (const std::exception& error) {
-		std::cout << error.what();
+		Log(ERR) << error.what();
 	}
 }
 
@@ -507,7 +507,7 @@ void Connection::readConverterNotify(_Out_ std::vector<std::pair<UINT, LPARAM>>&
 	_converterMessageList.clear();
 }
 
-void Connection::readControllerNotify(const int controller, std::vector<std::pair<UINT, LPARAM>>& controllerMessageList) {
+void Connection::readControllerNotify(const int controller, _Out_ std::vector<std::pair<UINT, LPARAM>>& controllerMessageList) {
 	temp_hController = _hControllersList.at(controller);
 	currentControllerNumber = controller;
 	ctr_GetNextMessage();
@@ -585,16 +585,16 @@ void Connection::readControllerIdxs() {
 
 int Connection::readEvents(int& startFrom, const int read, const int needToReed) { // TODO проверить при переполнении
 	bool transfusion = false;
-	temp_controllerEvents.resize(5);
+	temp_controllerEvents.resize(temp_controllerReadMax);
 	int reading = temp_controllerEvents.size();
 
-	if (startFrom + 5 > _data->controllersDetailInfo->at(currentControllerNumber).nMaxEvents) {
+	if (startFrom + temp_controllerReadMax > _data->controllersDetailInfo->at(currentControllerNumber).nMaxEvents) {
 		transfusion = true;
 		reading = _data->controllersDetailInfo->at(currentControllerNumber).nMaxEvents - startFrom;
 		startFrom = _data->controllersDetailInfo->at(currentControllerNumber).nMaxEvents - reading;
 		temp_controllerEvents.resize(reading);
 	}
-	if (startFrom + 5 > (startFrom + needToReed - read)) {
+	if (startFrom + temp_controllerReadMax > (startFrom + needToReed - read)) {
 		reading = needToReed - read;
 		temp_controllerEvents.resize(reading);
 	}
@@ -708,6 +708,7 @@ HRESULT Connection::ctr_GetNextMessage() {
 
 void Connection::ReadControllerEvents(const int controller, _Out_ std::vector<_ZG_CTR_EVENT>& controllerEventList) {
 	temp_hController = _hControllersList.at(controller);
+	temp_controllerReadMax = _data->controllersDetailInfo->at(controller).nOptReadItems;
 	currentControllerNumber = controller;
 
 	readControllerIdxs();
@@ -735,37 +736,34 @@ void Connection::ReadControllerEvents(const int controller, _Out_ std::vector<_Z
 
 #ifdef _DEBUG
 bool Connection::StaticTest() {
-	
+	//Log(DEBUG, std::string("hello in connection"));
 	HANDLE *_hSearch = new HANDLE;
 	HRESULT hrSearch;
 	INT_PTR nPortCount;
-	std::unique_ptr<Connection> tempConnection = nullptr;
+	std::shared_ptr<Connection> tempConnection = nullptr;
 	ZP_PORT_TYPE portType = ZP_PORT_IP;
 	_ZG_CVT_OPEN_PARAMS _searchParams;
 	ZeroMemory(&_searchParams, sizeof(_searchParams));
-	std::unique_ptr<AvailableConnection> tempAvailableConnection(new AvailableConnection);
+	auto tempAvailableConnection = std::make_unique<AvailableConnection>();
 
-	if (!CheckZGError(ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE), _T("ZG_SearchDevices")))
+	if (ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE) != S_OK)
 		throw SearchError(std::string("Error in search")); // TODO log trace
 
 	while ((hrSearch = ZG_FindNextDevice(*_hSearch, &*(tempAvailableConnection->converterInfo), &(*tempAvailableConnection->converterPorts)[0], tempAvailableConnection->converterPorts->size(), &nPortCount)) == S_OK) {
 		auto temp = bool();
 		tempAvailableConnection->portType = ZP_PORT_IP;
-		tempConnection = std::make_unique<Connection>(std::move(tempAvailableConnection));
-		tempConnection->initialConnections();
-		tempConnection->reconnect();
-		tempConnection->getConnectionStatus(temp);
-		tempConnection->getConnectionStatus(temp);
-		tempConnection->reconnect();
-		tempConnection->getConnectionStatus(temp);
-		_converterInfoListTest->push_back(std::move(tempConnection));
-
-		_tprintf(TEXT("1 convertor found\n"));
-
-		tempAvailableConnection = std::move(std::unique_ptr<AvailableConnection>(new AvailableConnection));
+		tempConnection = std::make_shared<Connection>(tempAvailableConnection);
+		std::thread thread(
+			[tempConnection,temp]() {
+				tempConnection->initialConnections(); 
+				_converterInfoListTest->push_back(tempConnection);
+		});
+		thread.detach();
+		Log(TRACE) << "1 converter found";
+		tempAvailableConnection = std::make_unique<AvailableConnection>();
 	}
+
 	ZG_CloseHandle(*_hSearch);
-	//_converterInfoListTest->clear();
 	delete _hSearch;
 	
 	return true;

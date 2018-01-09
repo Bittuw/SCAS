@@ -4,13 +4,13 @@ struct AvailableConnection;
 enum ErrorCode;
 
 enum Action {
-	ADD = 1, // Добавить контроллер
-	CLOSE = 2, // Закрыть контроллер (+ очистка части, func->erase)
-	CLEAR = 3, // Очистка буферов 
-	CHANGE = 4, // Изменение ,
-	REBASE = 5, // Переоткрытие или закрытие соединения
-	ADDERR = 6,
-	CHANGEERR = 7
+	ADD = 0, // Добавить контроллер
+	CLOSE = 1, // Закрыть контроллер (+ очистка части, func->erase)
+	CLEAR = 2, // Очистка буферов 
+	CHANGE = 3, // Изменение ,
+	REBASE = 4, // Переоткрытие или закрытие соединения
+	ADDERR = 5,
+	CHANGEERR = 6
 };
 
 static std::string ActionList[]{
@@ -19,13 +19,14 @@ static std::string ActionList[]{
 	std::string("CLEAR"),
 	std::string("CHANGE"),
 	std::string("REBASE"),
-	std::string("ADDERR")
+	std::string("ADDERR"),
+	std::string("CHANGEERR")
 };
 
 class Connection // TODO необходиом обрабатывать ErrorCode
 {
 public:
-	Connection(std::unique_ptr<AvailableConnection>);
+	Connection(std::unique_ptr<AvailableConnection>&);
 	~Connection();
 
 	/////////////// Сценарии TODO если exception то нужно читать ошибку и делать соответствующие выводы
@@ -41,12 +42,12 @@ public:
 	ErrorCode readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомлений конвертора DONE
 	ErrorCode addController(_ZG_FIND_CTR_INFO);
 	ErrorCode removeController(_ZG_FIND_CTR_INFO);
+	//ErrorCode setControllerKeysBase(const int, std::vector<type-error>); // Установка базы ключей
+	//ErrorCode getControllerKeyBase(const int, _Out_ std::vector<type-error>); // Получение базу ключей
 	ErrorCode readControllerNotifies(const int, _Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомления контроллера DONE
 	ErrorCode readControllerEvent(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий контроллера
+	//ErrorCode readControllerEvents(const int, _Out_ std::vector<_ZG_EVENT>&) // Чтение всех событий
 	ErrorCode setControllerTime(const int); // Установка времени контроллера DONE
-	//ErrorCode addController(_ZG_FIND_CTR_INFO); // Добавить контроллер
-	//ErrorCode removeController(); // Удалить контроллер (полностью)
-	//ErrorCode reconnect();
 	//AvailableConnection storeData();
 	//AvailableConnection restoreData();
 	///////////////
@@ -78,7 +79,7 @@ private:
 	_ZG_CTR_NOTIFY_SETTINGS commonControllerSettings; // Общие найстройки уведомлений от контоллеров
 
 	/////////////// Временная информация о текущем контроллере
-	int temp_writeIndex = 0, temp_readIndex = 0, currentControllerNumber = 0;
+	int temp_writeIndex = 0, temp_readIndex = 0, currentControllerNumber = 0, temp_controllerReadMax = 0;
 	HANDLE temp_hController = NULL;
 	_ZG_CTR_INFO temp_controllersDetailInfo;
 	std::pair<int, int> temp_controlerIndexWriteRead;
