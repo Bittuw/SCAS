@@ -28,6 +28,7 @@ struct AvailableConnection {
 
 	std::unique_ptr<std::mutex> mutex = nullptr; // ћьютетс доступа
 	
+	AvailableConnection() {}
 
 	AvailableConnection() :
 		converterInfo(new _ZG_ENUM_IPCVT_INFO),
