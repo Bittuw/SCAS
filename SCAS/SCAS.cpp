@@ -6,7 +6,7 @@
 #include "SearchDevice.h"
 #include "SpecialList.h"
 #include "NotifyThreads.h"
-#include "Logger.h"
+#include "Utils.h"
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
 

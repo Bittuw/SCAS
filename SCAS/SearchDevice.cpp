@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "SearchDevice.h"
 #include "Connection.h"
-#include "DataStructs.h"
+#include "DataStructs.h" 
+#include "Utils.h"
 
 SearchDevice::SearchDevice(_ZG_CVT_OPEN_PARAMS searchParams) :
 	_searchParams(searchParams) 
