@@ -1,7 +1,10 @@
 /Debug/
 /ipch/
 /SCAS/Debug/
+/SCAS/x64/
+*.swp
 *.opendb
 *.db
 *.suo
 *.cmd
+*.tmp
