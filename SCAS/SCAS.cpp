@@ -7,6 +7,8 @@
 #include "SpecialList.h"
 #include "NotifyThreads.h"
 #include "Utils.h"
+#include "LoggerFormat.hpp"
+#include "DataBase.h"
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
 
@@ -23,6 +25,8 @@ void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 
+	DataBase base("localhost", 33060, "sslroot", "elitaass18A", "test");
+
 	while (1) {
 		ResetEvent(*_globalExitThread);
 		PRINT("Enter commant: \n");
@@ -32,6 +36,8 @@ void MainLoop() {
 		PRINT("4 - Test Notified Threads\n");
 		PRINT("5 - Test Notify Converter\n");
 		PRINT("6 - Test LoggerInterface\n");
+		PRINT("7 - Test Formate\n");
+		PRINT("8 - Test DataBase\n");
 		PRINT("10 - GlobalExit\n");
 		PRINT("0 - quit\n");
 	
@@ -87,6 +93,12 @@ void MainLoop() {
 					Log(WARNING) << std::string("warning");
 				}
 
+				break;
+			case 7:
+				std::cout << format("% world %  %", "Hello", 123, "Lol");
+				std::cout << format(std::string("% world"), "Hello");
+				break;
+			case 8:
 				break;
 			case  10:
 				SetEvent(*_globalExitThread);

@@ -60,6 +60,9 @@
     <ClInclude Include="DataBase.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="LoggerFormat.hpp">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -95,13 +98,13 @@
     <ClCompile Include="DataBase.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="..\API\DEBUG_API\ZGuard_API\include\Utils.cpp">
+    <ClCompile Include="Utils.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="..\API\DEBUG_API\ZGuard_API\include\ZGuard.cpp">
+    <ClCompile Include="ZGuard.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="..\API\DEBUG_API\ZGuard_API\include\ZPort.cpp">
+    <ClCompile Include="ZPort.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>

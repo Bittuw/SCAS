@@ -164,3 +164,25 @@ private:
 
 	static bool created;
 };
+
+//template <typename S>
+//std::string format(S string){
+//	std::cout << string;
+//	return std::to_string(string);
+//}
+//
+//std::string format(std::string string) {
+//	return string;
+//}
+//
+//template <typename S, typename T, typename ...Targs>
+//std::string format(S string, T value, Targs... Fargs) {
+//	for (; *string != '\0'; string++) {
+//		if (*string == '%') {
+//			std::cout << value;
+//			auto formated = format(string + 1, Fargs...);
+//			return formated;
+//		}
+//		std::cout << *string;
+//	}
+//}
