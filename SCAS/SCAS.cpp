@@ -25,7 +25,7 @@ void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 
-	DataBase base("localhost", 33060, "sslroot", "elitaass18A", "test");
+	DataBase base("localhost", 33060, "sslroot", "elitaass18A", "test_skud");
 
 	while (1) {
 		ResetEvent(*_globalExitThread);
