@@ -25,7 +25,8 @@ void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
 
-	DataBase base("localhost", 33060, "sslroot", "elitaass18A", "test_skud");
+	ConnectionLayer base;
+	base.deleteRow();
 
 	while (1) {
 		ResetEvent(*_globalExitThread);
@@ -95,8 +96,8 @@ void MainLoop() {
 
 				break;
 			case 7:
-				std::cout << format("% world %  %", "Hello", 123, "Lol");
-				std::cout << format(std::string("% world"), "Hello");
+				std::cout << LoggerFormat::format("% world %  %", "Hello", 123, "Lol");
+				std::cout << LoggerFormat::format(std::string("% world"), "Hello");
 				break;
 			case 8:
 				break;
@@ -129,4 +130,3 @@ int _tmain(int argc, _TCHAR* argv[])
 
     return 0;
 }
-

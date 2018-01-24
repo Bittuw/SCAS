@@ -28,8 +28,9 @@ struct AvailableConnection {
 
 	ZP_PORT_TYPE portType; // “ип подключени€
 
-	std::unique_ptr<std::mutex> mutex = nullptr; // ћьютетс доступа
-	
+	std::shared_ptr<std::mutex> mutex = nullptr; // ћьютетс доступа
+
+	AvailableConnection(const AvailableConnection&) = default;
 
 	AvailableConnection() :
 		converterInfo(new _ZG_ENUM_IPCVT_INFO),

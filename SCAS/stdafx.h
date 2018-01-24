@@ -22,6 +22,8 @@
 #include <locale.h>
 #include <thread>
 #include <mutex>
+#include <utility>
+#include <cassert>
 #include <mysql_devapi.h>
 #include <ZGuard.h>
 #include <ZPort.h>

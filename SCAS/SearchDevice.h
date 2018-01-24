@@ -4,7 +4,8 @@ struct AvailableConnection;
 class SearchDevice // in Thread
 {
 
-	//TODO ZG_SearchDevice
+	//TODO Главная задача: вернуть список AV
+
 public:
 	SearchDevice(_ZG_CVT_OPEN_PARAMS);
 	~SearchDevice();
