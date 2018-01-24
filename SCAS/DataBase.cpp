@@ -62,9 +62,9 @@ mysqlx::Table& DataBase::getTable(std::string& tableName) {
 
 void DataBase::removeFrom(std::string& tableName) {
 	try {
-		auto table = database.getTable(tableName, false);
+	/*	auto table = database.getTable(tableName, false);
 		table.remove().where(mysqlx::expr("id_converters = 1")).execute();
-		table.insert();
+		table.insert();*/
 	}
 	catch (std::exception& error) {
 		Log(TRACE) << error.what();
@@ -72,7 +72,10 @@ void DataBase::removeFrom(std::string& tableName) {
 }
 
 void ConnectionLayer::loadData(std::vector<AvailableConnection>& data) {
+	auto convertersTable = database.getTable(std::string("converters"));
+	auto controllersTable = database.getTable(std::string("controllers"));
+
 	for(auto converter : data) {
-		auto table = 
+		
 	}
 }

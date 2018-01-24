@@ -2,7 +2,7 @@
 
 #include "DataStructs.h"
 
-class DataBase
+class DataBase // TODO 
 {
 public:
 	
@@ -15,8 +15,9 @@ public:
 
 	void disconnect();
 	void downloadTables();
-	void pushTables();
 
+
+	mysqlx::Table& getTable(std::string&);
 	void removeFrom(std::string&);
 
 	Converters_data_list _converters_list;
@@ -40,6 +41,7 @@ class ConnectionLayer {
 public:
 	ConnectionLayer() : database("localhost", 33060, "sslroot", "elitaass18A", "test_skud"){}
 
+	void loadData(std::vector<AvailableConnection>&);
 	
 	void deleteRow() {
 		database.removeFrom(std::string("converters"));
