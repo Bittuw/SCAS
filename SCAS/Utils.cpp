@@ -107,5 +107,5 @@ CZGuardLoader::~CZGuardLoader()
 }
 
 
-template <typename T,typename...Targs>
-std::sstream& formatstream(std::sstream& stream)
+//template <typename T,typename...Targs>
+//std::sstream& formatstream(std::sstream& stream)

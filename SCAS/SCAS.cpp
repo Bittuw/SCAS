@@ -7,21 +7,16 @@
 #include "SpecialList.h"
 #include "NotifyThreads.h"
 #include "Utils.h"
+#include "DataBase.h"
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
-
-void f()
-{
-	std::string line;
-	while (std::getline(std::cin, line))  //input from the file in.txt
-	{
-		std::cout << line << "\n";   //output to the file out.txt
-	} 
-}
 
 void MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return;
+
+	/*ConnectionLayer base;
+	base.deleteRow();*/
 
 	while (1) {
 		ResetEvent(*_globalExitThread);
@@ -32,6 +27,8 @@ void MainLoop() {
 		PRINT("4 - Test Notified Threads\n");
 		PRINT("5 - Test Notify Converter\n");
 		PRINT("6 - Test LoggerInterface\n");
+		PRINT("7 - Test Formate\n");
+		PRINT("8 - Test DataBase\n");
 		PRINT("10 - GlobalExit\n");
 		PRINT("0 - quit\n");
 	
@@ -82,11 +79,17 @@ void MainLoop() {
 				break;
 			case 6:
 				for (int i = 0; i < 100; i++) {
-					Log(DEBUG) << std::string("hello");
-					Log(ERR) << std::string("error");
-					Log(WARNING) << std::string("warning");
+					Log(MessageTypes::DEBUG) << std::string("hello");
+					Log(MessageTypes::ERR) << std::string("error");
+					Log(MessageTypes::WARNING) << std::string("warning");
 				}
 
+				break;
+			case 7:
+				std::cout << LoggerFormat::format("% world %  %", "Hello", 123, "Lol");
+				std::cout << LoggerFormat::format(std::string("% world"), "Hello");
+				break;
+			case 8:
 				break;
 			case  10:
 				SetEvent(*_globalExitThread);
@@ -103,6 +106,7 @@ void MainLoop() {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	Log.start();
 	setlocale(LC_ALL, "Russian");
 	
 	CZGuardLoader oZGL;
@@ -114,7 +118,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	
 	MainLoop();
-
+	
+	Log.stop();
     return 0;
 }
-
