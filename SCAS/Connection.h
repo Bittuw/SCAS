@@ -1,7 +1,8 @@
 #pragma once
 
-struct AvailableConnection;
-enum class ErrorCode;
+#include "DataStructs.h"
+
+struct Available_Connection;
 
 enum Action {
 	ADD = 0, // Добавить контроллер
@@ -26,28 +27,28 @@ static std::string ActionList[]{
 class Connection // TODO необходиом обрабатывать ErrorCode
 {
 public:
-	Connection(std::unique_ptr<AvailableConnection>&);
+	Connection(std::unique_ptr<Available_Connection>&);
 	~Connection();
 
 	/////////////// Сценарии TODO если exception то нужно читать ошибку и делать соответствующие выводы
-	void setNewConnactionInfo(std::unique_ptr<AvailableConnection>);
+	void setNewConnactionInfo(std::unique_ptr<Available_Connection>);
 	//int addController(_ZG_FIND_CTR_INFO); // TODO сделать условие
 	//void removeController(const int);
-	ErrorCode initialConnections() noexcept; // Отрытие конвертора и создание/открытие контроллеров DONE
-	ErrorCode closeConnections() noexcept; // Закрыть все подключения DONE
-	ErrorCode reconnect() noexcept; // Пересоздать соединение DONE
-	ErrorCode getConnectionStatus(_Out_ bool&) noexcept; // Статус подключения конвертора DONE
-	ErrorCode setNotifications(_Out_ std::vector<HANDLE>&) noexcept; // Установка уведомлений
-	ErrorCode closeNotifications(); // Закрыть уведомления DONE
-	ErrorCode readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомлений конвертора DONE
-	ErrorCode addController(_ZG_FIND_CTR_INFO);
-	ErrorCode removeController(_ZG_FIND_CTR_INFO);
+	Common_Types::Connection_Error_Code initialConnections() noexcept; // Отрытие конвертора и создание/открытие контроллеров DONE
+	Common_Types::Connection_Error_Code closeConnections() noexcept; // Закрыть все подключения DONE
+	Common_Types::Connection_Error_Code reconnect() noexcept; // Пересоздать соединение DONE
+	Common_Types::Connection_Error_Code getConnectionStatus(_Out_ bool&) noexcept; // Статус подключения конвертора DONE
+	Common_Types::Connection_Error_Code setNotifications(_Out_ std::vector<HANDLE>&) noexcept; // Установка уведомлений
+	Common_Types::Connection_Error_Code closeNotifications(); // Закрыть уведомления DONE
+	Common_Types::Connection_Error_Code readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомлений конвертора DONE
+	Common_Types::Connection_Error_Code addController(_ZG_FIND_CTR_INFO);
+	Common_Types::Connection_Error_Code removeController(_ZG_FIND_CTR_INFO);
 	//ErrorCode setControllerKeysBase(const int, std::vector<type-error>); // Установка базы ключей
 	//ErrorCode getControllerKeyBase(const int, _Out_ std::vector<type-error>); // Получение базу ключей
-	ErrorCode readControllerNotifies(const int, _Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомления контроллера DONE
-	ErrorCode readControllerEvent(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий контроллера
+	Common_Types::Connection_Error_Code readControllerNotifies(const int, _Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомления контроллера DONE
+	Common_Types::Connection_Error_Code readControllerEvent(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий контроллера
 	//ErrorCode readControllerEvents(const int, _Out_ std::vector<_ZG_EVENT>&) // Чтение всех событий
-	ErrorCode setControllerTime(const int); // Установка времени контроллера DONE
+	Common_Types::Connection_Error_Code setControllerTime(const int); // Установка времени контроллера DONE
 	//AvailableConnection storeData();
 	//AvailableConnection restoreData();
 	///////////////
@@ -61,12 +62,12 @@ public:
 #endif
 
 	/////////////// 
-	std::unique_ptr<AvailableConnection> _data; // Принимает структуру хранения информации
+	std::unique_ptr<Available_Connection> _data; // Принимает структуру хранения информации
 	std::shared_ptr<HANDLE> _e_newInfo = nullptr; // Событие перезаписи данных **оставить
 	std::shared_ptr<HANDLE> _e_destroyed = nullptr; // Событие уничтожения объекта **оставить
 	///////////////
 
-	ErrorCode errorStatus;
+	Common_Types::Connection_Error_Code errorStatus;
 
 private:
 	
