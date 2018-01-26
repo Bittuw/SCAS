@@ -66,7 +66,6 @@ struct AvailableConnection {
 extern const std::unique_ptr<SpecialList> _converterInfoListTest;
 extern const std::unique_ptr<HANDLE> _globalExitThread;
 extern const std::unique_ptr<HANDLE> _globalNotifiedThreadReset;
-//extern const std::unique_ptr<std::vector<_ZG_CTR_EVENT>> testList;
 
 extern LPCTSTR EventTypeList[];
 extern LPCTSTR DirectList[];

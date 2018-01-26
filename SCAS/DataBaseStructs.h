@@ -6,16 +6,16 @@
 
 #define Converters_data_type_fields \
 	X(unsigned int, _nSn) \
-	X(std::string, _type_name) \
-	X(std::string, _version) \
-	X(std::string, _first_ip_port) \
-	X(std::string, _second_ip_port)
+	X(mysqlx::string, _type_name) \
+	X(mysqlx::string, _version) \
+	X(mysqlx::string, _first_ip_port) \
+	X(mysqlx::string, _second_ip_port)
 
 #define Controllers_data_type_fields \
 	X(unsigned int, _nSn) \
-	X(std::string, _type_name) \
+	X(mysqlx::string, _type_name) \
 	X(unsigned int, _type_code) \
-	X(std::string, _name) \
+	X(mysqlx::string, _name) \
 	X(unsigned int, _max_groups) \
 	X(unsigned int, _max_keys) \
 	X(unsigned int, _max_events) \
@@ -24,13 +24,13 @@
 	X(unsigned int, _id_converter)
 
 #define Groups_data_type_fields \
-	X(std::string, _name) \
+	X(mysqlx::string, _name) \
 	X(unsigned int, _time_zone)
 
 #define Employees_data_type_fields \
-	X(std::string, _name) \
-	X(std::string, _surname) \
-	X(std::string, _patronymic) \
+	X(mysqlx::string, _name) \
+	X(mysqlx::string, _surname) \
+	X(mysqlx::string, _patronymic) \
 	X(unsigned int, _card_number) \
 	X(unsigned int, _id_groups)
 
@@ -68,11 +68,11 @@ struct  Converters_data_type : public Data_type {
 		mysqlx::Row& row,
 		int&& count
 	)	: Data_type(row.get(count++)),
-		_nSn(static_cast<int>(row.get(count++))),
-		_type_name(static_cast<mysqlx::string>(row.get(count++))),
-		_version(static_cast<mysqlx::string>(row.get(count++))),
-		_first_ip_port(static_cast<mysqlx::string>(row.get(count++))),
-		_second_ip_port(static_cast<mysqlx::string>(row.get(count++)))
+		_nSn(row.get(count++)),
+		_type_name(row.get(count++)),
+		_version(row.get(count++)),
+		_first_ip_port(row.get(count++)),
+		_second_ip_port(row.get(count++))
 	{}
 
 	mysqlx::Table& writeToRow(mysqlx::Table& table, int&& count) override {
