@@ -28,7 +28,7 @@ void NotifyThreads::runListening() {
 			isRunning = true;
 		}
 		catch (const std::exception& error) {
-			Log(ERR) << error.what();
+			Log(MessageTypes::ERR) << error.what();
 		}
 	}
 	else {

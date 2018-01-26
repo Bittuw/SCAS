@@ -34,7 +34,7 @@ void NotifiedThread::runListening(std::shared_ptr<Connection> connection) {
 		NotifiedThread.detach();
 	}
 	catch (const std::exception& error) {
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 }
 
@@ -124,14 +124,14 @@ void NotifiedThread::parseConverterNotify() {
 			auto add = *(_ZG_FIND_CTR_INFO*)tempController;
 			temp_localConnection->addController(add);
 			//_tprintf(TEXT("Controller added: %d\r\n"), add.nSn);
-			Log(EVENT) << std::string("Constroller added: " + std::to_string(add.nSn));
+			Log(MessageTypes::EVENT) << std::string("Constroller added: " + std::to_string(add.nSn));
 			createNotifies();
 			break;
 		case ZG_N_CVT_CTR_REMOVE:
 			tempController = (PZG_FIND_CTR_INFO)(message.second);
 			auto remove = *(_ZG_FIND_CTR_INFO*)tempController;
 			temp_localConnection->removeController(remove);
-			Log(EVENT) << std::string("Constroller removed: " + std::to_string(remove.nSn));
+			Log(MessageTypes::EVENT) << std::string("Constroller removed: " + std::to_string(remove.nSn));
 			createNotifies();
 			break;
 		case ZG_N_CVT_CTR_CHANGE:

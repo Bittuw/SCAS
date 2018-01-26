@@ -6,16 +6,16 @@
 
 #define Converters_data_type_fields \
 	X(unsigned int, _nSn) \
-	X(mysqlx::string, _type_name) \
-	X(mysqlx::string, _version) \
-	X(mysqlx::string, _first_ip_port) \
-	X(mysqlx::string, _second_ip_port)
+	X(std::string, _type_name) \
+	X(std::string, _version) \
+	X(std::string, _first_ip_port) \
+	X(std::string, _second_ip_port)
 
 #define Controllers_data_type_fields \
 	X(unsigned int, _nSn) \
-	X(mysqlx::string, _type_name) \
+	X(std::string, _type_name) \
 	X(unsigned int, _type_code) \
-	X(mysqlx::string, _name) \
+	X(std::string, _name) \
 	X(unsigned int, _max_groups) \
 	X(unsigned int, _max_keys) \
 	X(unsigned int, _max_events) \
@@ -24,13 +24,13 @@
 	X(unsigned int, _id_converter)
 
 #define Groups_data_type_fields \
-	X(mysqlx::string, _name) \
+	X(std::string, _name) \
 	X(unsigned int, _time_zone)
 
 #define Employees_data_type_fields \
-	X(mysqlx::string, _name) \
-	X(mysqlx::string, _surname) \
-	X(mysqlx::string, _patronymic) \
+	X(std::string, _name) \
+	X(std::string, _surname) \
+	X(std::string, _patronymic) \
 	X(unsigned int, _card_number) \
 	X(unsigned int, _id_groups)
 
@@ -50,9 +50,11 @@ struct Data_type {
 	virtual ~Data_type() {};
 	virtual mysqlx::Table& writeToRow
 	(
-		mysqlx::Table&,
+		mysqlx::Table& table,
 		int&&
-	);
+	) {
+		return table;
+	};
 	//virtual std::vector<Data_type>getList();
 };
 
@@ -68,16 +70,16 @@ struct  Converters_data_type : public Data_type {
 		mysqlx::Row& row,
 		int&& count
 	)	: Data_type(row.get(count++)),
-		_nSn(row.get(count++)),
-		_type_name(row.get(count++)),
-		_version(row.get(count++)),
-		_first_ip_port(row.get(count++)),
-		_second_ip_port(row.get(count++))
+		_nSn(static_cast<int>(row.get(count++))),
+		_type_name(static_cast<mysqlx::string>(row.get(count++))),
+		_version(static_cast<mysqlx::string>(row.get(count++))),
+		_first_ip_port(static_cast<mysqlx::string>(row.get(count++))),
+		_second_ip_port(static_cast<mysqlx::string>(row.get(count++)))
 	{}
 
 	mysqlx::Table& writeToRow(mysqlx::Table& table, int&& count) override {
-		table.insert("nSn", "type_name", "version", "first_ip:port", "second_ip:port")
-			.values(_nSn, _type_name, _version, _first_ip_port, _second_ip_port);
+		/*table.insert("nSn", "type_name", "version", "first_ip:port", "second_ip:port")
+			.values(_nSn, _type_name, _version, _first_ip_port, _second_ip_port);*/
 		return table;
 	}
 };
@@ -104,6 +106,12 @@ struct Controllers_data_type : public Data_type {
 		_max_w_event_at_time(static_cast<int>(row.get(count++))),
 		_id_converter(static_cast<int>(row.get(count++)))
 	{}
+
+	mysqlx::Table& writeToRow(mysqlx::Table& table, int&& count) override {
+		/*table.insert("nSn", "type_name", "version", "first_ip:port", "second_ip:port")
+		.values(_nSn, _type_name, _version, _first_ip_port, _second_ip_port);*/
+		return table;
+	}
 };
 
 
@@ -120,6 +128,11 @@ struct Groups_data_type : public Data_type {
 		_name(static_cast<mysqlx::string>(row.get(count++))),
 		_time_zone(static_cast<int>(row.get(count++)))
 	{}
+	mysqlx::Table& writeToRow(mysqlx::Table& table, int&& count) override {
+		/*table.insert("nSn", "type_name", "version", "first_ip:port", "second_ip:port")
+		.values(_nSn, _type_name, _version, _first_ip_port, _second_ip_port);*/
+		return table;
+	}
 };
 
 
@@ -138,6 +151,11 @@ struct Employees_data_type : public Data_type {
 		_patronymic(static_cast<mysqlx::string>(row.get(count++))),
 		_card_number(static_cast<int>(row.get(count++)))
 	{}
+	mysqlx::Table& writeToRow(mysqlx::Table& table, int&& count) override {
+		/*table.insert("nSn", "type_name", "version", "first_ip:port", "second_ip:port")
+		.values(_nSn, _type_name, _version, _first_ip_port, _second_ip_port);*/
+		return table;
+	}
 };
 
 
@@ -156,6 +174,12 @@ struct GroupsInControllers_data_type : public Data_type {
 		_id_converter(static_cast<int>(row.get(count++))),
 		_position_in_controller(static_cast<int>(row.get(count++)))
 	{}
+
+	mysqlx::Table& writeToRow(mysqlx::Table& table, int&& count) override {
+		/*table.insert("nSn", "type_name", "version", "first_ip:port", "second_ip:port")
+		.values(_nSn, _type_name, _version, _first_ip_port, _second_ip_port);*/
+		return table;
+	}
 };
 
 static const std::string TablesNames[] = {

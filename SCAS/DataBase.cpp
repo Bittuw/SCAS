@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "DataBase.h"
 #include <tuple>
-#include "LoggerFormat.hpp"
+
 
 DataBase::~DataBase()
 {
@@ -10,7 +10,7 @@ DataBase::~DataBase()
 
 void DataBase::disconnect() {
 	session.close();
-	Log(TRACE) << "close DataBase connection!";
+	Log(MessageTypes::TRACE) << "close DataBase connection!";
 }
 
 void DataBase::downloadTables() {
@@ -67,15 +67,15 @@ void DataBase::removeFrom(std::string& tableName) {
 		table.insert();*/
 	}
 	catch (std::exception& error) {
-		Log(TRACE) << error.what();
+		Log(MessageTypes::TRACE) << error.what();
 	}
 }
 
 void ConnectionLayer::loadData(std::vector<AvailableConnection>& data) {
-	auto convertersTable = database.getTable(std::string("converters"));
+	/*auto convertersTable = database.getTable(std::string("converters"));
 	auto controllersTable = database.getTable(std::string("controllers"));
 
 	for(auto converter : data) {
 		
-	}
+	}*/
 }

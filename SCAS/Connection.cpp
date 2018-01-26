@@ -2,12 +2,11 @@
 #include "stdafx.h"
 #include "Connection.h"
 #include "DataStructs.h"
-#include "Logger.h"
 
 Connection::Connection(std::unique_ptr<AvailableConnection>& availableConnection) :
 _e_newInfo(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
 _e_destroyed(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
-errorStatus(NotDefined),
+errorStatus(ErrorCode::NotDefined),
 _converterMessageList({}),
 _controllerMessageList({})
 {
@@ -39,7 +38,7 @@ Connection::~Connection()
 		tryCloseConverter();
 	}
 	catch (std::exception& error) {
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 }
 
@@ -52,7 +51,7 @@ void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> point
 
 /////////////// Открытые сценарии
 ErrorCode Connection::initialConnections() noexcept {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		if (tryOpenConverter()) {
@@ -60,35 +59,35 @@ ErrorCode Connection::initialConnections() noexcept {
 			openControllers();
 			SetEvent(*_e_newInfo);
 			updateControllerInfo(CLEAR);
-			result = Success;
+			result = ErrorCode::Success;
 		}
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 	
 	return result;
 }
 
 ErrorCode Connection::closeConnections() noexcept  {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		tryCloseConverter();
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 	return result;
 }
 
 ErrorCode Connection::reconnect() noexcept {
-	auto result = NotDefined;
-
+	auto result = ErrorCode::NotDefined;
+	
 	try {
 		tryCloseConverter();
 		if (tryOpenConverter()) {
@@ -97,150 +96,150 @@ ErrorCode Connection::reconnect() noexcept {
 			SetEvent(*_e_newInfo);
 		}
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch(const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 
 	return result;
 }
 
 ErrorCode Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		(getStatus() != ZP_CS_DISCONNECTED) ? connection = true : connection = false;
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch(const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 
 	return result;
 }
 
 ErrorCode Connection::setNotifications(_Out_ std::vector<HANDLE>& waitingArray) noexcept {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		trySetNotifications(waitingArray);
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 
 	return result;
 }
 
 ErrorCode Connection::closeNotifications() {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		tryCloseNotifications();
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 
 	return result;
 }
 
 ErrorCode Connection::readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>& converterMessageList) noexcept {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		readConverterNotify(converterMessageList);
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 	return result;
 }
 
 ErrorCode Connection::addController(_ZG_FIND_CTR_INFO controllerInfo) {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		openController(controllerInfo);
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 	return result;
 }
 
 ErrorCode Connection::removeController(_ZG_FIND_CTR_INFO controllerInfo) {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		deactivateController(controllerInfo);
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 	return result;
 }
 
 ErrorCode Connection::readControllerNotifies(const int controller, _Out_ std::vector<std::pair<UINT, LPARAM>>& controllerMessageList) noexcept {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		readControllerNotify(controller, controllerMessageList);
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 	return result;
 }
 
 ErrorCode Connection::readControllerEvent(const int controller, _Out_ std::vector<_ZG_CTR_EVENT>& controllerEventsList) {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		ReadControllerEvents(controller, controllerEventsList);
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 	return result;
 }
 
 ErrorCode Connection::setControllerTime(const int controller) {
-	auto result = NotDefined;
+	auto result = ErrorCode::NotDefined;
 
 	try {
 		setControllerCurrentTime(controller);
 		updateControllerInfo(CLEAR);
-		result = Success;
+		result = ErrorCode::Success;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 	return result;
 }
@@ -266,7 +265,7 @@ bool Connection::tryOpenConverter() {
 			if (typeid(error) == typeid(OpenFailed) && i < _data->converterPorts->size() - 1)
 				continue;
 			else {
-				Log(ERR) << error.what();
+				Log(MessageTypes::ERR) << error.what();
 			}
 		}
 		if (_hConvector != NULL) {
@@ -275,7 +274,7 @@ bool Connection::tryOpenConverter() {
 		}
 	}
 
-	errorStatus = ConverterOpenFail;
+	errorStatus = ErrorCode::ConverterOpenFail;
 	updateConverterInfo(false);
 	return false;
 }
@@ -302,7 +301,7 @@ void Connection::scanControllers() {
 	}
 
 	if (hrController != ZP_S_NOTFOUND) {
-		errorStatus = ConverterCommandFail;
+		errorStatus = ErrorCode::ConverterCommandFail;
 		throw SearchError(std::string("Error while search controllers"));
 	}
 }
@@ -404,7 +403,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 			ZeroMemory(&_data->controllersIndexWriteRead->at(controller), sizeof(&_data->controllersIndexWriteRead->at(controller)));
 		}
 		else {
-			errorStatus = ConnectionCommandFail;
+			errorStatus = ErrorCode::ConnectionCommandFail;
 			throw CommandError(std::string("updateControllerInfo number: " + controller + ' ' + ActionList[action]));
 		}
 		break;
@@ -425,7 +424,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 			_data->controllersIndexWriteRead->at(controller) = temp_controlerIndexWriteRead;
 		}
 		else {
-			errorStatus = ConnectionCommandFail;
+			errorStatus = ErrorCode::ConnectionCommandFail;
 			throw CommandError(std::string("updateControllerInfo number: " + controller + ' ' + ActionList[action]));
 		}
 		break;
@@ -437,7 +436,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 			_data->controllersIndexWriteRead->at(controller) = temp_controlerIndexWriteRead;
 		}
 		else {
-			errorStatus = ConnectionCommandFail;
+			errorStatus = ErrorCode::ConnectionCommandFail;
 			throw CommandError(std::string("updateControllerInfo number: " + controller + ' ' + ActionList[action]));
 		}
 		break;
@@ -452,7 +451,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 		_data->controllersIndexWriteRead->clear();
 		break;
 	default:
-		errorStatus = ConnectionCommandFail;
+		errorStatus = ErrorCode::ConnectionCommandFail;
 		throw CommandError(std::string("updateControllerInfo number: " + controller + ' ' + action));
 		break;
 	}
@@ -479,8 +478,8 @@ void Connection::trySetNotifications(_Out_ std::vector<HANDLE>& waitingArray) {
 				waitingArray.push_back(eventController);
 			}
 			catch (const std::exception& error) {
-				errorStatus = ControllerCommandFail;
-				Log(ERR) << error.what();
+				errorStatus = ErrorCode::ControllerCommandFail;
+				Log(MessageTypes::ERR) << error.what();
 			}
 	}
 
@@ -497,7 +496,7 @@ void Connection::tryCloseNotifications() {
 		}
 	}
 	catch (const std::exception& error) {
-		Log(ERR) << error.what();
+		Log(MessageTypes::ERR) << error.what();
 	}
 }
 
@@ -537,7 +536,7 @@ void Connection::openConverter() {
 	_data->mutex->lock();
 	if (ZG_Cvt_Open(&_hConvector, &temp_Params, &*_data->converterDetailInfo) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = ConverterOpenFail;
+		errorStatus = ErrorCode::ConverterOpenFail;
 		throw OpenFailed(std::string("ZG_Cvt_Open"), std::string("Converter: " + std::to_string(_data->converterInfo->nSn)));
 	}
 	_data->mutex->unlock();
@@ -554,7 +553,7 @@ ZP_CONNECTION_STATUS Connection::getStatus() {
 	_data->mutex->lock();
 	if (ZG_Cvt_GetConnectionStatus(_hConvector, &status) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = ConnectionCommandFail;
+		errorStatus = ErrorCode::ConnectionCommandFail;
 		throw CommandError(std::string("getStatus"));
 	}
 	_data->mutex->unlock();
@@ -566,7 +565,7 @@ void Connection::openController(const int controller) {
 	_data->mutex->lock();
 	if (ZG_Ctr_Open(&temp_hController, _hConvector, address, 0, &temp_controllersDetailInfo, ZG_CTR_UNDEF) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = ControllerOpenFail;
+		errorStatus = ErrorCode::ControllerOpenFail;
 		throw OpenFailed(std::string("ZG_Ctr_Open"), std::string("Controller: " + std::to_string(_data->controllersInfo->at(controller).nAddr) + std::string(" at Converter: ") + std::to_string(_data->converterInfo->nSn)));
 	}
 	_data->mutex->unlock();
@@ -576,7 +575,7 @@ void Connection::readControllerIdxs() {
 	_data->mutex->lock();
 	if (ZG_Ctr_ReadEventIdxs(temp_hController, &temp_writeIndex, &temp_readIndex) != S_OK) {
 		_data->mutex->lock();
-		errorStatus = ControllerCommandFail;
+		errorStatus = ErrorCode::ControllerCommandFail;
 		throw OpenFailed(std::string("Connection controller address: " + std::to_string(_data->controllersDetailInfo->at(currentControllerNumber).nAddr)), std::string("Controller"));
 	}
 	_data->mutex->unlock();
@@ -602,7 +601,7 @@ int Connection::readEvents(int& startFrom, const int read, const int needToReed)
 	_data->mutex->lock();
 	if (ZG_Ctr_ReadEvents(temp_hController, startFrom, temp_controllerEvents.data(), reading, NULL, NULL) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = ControllerCommandFail;
+		errorStatus = ErrorCode::ControllerCommandFail;
 		throw CommandError(std::string("ZG_Ctr_ReadEvents at: " + std::to_string(_data->converterDetailInfo->nSn)));
 	}
 	_data->mutex->unlock();
@@ -631,7 +630,7 @@ void Connection::setTime(_ZG_CTR_CLOCK& newTime) {
 	_data->mutex->lock();
 	if (ZG_Ctr_SetClock(temp_hController, &newTime) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = ControllerCommandFail;
+		errorStatus = ErrorCode::ControllerCommandFail;
 		throw CommandError(std::string("Error with ZG_Ctr_SetClock"));
 	}
 	_data->mutex->unlock();
@@ -647,7 +646,7 @@ void Connection::cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS settings) {
 	_data->mutex->lock();
 	if (ZG_Cvt_SetNotification(_hConvector, &settings) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = ConverterCommandFail;
+		errorStatus = ErrorCode::ConverterCommandFail;
 		throw CommandError(std::string("ZG_Cvt_SetNotification"));
 	}
 	_data->mutex->unlock();
@@ -657,7 +656,7 @@ void Connection::ctr_SetNotification(_ZG_CTR_NOTIFY_SETTINGS settings) {
 	_data->mutex->lock();
 	if (ZG_Ctr_SetNotification(temp_hController, &settings) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = ControllerCommandFail;
+		errorStatus = ErrorCode::ControllerCommandFail;
 		throw CommandError(std::string("ZG_Ctr_SetNotification at: " + std::to_string(currentControllerNumber)));
 	}
 	_data->mutex->unlock();
@@ -678,7 +677,7 @@ HRESULT Connection::cvt_GetNextMessage() {
 	if (result == ZP_S_NOTFOUND)
 		result = S_OK;
 	else {
-		errorStatus = ConverterCommandFail;
+		errorStatus = ErrorCode::ConverterCommandFail;
 		throw CommandError(std::string("ZG_Cvt_GetNextMessage"));
 	}
 
@@ -759,7 +758,7 @@ bool Connection::StaticTest() {
 				_converterInfoListTest->push_back(tempConnection);
 		});
 		thread.detach();
-		Log(TRACE) << "1 converter found";
+		Log(MessageTypes::TRACE) << "1 converter found";
 		tempAvailableConnection = std::make_unique<AvailableConnection>();
 	}
 

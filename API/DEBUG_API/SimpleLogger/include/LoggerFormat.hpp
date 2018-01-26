@@ -37,15 +37,4 @@ namespace LoggerFormat {
 		return ss.str();
 	}
 }
-
-//template <typename Arg>
-//void log_print(std::ostream& stream, Arg arg) {
-//	stream << arg << " ";
-//}
-//
-//template <typename Arg, typename... Args>
-//void log_print(std::ostream& stream, Arg arg,  Args&&... args) {
-//	stream << arg << " ";
-//	log_print(stream, args...);
-//}
 #endif
