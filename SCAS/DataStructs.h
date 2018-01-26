@@ -5,7 +5,7 @@
 class Connection;
 
 enum class ErrorCode { // TODO сделать класс, заменить в Connection
-	NotDefined = 0,
+	UNDEFINE = 0,
 	Success = 1,
 	ConverterOpenFail = 2,
 	ConverterCommandFail = 3,

@@ -1,7 +1,7 @@
 #pragma once
 
 struct AvailableConnection;
-enum ErrorCode;
+enum class ErrorCode;
 
 enum Action {
 	ADD = 0, // Добавить контроллер

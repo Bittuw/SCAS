@@ -6,7 +6,7 @@
 Connection::Connection(std::unique_ptr<AvailableConnection>& availableConnection) :
 _e_newInfo(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
 _e_destroyed(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
-errorStatus(ErrorCode::NotDefined),
+errorStatus(ErrorCode::UNDEFINE),
 _converterMessageList({}),
 _controllerMessageList({})
 {
@@ -43,15 +43,15 @@ Connection::~Connection()
 }
 
 void Connection::setNewConnactionInfo(std::unique_ptr<AvailableConnection> pointer) { // Нужна проверка
-	_data = std::move(pointer);
-	if (!initialConnections());
+	/*_data = std::move(pointer);
+	if (!initialConnections());*/
 		// TODO Throw connection
 	// TODO обнуление всех значений и сигнал евентом
 }
 
 /////////////// Открытые сценарии
 ErrorCode Connection::initialConnections() noexcept {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		if (tryOpenConverter()) {
@@ -71,7 +71,7 @@ ErrorCode Connection::initialConnections() noexcept {
 }
 
 ErrorCode Connection::closeConnections() noexcept  {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		tryCloseConverter();
@@ -86,7 +86,7 @@ ErrorCode Connection::closeConnections() noexcept  {
 }
 
 ErrorCode Connection::reconnect() noexcept {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 	
 	try {
 		tryCloseConverter();
@@ -107,7 +107,7 @@ ErrorCode Connection::reconnect() noexcept {
 }
 
 ErrorCode Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		(getStatus() != ZP_CS_DISCONNECTED) ? connection = true : connection = false;
@@ -123,7 +123,7 @@ ErrorCode Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
 }
 
 ErrorCode Connection::setNotifications(_Out_ std::vector<HANDLE>& waitingArray) noexcept {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		trySetNotifications(waitingArray);
@@ -139,7 +139,7 @@ ErrorCode Connection::setNotifications(_Out_ std::vector<HANDLE>& waitingArray) 
 }
 
 ErrorCode Connection::closeNotifications() {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		tryCloseNotifications();
@@ -155,7 +155,7 @@ ErrorCode Connection::closeNotifications() {
 }
 
 ErrorCode Connection::readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>& converterMessageList) noexcept {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		readConverterNotify(converterMessageList);
@@ -170,7 +170,7 @@ ErrorCode Connection::readConverterNotifies(_Out_ std::vector<std::pair<UINT, LP
 }
 
 ErrorCode Connection::addController(_ZG_FIND_CTR_INFO controllerInfo) {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		openController(controllerInfo);
@@ -185,7 +185,7 @@ ErrorCode Connection::addController(_ZG_FIND_CTR_INFO controllerInfo) {
 }
 
 ErrorCode Connection::removeController(_ZG_FIND_CTR_INFO controllerInfo) {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		deactivateController(controllerInfo);
@@ -200,7 +200,7 @@ ErrorCode Connection::removeController(_ZG_FIND_CTR_INFO controllerInfo) {
 }
 
 ErrorCode Connection::readControllerNotifies(const int controller, _Out_ std::vector<std::pair<UINT, LPARAM>>& controllerMessageList) noexcept {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		readControllerNotify(controller, controllerMessageList);
@@ -215,7 +215,7 @@ ErrorCode Connection::readControllerNotifies(const int controller, _Out_ std::ve
 }
 
 ErrorCode Connection::readControllerEvent(const int controller, _Out_ std::vector<_ZG_CTR_EVENT>& controllerEventsList) {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		ReadControllerEvents(controller, controllerEventsList);
@@ -230,7 +230,7 @@ ErrorCode Connection::readControllerEvent(const int controller, _Out_ std::vecto
 }
 
 ErrorCode Connection::setControllerTime(const int controller) {
-	auto result = ErrorCode::NotDefined;
+	auto result = ErrorCode::UNDEFINE;
 
 	try {
 		setControllerCurrentTime(controller);

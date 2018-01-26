@@ -1,10 +1,14 @@
 #pragma once
 struct AvailableConnection;
+enum class ErrorCode;
 
 template <typename Ret_data>
 struct Return_Data {
-	ErrorCode code = NotDefined;
-	std::shared_ptr<Ret_data> data = nullptr;
+	ErrorCode _code;
+	std::shared_ptr<Ret_data> _data = nullptr;
+
+	Return_Data(const ErrorCode& code, std::shared_ptr<Ret_data>& data)
+		: _code(code), _data(data) {}
 };
 
 using AV_list = std::vector<std::shared_ptr<AvailableConnection>>;
