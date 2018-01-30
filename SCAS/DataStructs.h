@@ -39,8 +39,9 @@ namespace Common_Types {
 	};
 
 	// Common converter's information types
-	using Controller_Info = _ZG_ENUM_IPCVT_INFO; // Common type for mysql
-	using Converter_Info_Ref = std::shared_ptr<_ZG_ENUM_IPCVT_INFO>; 
+	//using Converter_Info = _ZG_ENUM_IPCVT_INFO; // Common type for mysql
+	//using Converter_Info_Ref = std::shared_ptr<_ZG_ENUM_IPCVT_INFO>;
+
 	using Converter_Detail_Info = _ZG_CVT_INFO;
 	using Converter_Detail_Info_Ref = std::shared_ptr<Converter_Detail_Info>;
 	using Converter_Port_Info = _ZP_PORT_INFO;
@@ -65,44 +66,44 @@ namespace Common_Types {
 	using Connection_Mutex_Ref = std::shared_ptr<std::mutex>;
 	using Connection_Type = ZP_PORT_TYPE;
 
-	using Global_Connections_List_ref = std::unique_ptr<SpecialList>;
+	using Global_Connections_List_Ref = std::unique_ptr<SpecialList>;
 
 
-	struct Common_Connection_Data_Type { // TODO проверить работу
-	public:
-		Controller_Info _converter_info;
-		Converter_Ports_Info_List _converter_ports_info_list;
-		Controllers_Info_List _controllers_info_list;
-
-		template <typename...Info>
-		Common_Connection_Data_Type(Info...args)
-			: Common_Connection_Data_Type(args...){}
-
-	protected:
-		Common_Connection_Data_Type(Controller_Info controller_info) 
-			: _converter_info(controller_info){}
-		Common_Connection_Data_Type(Converter_Ports_Info_List converter_ports_info_list) 
-			: _converter_ports_info_list(converter_ports_info_list){}
-		Common_Connection_Data_Type(Controllers_Info_List controllers_info_list) 
-			: _controllers_info_list(controllers_info_list){}
-	};
-
-	//Only for Connection
-	struct Common_Connection_Inforamtion : public Common_Connection_Data_Type { // TODO make template to get types from parent struct
-
+	struct Runtime_Info {
+		//Converter info
 		Converter_Detail_Info _converter_detail_info;
 		Converter_Connection_Status _converter_connection_info;
 
+		//Controller info
 		Controllers_Detail_Info_List _controllers_detail_info_list;
 		Controllers_Connection_Status_List _controllers_connection_status_list;
 		Controllers_Index_Read_Write_List _controllers_index_read_write_list;
 
+		//Converter connection info
 		Connection_Type _connection_type;
 
+		//Mutex of access
 		Connection_Mutex_Ref _mutex;
 
-		Common_Connection_Inforamtion()  {}
+		Runtime_Info() 
+			:
+			_converter_detail_info(),
+			_converter_connection_info(),
+			_controllers_detail_info_list(),
+			_controllers_connection_status_list(),
+			_controllers_index_read_write_list(),
+			_connection_type(),
+			_mutex(std::make_shared<std::mutex>())
+		{}
 	};
+	
+	//Only for Connection
+	struct Common_Connection_Info : Runtime_Info {
+		Common_DataBaseLayer_Types::Basic_Info_Ref _basic_info;
+		Common_Connection_Info(const Common_DataBaseLayer_Types::Basic_Info_Ref& basic_info) : Runtime_Info(), _basic_info(basic_info) {}
+	};
+
+	using Connection_Info_Ref = std::shared_ptr<Common_Connection_Info>;
 
 }
 

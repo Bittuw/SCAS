@@ -1,81 +1,69 @@
 #include "stdafx.h"
 #include "DataBase.h"
-#include <tuple>
 
 
 DataBase::~DataBase()
 {
-	disconnect();
+	_session.close();
+	Log(MessageTypes::DEBUG) << "Close DataBase connection!";
+
 }
 
-void DataBase::disconnect() {
-	session.close();
-	Log(MessageTypes::TRACE) << "close DataBase connection!";
-}
+void DataBase::downloadTables() { // TODO just do it like template
 
-void DataBase::downloadTables() {
-
-	for (size_t i = 0; i < _countof(TablesNames); i++) {
-		auto table = database.getTable(TablesNames[i], false);
-
+	for (size_t i = 0; i < _countof(Common_Database_Types::TablesNames); i++) {
+		auto table = _database.getTable(Common_Database_Types::TablesNames[i], false);
+		
 		switch (i)
-		{
+		{ 
 		case 0:
-			_converters_select = table.select("*").execute();
-			for (auto row : _converters_select) {
-				_converters_list.push_back(Converters_data_type(row,0));
+			for (auto row : table.select("*").execute()) {
+				_converters_list->push_back(Common_Database_Types::Mysql_Converter_Data_Type(row, 0));
 			}
 			break;
 		case 1:
-			_controllers_select = table.select("*").execute();
-			for (auto row : _controllers_select) {
-				_controllers_list.push_back(Controllers_data_type(row, 0));
+			for (auto row : table.select("*").execute()) {
+				_controllers_list->push_back(Common_Database_Types::Mysql_Controller_Data_Type(row, 0));
 			}
 			break;
 		case 2:
-			_groups_select = table.select("*").execute();
-			for (auto row : _groups_select) {
-				_groups_list.push_back(Groups_data_type(row, 0));
+			for (auto row : table.select("*").execute()) {
+				_groups_list->push_back(Common_Database_Types::Mysql_Group_Data_Type(row, 0));
 			}
 			break;
 		case 3:
-			_employees_select = table.select("*").execute();
-			for (auto row : _employees_select) {
-				_employees_list.push_back(Employees_data_type(row, 0));
+			for (auto row : table.select("*").execute()) {
+				_employees_list->push_back(Common_Database_Types::Mysql_Employee_Data_Type(row, 0));
 			}
 			break;
 		case 4:
-			_groupsInControllers_select = table.select("*").execute();
-			for (auto row : _groupsInControllers_select) {
-				_groupsInControllers_list.push_back(GroupsInControllers_data_type(row, 0));
+			for (auto row : table.select("*").execute()) {
+				_groupsInControllers_list->push_back(Common_Database_Types::Mysql_Group_In_Controller_Data_Type(row, 0));
 			}
 			break;
 		default:
+			throw  std::logic_error("Unknown database name");
 			break;
 		}
 	}
 }
 
-mysqlx::Table& DataBase::getTable(std::string& tableName) {
-	return database.getTable(tableName);
+std::shared_ptr<mysqlx::Table> DataBase::get_Table(std::string&& table_name) {
+	return std::make_shared<mysqlx::Table>(_database.getTable(std::move(table_name)));
 }
 
-void DataBase::removeFrom(std::string& tableName) {
-	try {
-	/*	auto table = database.getTable(tableName, false);
-		table.remove().where(mysqlx::expr("id_converters = 1")).execute();
-		table.insert();*/
-	}
-	catch (std::exception& error) {
-		Log(MessageTypes::TRACE) << error.what();
-	}
+std::shared_ptr<mysqlx::Table> DataBase::get_table(const std::string& table_name)
+{
+	return std::make_shared<mysqlx::Table>(_database.getTable(table_name));
 }
 
-void ConnectionLayer::loadData(std::vector<AvailableConnection>& data) {
-	/*auto convertersTable = database.getTable(std::string("converters"));
-	auto controllersTable = database.getTable(std::string("controllers"));
+Common_DataBaseLayer_Types::Basic_Info_Ref_List_Ref DataBaseLayer::make_Basic_Info_List() {
+	for (auto _converter_data : *database._converters_list) {
+		/*Common_DataBaseLayer_Types::Basic_Info bas1(_converter_data);
+		Common_DataBaseLayer_Types::Basic_Info bas2(*database._controllers_list);
+		std::make_shared<Common_DataBaseLayer_Types::Basic_Info>(_converter_data, *database._controllers_list);*/
+		_basic_info_ref_list_ref->emplace_back(std::make_shared<Common_DataBaseLayer_Types::Basic_Info>(_converter_data, *database._controllers_list));
+	}
 
-	for(auto converter : data) {
-		
-	}*/
+	return nullptr;
 }

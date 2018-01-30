@@ -11,12 +11,12 @@
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
 
-void MainLoop() {
+int MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
-		return;
+		return 0;
 
-	/*ConnectionLayer base;
-	base.deleteRow();*/
+	DataBaseLayer base;
+	//base.deleteRow();
 
 	while (1) {
 		ResetEvent(*_globalExitThread);
@@ -95,13 +95,13 @@ void MainLoop() {
 				SetEvent(*_globalExitThread);
 				break;
 			case 0:
-				return;
-			default:
-				PRINT("Invalid command.\n\n");
-				break;
+				return 0;
+				
 			}
 		}
+		return 0;
 	}
+	return 0;
 }
 
 int _tmain(int argc, _TCHAR* argv[])

@@ -1,16 +1,16 @@
 #pragma once
 struct Available_Connection;
 
-template <typename Ret_data>
-struct Return_Data {
-	Connection_Error_Code _code;
-	std::shared_ptr<Ret_data> _data = nullptr;
-
-	Return_Data(const Connection_Error_Code& code, std::shared_ptr<Ret_data>& data)
-		: _code(code), _data(data) {}
-};
-
-using AV_list = std::vector<std::shared_ptr<Available_Connection>>;
+//template <typename Ret_data>
+//struct Return_Data {
+//	Connection_Error_Code _code;
+//	std::shared_ptr<Ret_data> _data = nullptr;
+//
+//	Return_Data(const Connection_Error_Code& code, std::shared_ptr<Ret_data>& data)
+//		: _code(code), _data(data) {}
+//};
+//
+//using AV_list = std::vector<std::shared_ptr<Available_Connection>>;
 
 class SearchDevice 
 {
