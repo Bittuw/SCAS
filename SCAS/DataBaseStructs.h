@@ -425,12 +425,13 @@ namespace Common_DataBaseLayer_Types {
 			_mysql_controllers_data_list()
 		{
 			Common_Database_Types::Controllers_Data_List::const_iterator result;
+			Common_Database_Types::Controllers_Data_List::const_iterator start_from = mysql_controllers_data_list.cbegin();
 			while (
 				(
 					result = std::find_if
 					(
-						mysql_controllers_data_list.begin(),
-						mysql_controllers_data_list.end(),
+						start_from,
+						mysql_controllers_data_list.cend(),
 						[this](const Common_Database_Types::Mysql_Controller_Data_Type& _constroller)
 						{ return _constroller._id_converter == _mysql_converter_data._id; }
 					)
@@ -438,6 +439,7 @@ namespace Common_DataBaseLayer_Types {
 			)
 			{
 				_mysql_controllers_data_list.push_back(*result);
+				start_from = result + 1;
 			}
 		}
 	};
