@@ -16,6 +16,8 @@ int MainLoop() {
 		return 0;
 
 	DataBaseLayer base;
+	auto list = base.make_Basic_Info_List();
+	Common_Connection_Types::Common_Connection_Info info(list->at(0));
 	//base.deleteRow();
 
 	while (1) {

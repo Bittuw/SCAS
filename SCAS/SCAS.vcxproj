@@ -156,6 +156,7 @@
     <ClInclude Include="NotifyThreads.h" />
     <ClInclude Include="SaveInfo.h" />
     <ClInclude Include="SearchDevice.h" />
+    <ClInclude Include="Serializer.h" />
     <ClInclude Include="SpecialList.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="SaveInfo.cpp" />
     <ClCompile Include="SCAS.cpp" />
     <ClCompile Include="SearchDevice.cpp" />
+    <ClCompile Include="Serializer.cpp" />
     <ClCompile Include="SpecialList.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

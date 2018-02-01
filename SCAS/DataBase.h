@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DataStructs.h"
-
+#include "Serializer.h"
 // Little Interface for MySQL Database
 class DataBase 
 {
@@ -15,7 +15,7 @@ public:
 		_controllers_list(std::make_shared<Common_Database_Types::Controllers_Data_List>()),
 		_groups_list(std::make_shared<Common_Database_Types::Groups_Data_List>()),
 		_employees_list(std::make_shared<Common_Database_Types::Employees_Data_List>()),
-		_groupsInControllers_list(std::make_shared<Common_Database_Types::Groups_In_Controllers_Data_List>())
+		_groups_In_Controllers_list(std::make_shared<Common_Database_Types::Groups_In_Controllers_Data_List>())
 	{
 		Log(MessageTypes::DEBUG) << LoggerFormat::format(
 			"Open DataBase connection: \n\
@@ -48,7 +48,7 @@ public:
 	std::shared_ptr<Common_Database_Types::Controllers_Data_List> _controllers_list;
 	std::shared_ptr<Common_Database_Types::Groups_Data_List> _groups_list;
 	std::shared_ptr<Common_Database_Types::Employees_Data_List> _employees_list;
-	std::shared_ptr<Common_Database_Types::Groups_In_Controllers_Data_List> _groupsInControllers_list;
+	std::shared_ptr<Common_Database_Types::Groups_In_Controllers_Data_List> _groups_In_Controllers_list;
 
 private:
 	mysqlx::Session _session;
@@ -62,14 +62,17 @@ public:
 		: database("localhost", 33060, "sslroot", "elitaass18A", "test_skud") ,
 		_basic_info_ref_list_ref(std::make_shared<Common_DataBaseLayer_Types::Basic_Info_Ref_List>())
 	{
-		/*auto copy_converters_list = *database._converters_list;
-		auto copy_controllers_list = *database._controllers_list;
-		auto copy_groups_list = *database._groups_list;
-		auto copy_employees_list = *database._employees_list;
-		auto copy_groupsInControllers_list = *database._groupsInControllers_list;*/
-		make_Basic_Info_List();
+		Log(MessageTypes::TRACE) << std::string("Begin serializing mysql data.");
+		Serialization::Serializer ser(
+			*database._converters_list,
+			*database._controllers_list,
+			*database._groups_list,
+			*database._groups_In_Controllers_list,
+			*database._employees_list
+		);
+		Log(MessageTypes::TRACE) << std::string("End serializing mysql data.");
 	}
-
+	
 	Common_DataBaseLayer_Types::Basic_Info_Ref_List_Ref make_Basic_Info_List();
 
 
@@ -80,6 +83,11 @@ private:
 	//void make_copies();
 	DataBase database;
 
+	Common_Database_Types::Converters_Data_List _copy_converters_list;
+	Common_Database_Types::Controllers_Data_List _copy_controllers_list;
+	Common_Database_Types::Groups_Data_List _copy_groups_list;
+	Common_Database_Types::Employees_Data_List _copy_employees_list;
+	Common_Database_Types::Groups_In_Controllers_Data_List _copy_groups_In_Controllers_list;
 };
 
 //class DataBasePresenter {

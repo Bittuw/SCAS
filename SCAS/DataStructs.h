@@ -5,7 +5,7 @@
 
 #include "DataBaseStructs.h"
 
-namespace Common_Types {
+namespace Common_Connection_Types {
 
 #define Connection_Error_Code_Types \
 	X(UNDEFINE, 0) \
@@ -95,16 +95,48 @@ namespace Common_Types {
 			_connection_type(),
 			_mutex(std::make_shared<std::mutex>())
 		{}
+		Runtime_Info(Runtime_Info&& other) 
+			:
+			_converter_detail_info(other._converter_detail_info),
+			_converter_connection_info(other._converter_connection_info),
+			_controllers_detail_info_list(other._controllers_detail_info_list),
+			_controllers_connection_status_list(other._controllers_connection_status_list),
+			_controllers_index_read_write_list(other._controllers_index_read_write_list),
+			_connection_type(other._connection_type),
+			_mutex(other._mutex)
+		{
+			other._converter_detail_info;
+			other._converter_connection_info;
+			other._controllers_detail_info_list;
+			other._controllers_connection_status_list;
+			other._controllers_index_read_write_list;
+			other._connection_type;
+			other._mutex;
+		}
+		Runtime_Info& operator=(Runtime_Info&& other) = default;
+		virtual ~Runtime_Info() {};
 	};
 	
 	//Only for Connection
 	struct Common_Connection_Info : Runtime_Info {
 		Common_DataBaseLayer_Types::Basic_Info_Ref _basic_info;
-		Common_Connection_Info(const Common_DataBaseLayer_Types::Basic_Info_Ref& basic_info) : Runtime_Info(), _basic_info(basic_info) {}
+		Common_Connection_Info() = delete;
+		Common_Connection_Info(const Common_DataBaseLayer_Types::Basic_Info_Ref& basic_info) 
+			: Runtime_Info(), 
+			_basic_info(basic_info) 
+		{}
+		Common_Connection_Info(Common_Connection_Info&& other) 
+			:
+			Runtime_Info(std::move(other)),
+			_basic_info(other._basic_info)
+		{
+			decltype(_basic_info) null = nullptr;
+			other._basic_info.swap(null);
+		}
+		Common_Connection_Info& operator=(Common_Connection_Info&& other) = default;
 	};
 
 	using Connection_Info_Ref = std::shared_ptr<Common_Connection_Info>;
-
 }
 
 
@@ -162,7 +194,7 @@ struct Available_Connection {
 extern const std::unique_ptr<SpecialList> _converterInfoListTest;
 extern const std::unique_ptr<HANDLE> _globalExitThread;
 extern const std::unique_ptr<HANDLE> _globalNotifiedThreadReset;
-//extern const std::unique_ptr<std::vector<_ZG_CTR_EVENT>> testList;
+
 
 extern LPCTSTR EventTypeList[];
 extern LPCTSTR DirectList[];

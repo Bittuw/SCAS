@@ -5,264 +5,7 @@
 
 namespace Common_Database_Types {
 
-////////// Next new data types
-//
-//	// Common type for database types
-//	template <typename T>
-//	struct Common_Database_Type {
-//		T _value;
-//		using _type = T;
-//		Common_Database_Type() {}
-//		Common_Database_Type(const T& value) : _value(value) {}
-//		virtual ~Common_Database_Type() {}
-//	};
-//
-//	//Common
-//	struct Id_Type : public Common_Database_Type<unsigned int> {
-//		Id_Type(const _type& value) : Common_Database_Type(value) {}
-//		Id_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {};
-//	};
-//	struct nSn_Type : public Common_Database_Type<unsigned int> {
-//		nSn_Type(const _type& value) : Common_Database_Type(value) {}
-//		nSn_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Type_Name_Type : public Common_Database_Type<std::string> {
-//		Type_Name_Type(const _type& value) : Common_Database_Type(value) {}
-//		Type_Name_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Name_Type : public Common_Database_Type<std::string> {
-//		Name_Type(const _type& value) : Common_Database_Type(value) {}
-//		Name_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Id_Groups_Type : public Common_Database_Type<unsigned int> {
-//		Id_Groups_Type(const _type& value) : Common_Database_Type(value) {}
-//		Id_Groups_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Id_Converter_Type : public Common_Database_Type<unsigned int> {
-//		Id_Converter_Type(const _type& value) : Common_Database_Type(value) {}
-//		Id_Converter_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct id_Controller_Type : public Common_Database_Type<unsigned int> {
-//		id_Controller_Type(const _type& value) : Common_Database_Type(value) {}
-//		id_Controller_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//
-//	//Converter
-//	struct Version_Type : public Common_Database_Type<std::string> {
-//		Version_Type(const _type& value) : Common_Database_Type(value) {}
-//		Version_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct First_Ip_Port_Type : public Common_Database_Type<std::string> {
-//		First_Ip_Port_Type(const _type& value) : Common_Database_Type(value) {}
-//		First_Ip_Port_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Second_Ip_Port_Type : public Common_Database_Type<std::string> {
-//		Second_Ip_Port_Type(const _type& value) : Common_Database_Type(value) {}
-//		Second_Ip_Port_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//
-//	//Controller
-//	struct Type_Code_Type : public Common_Database_Type<unsigned int> {
-//		Type_Code_Type(const _type& value) : Common_Database_Type(value) {}
-//		Type_Code_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Max_Groups_Type : public Common_Database_Type<unsigned int> {
-//		Max_Groups_Type(const _type& value) : Common_Database_Type(value) {}
-//		Max_Groups_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Max_Keys_Type : public Common_Database_Type<unsigned int> {
-//		Max_Keys_Type(const _type& value) : Common_Database_Type(value) {}
-//		Max_Keys_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Max_Events_Type : public Common_Database_Type<unsigned int> {
-//		Max_Events_Type(const _type& value) : Common_Database_Type(value) {}
-//		Max_Events_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Max_R_In_Time_Type : public Common_Database_Type<unsigned int> {
-//		Max_R_In_Time_Type(const _type& value) : Common_Database_Type(value) {}
-//		Max_R_In_Time_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Max_W_In_Time_Type : public Common_Database_Type<unsigned int> {
-//		Max_W_In_Time_Type(const _type& value) : Common_Database_Type(value) {}
-//		Max_W_In_Time_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//
-//	//Groups
-//	struct Time_Zone_Type : public Common_Database_Type<unsigned int> {
-//		Time_Zone_Type(const _type& value) : Common_Database_Type(value) {}
-//		Time_Zone_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//
-//	//Employee
-//	struct Surname_Type : public Common_Database_Type<std::string> {
-//		Surname_Type(const _type& value) : Common_Database_Type(value) {}
-//		Surname_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Patronymic_Type : public Common_Database_Type<std::string> {
-//		Patronymic_Type(const _type& value) : Common_Database_Type(value) {}
-//		Patronymic_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Card_Number_Type : public Common_Database_Type<unsigned int> {
-//		Card_Number_Type(const _type& value) : Common_Database_Type(value) {}
-//		Card_Number_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//
-//	//Groups in controller
-//	struct Id_Controller_Type : public Common_Database_Type<unsigned int> {
-//		Id_Controller_Type(const _type& value) : Common_Database_Type(value) {}
-//		Id_Controller_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//	struct Position_In_Controller_Type : public Common_Database_Type<unsigned int> {
-//		Position_In_Controller_Type(const _type& value) : Common_Database_Type(value) {}
-//		Position_In_Controller_Type(_type&& value) : Common_Database_Type(std::forward<_type>(value)) {}
-//	};
-//
-//#define Common_Data_Type_Fields \
-//	X(Id_Type, _id)
-//
-//#define Converters_Data_Types_Fields \
-//	/*Done*/X(nSn_Type, _nSn) \
-//	/*Done*/X(Type_Name_Type, _type_name) \
-//	/*Done*/X(Version_Type, _version) \
-//	/*Done*/X(First_Ip_Port_Type, _first_ip_port) \
-//	/*Done*/X(Second_Ip_Port_Type, _second_ip_port)
-//
-//#define Controllers_Data_Types_Fields \
-//	/*Done*/X(nSn_Type, _nSn) \
-//	/*Done*/X(Type_Name_Type, _type_name) \
-//	/*Done*/X(Type_Code_Type, _type_code) \
-//	/*Done*/X(Name_Type, _name) \
-//	/*Done*/X(Max_Groups_Type, _max_groups) \
-//	/*Done*/X(Max_Keys_Type, _max_keys) \
-//	/*Done*/X(Max_Events_Type, _max_events) \
-//	/*Done*/X(Max_R_In_Time_Type,	_max_r_event_at_time) \
-//	/*Done*/X(Max_W_In_Time_Type, _max_w_event_at_time) \
-//	/*Done*/X(Id_Converter_Type, _id_converter)
-//
-//#define Groups_Data_Types_Fields \
-//	/*Done*/X(Name_Type, _name) \
-//	/*Done*/X(Time_Zone_Type, _time_zone)
-//
-//#define Employees_Data_Types_Field \
-//	/*Done*/X(Name_Type, _name) \
-//	/*Done*/X(Surname_Type, _surname) \
-//	/*Done*/X(Patronymic_Type, _patronymic) \
-//	/*Done*/X(Card_Number_Type, _card_number) \
-//	/*Done*/X(Id_Groups_Type, _id_groups)
-//
-//#define Groups_In_Controllers_Data_Types_Fields \
-//	/*Done*/X(Id_Groups_Type, _id_groups) \
-//	/*Done*/X(id_Controller_Type, _id_controllers) \
-//	/*Done*/X(Id_Converter_Type, _id_converter) \
-//	/*Done*/X(Position_In_Controller_Type, _position_in_controller)
-//
-//	struct Common_Data {
-//#define X(type, name) type name;
-//		Common_Data_Type_Fields
-//#undef X
-//
-//		Common_Data(const mysqlx::Value& id) : _id(static_cast<unsigned int>(id)){}
-//		virtual ~Common_Data() {}
-//	};
-//
-//	struct Converters_Data : Common_Data {
-//#define X(type, name) type name;
-//		Converters_Data_Types_Fields
-//#undef X
-//		Converters_Data
-//		(
-//			mysqlx::Row& row,
-//			int&& count
-//		) : Common_Data(row.get(count++)),
-//		_nSn(static_cast<unsigned int>(row.get(count++))),
-//		_type_name(static_cast<mysqlx::string>(row.get(count++))),
-//		_version(static_cast<mysqlx::string>(row.get(count++))),
-//		_first_ip_port(static_cast<mysqlx::string>(row.get(count++))),
-//		_second_ip_port(static_cast<mysqlx::string>(row.get(count++)))
-//	{}
-//	};
-//
-//	struct Controllers_Data : Common_Data {
-//#define X(type, name) type name;
-//		Controllers_Data_Types_Fields
-//#undef X
-//		Controllers_Data
-//		(
-//			mysqlx::Row& row,
-//			int&& count
-//		) : Common_Data(row.get(count++)),
-//		_nSn(static_cast<unsigned int>(row.get(count++))),
-//		_type_name(static_cast<mysqlx::string>(row.get(count++))),
-//		_type_code(static_cast<unsigned int>(row.get(count++))),
-//		_name(static_cast<mysqlx::string>(row.get(count++))),
-//		_max_groups(static_cast<unsigned int>(row.get(count++))),
-//		_max_keys(static_cast<unsigned int>(row.get(count++))),
-//		_max_events(static_cast<unsigned int>(row.get(count++))),
-//		_max_r_event_at_time(static_cast<unsigned int>(row.get(count++))),
-//		_max_w_event_at_time(static_cast<unsigned int>(row.get(count++))),
-//		_id_converter(static_cast<unsigned int>(row.get(count++)))
-//	{}
-//	};
-//
-//	struct Groupd_Data : Common_Data {
-//#define X(type, name) type name;
-//		Groups_Data_Types_Fields
-//#undef X
-//		Groupd_Data
-//		(
-//			mysqlx::Row& row,
-//			int&& count
-//		) : Common_Data(row.get(count++)),
-//		_name(static_cast<mysqlx::string>(row.get(count++))),
-//		_time_zone(static_cast<unsigned int>(row.get(count++)))
-//		{}
-//	};
-//
-//	struct Employees_Data : Common_Data {
-//#define X(type, name) type name;
-//		Employees_Data_Types_Field
-//#undef X
-//		Employees_Data
-//		(
-//			mysqlx::Row& row,
-//			int&& count
-//		) : Common_Data(row.get(count++)),
-//		_name(static_cast<mysqlx::string>(row.get(count++))),
-//		_surname(static_cast<mysqlx::string>(row.get(count++))),
-//		_patronymic(static_cast<mysqlx::string>(row.get(count++))),
-//		_card_number(static_cast<unsigned int>(row.get(count++))),
-//		_id_groups(static_cast<unsigned int>(row.get(count++)))
-//		{}
-//	};
-//
-//	struct Groups_In_Controllers_Data : Common_Data {
-//#define X(type, name) type name;
-//		Groups_In_Controllers_Data_Types_Fields
-//#undef X
-//		Groups_In_Controllers_Data
-//		(
-//			mysqlx::Row& row,
-//			int&& count
-//		) : Common_Data(row.get(count++)),
-//		_id_groups(static_cast<int>(row.get(count++))),
-//		_id_controllers(static_cast<int>(row.get(count++))),
-//		_id_converter(static_cast<int>(row.get(count++))),
-//		_position_in_controller(static_cast<int>(row.get(count++)))
-//		{}
-//	};
-//
-//	using Controllers_Data_List = std::vector<Controllers_Data>;
-//
-//	//struct Converter_Controllers_Data  {
-//	//	Converters_Data _converter_data;
-//	//	Controllers_Data_List _controllers_data_list;
-//
-//	//	//Converter_Controllers_Data() {}
-//	//};
-//
-///////// Next old data
-
-////////// Next old data types
+////////// Next new veiw of data_type
 
 #define Mysql_Generic_Type_Fields \
 	/*Done*/X(unsigned int, _id)
@@ -303,40 +46,159 @@ namespace Common_Database_Types {
 	/*Done*/X(unsigned int, _id_converter) \
 	/*Done*/X(unsigned int, _position_in_controller)
 
+	// Next POD's types
+
+	static const std::string TablesNames[] = {
+		"converters",
+		"controllers",
+		"groups",
+		"employees",
+		"groups_in_controllers"
+	};
+
+	struct Mysql_POD_Converter_Data_Type {
+#define X(type, name) type name;
+		Mysql_Generic_Type_Fields
+		Mysql_Converter_Data_Type_Field
+#undef X
+	};
+
+	struct Mysql_POD_Controller_Data_Type {
+#define X(type, name) type name;
+		Mysql_Generic_Type_Fields
+		Mysql_Controller_Data_Type_Fields
+#undef X
+	};
+
+	struct Mysql_POD_Group_Data_Type {
+#define X(type, name) type name;
+		Mysql_Generic_Type_Fields
+		Mysql_Group_Data_Type_Fields
+#undef X
+	};
+
+	struct Mysql_POD_Employee_Data_Type {
+#define X(type, name) type name;
+		Mysql_Generic_Type_Fields
+		Mysql_Employee_Data_Type_Fields
+#undef X
+	};
+
+	struct Mysql_POD_Group_In_Controller_Data_Type {
+#define X(type, name) type name;
+		Mysql_Generic_Type_Fields
+		Mysql_Group_In_Controller_Data_Type_Fields
+#undef X
+	};
+
+	///
+	/// Next mysql wrappers type
+	///
 
 	struct Mysql_Generic_Type {
 #define X(type, name) type name;
 		Mysql_Generic_Type_Fields
 #undef X
-
 		Mysql_Generic_Type() {};
+		Mysql_Generic_Type(int id)
+			: _id(id)
+		{}
+		Mysql_Generic_Type(const Mysql_Generic_Type& other) = default;
 		Mysql_Generic_Type(mysqlx::Value id) : _id(static_cast<int>(id)){};
-		virtual ~Mysql_Generic_Type() {};
+		Mysql_Generic_Type(Mysql_Generic_Type&& other)
+			:
+			_id(other._id)
+		{
+			other._id = 0;
+		}
+		Mysql_Generic_Type& operator=(const Mysql_Generic_Type& other) = default;
+		Mysql_Generic_Type& operator=(Mysql_Generic_Type&& other) = default;
+		virtual ~Mysql_Generic_Type() = default;
 	};
 
+	struct Mysql_Converter_Data_Type : public Mysql_Generic_Type {
+		using POD_type = Mysql_POD_Converter_Data_Type;
 
-	struct  Mysql_Converter_Data_Type : public Mysql_Generic_Type {
 #define X(type, name) type name;
 		Mysql_Converter_Data_Type_Field
 #undef X
+		Mysql_Converter_Data_Type() {}
+		Mysql_Converter_Data_Type(POD_type pod)
+			:
+			Mysql_Generic_Type(pod._id),
+			_nSn(pod._nSn),
+			_type_name(pod._type_name),
+			_version(pod._version),
+			_first_ip_port(pod._first_ip_port),
+			_second_ip_port(pod._second_ip_port)
 
-		Mysql_Converter_Data_Type() {};
+		{}
+		Mysql_Converter_Data_Type(const Mysql_Converter_Data_Type& other) = default;
 		Mysql_Converter_Data_Type(mysqlx::Row& row,	int&& count)
-			: Mysql_Generic_Type(row.get(count++)),
+			: 
+			Mysql_Generic_Type(row.get(count++)),
 			_nSn(static_cast<int>(row.get(count++))),
 			_type_name(static_cast<mysqlx::string>(row.get(count++))),
 			_version(static_cast<unsigned int>(row.get(count++))),
 			_first_ip_port(static_cast<mysqlx::string>(row.get(count++))),
 			_second_ip_port(static_cast<mysqlx::string>(row.get(count++)))
 		{}
+		Mysql_Converter_Data_Type(Mysql_Converter_Data_Type&& other) 
+			: 
+			Mysql_Generic_Type(std::move(other)),
+			_nSn(other._nSn),
+			_type_name(other._type_name),
+			_version(other._version),
+			_first_ip_port(other._first_ip_port),
+			_second_ip_port(other._second_ip_port)
+		{
+			other._nSn = 0;
+			other._type_name.clear();
+			other._version = 0;
+			other._first_ip_port.clear();
+			other._second_ip_port.clear();
+		}
+		Mysql_Converter_Data_Type& operator=(const Mysql_Converter_Data_Type& other) = default;
+		Mysql_Converter_Data_Type& operator=(Mysql_Converter_Data_Type&& other) = default;
+
+		explicit operator POD_type()
+		{
+			POD_type ret = {
+				this->_id,
+				this->_nSn,
+				this->_type_name,
+				this->_version,
+				this->_first_ip_port,
+				this->_second_ip_port
+			};
+			return ret;
+		}
+
+		static std::string* _table_name;
 	};
 
 	struct Mysql_Controller_Data_Type : public Mysql_Generic_Type {
+		using POD_type = Mysql_POD_Controller_Data_Type;
+
 #define X(type, name) type name;
 		Mysql_Controller_Data_Type_Fields
 #undef X
-
 		Mysql_Controller_Data_Type() {};
+		Mysql_Controller_Data_Type(POD_type pod)
+			:
+			Mysql_Generic_Type(pod._id),
+			_nSn(pod._nSn),
+			_type_name(pod._type_name),
+			_type_code(pod._type_code),
+			_name(pod._name),
+			_max_groups(pod._max_groups),
+			_max_keys(pod._max_keys),
+			_max_events(pod._max_events),
+			_max_r_event_at_time(pod._max_r_event_at_time),
+			_max_w_event_at_time(pod._max_w_event_at_time),
+			_id_converter(pod._id_converter)
+		{}
+		Mysql_Controller_Data_Type(const Mysql_Controller_Data_Type& other) = default;
 		Mysql_Controller_Data_Type(mysqlx::Row& row, int&& count)
 			: Mysql_Generic_Type(row.get(count++)),
 			_nSn(static_cast<int>(row.get(count++))),
@@ -350,27 +212,116 @@ namespace Common_Database_Types {
 			_max_w_event_at_time(static_cast<int>(row.get(count++))),
 			_id_converter(static_cast<int>(row.get(count++)))
 		{}
+		Mysql_Controller_Data_Type(Mysql_Controller_Data_Type&& other) 
+			:
+			Mysql_Generic_Type(std::move(other)),
+			_nSn(other._nSn),
+			_type_name(other._type_name),
+			_type_code(other._type_code),
+			_name(other._name),
+			_max_groups(other._max_groups),
+			_max_keys(other._max_keys),
+			_max_events(other._max_events),
+			_max_r_event_at_time(other._max_r_event_at_time),
+			_max_w_event_at_time(other._max_w_event_at_time),
+			_id_converter(other._id_converter)
+		{
+			other._nSn = 0;
+			other._type_name.clear();
+			other._type_code = 0;
+			other._name.clear();
+			other._max_groups = 0;
+			other._max_keys = 0;
+			other._max_events = 0;
+			other._max_r_event_at_time = 0;
+			other._max_w_event_at_time = 0;
+			other._id_converter = 0;
+		}
+		Mysql_Controller_Data_Type& operator=(const Mysql_Controller_Data_Type& other) = default;
+		Mysql_Controller_Data_Type& operator=(Mysql_Controller_Data_Type&& other) = default;
+
+		explicit operator POD_type()
+		{
+			POD_type ret = {
+				this->_id,
+				this->_nSn,
+				this->_type_name,
+				this->_type_code,
+				this->_name,
+				this->_max_groups,
+				this->_max_keys,
+				this->_max_events,
+				this->_max_r_event_at_time,
+				this->_max_w_event_at_time,
+				this->_id_converter
+			};
+			return ret;
+		}
+
+		static std::string* _table_name;
 	};
 
+	struct Mysql_Group_Data_Type : public Mysql_Generic_Type { // TODO move
+		using POD_type = Mysql_POD_Group_Data_Type;
 
-	struct Mysql_Group_Data_Type : public Mysql_Generic_Type {
 #define X(type, name) type name;
 		Mysql_Group_Data_Type_Fields
 #undef X
-			Mysql_Group_Data_Type() {};
+		Mysql_Group_Data_Type() {};
+		Mysql_Group_Data_Type(const POD_type& pod)
+			:
+			Mysql_Generic_Type(pod._id),
+			_name(pod._name),
+			_time_zone(pod._time_zone)
+		{}
+		Mysql_Group_Data_Type(const Mysql_Group_Data_Type& other) = default;
 		Mysql_Group_Data_Type(mysqlx::Row& row, int&& count)
 			: Mysql_Generic_Type(row.get(count++)),
 			_name(static_cast<mysqlx::string>(row.get(count++))),
 			_time_zone(static_cast<int>(row.get(count++)))
 		{}
+		Mysql_Group_Data_Type(Mysql_Group_Data_Type&& other) 
+			:
+			Mysql_Generic_Type(std::move(other)),
+			_name(other._name),
+			_time_zone(other._time_zone)
+		{
+			other._name.clear();
+			other._time_zone = 0;
+		}
+		Mysql_Group_Data_Type& operator=(const Mysql_Group_Data_Type& other) = default;
+		Mysql_Group_Data_Type& operator=(Mysql_Group_Data_Type&& other) = default;
+
+		explicit operator POD_type()
+		{
+			Mysql_POD_Group_Data_Type ret = {
+				this->_id,
+				this->_name,
+				this->_time_zone
+			};
+			return ret;
+		}
+
+		static std::string* _table_name;
+		
 	};
 
+	struct Mysql_Employee_Data_Type : public Mysql_Generic_Type { // TODO move
+		using POD_type = Mysql_POD_Employee_Data_Type;
 
-	struct Mysql_Employee_Data_Type : public Mysql_Generic_Type {
 #define X(type, name) type name;
 		Mysql_Employee_Data_Type_Fields
 #undef X
 		Mysql_Employee_Data_Type() {};
+		Mysql_Employee_Data_Type(const POD_type& pod)
+			:
+			Mysql_Generic_Type(std::move(pod._id)),
+			_name(std::move(pod._name)),
+			_surname(std::move(pod._surname)),
+			_patronymic(std::move(pod._patronymic)),
+			_card_number(std::move(pod._card_number))
+		{}
+		Mysql_Employee_Data_Type(const Mysql_Employee_Data_Type& other) = default;
 		Mysql_Employee_Data_Type(mysqlx::Row& row, int&& count)
 			: Mysql_Generic_Type(row.get(count++)),
 			_name(static_cast<mysqlx::string>(row.get(count++))),
@@ -378,14 +329,54 @@ namespace Common_Database_Types {
 			_patronymic(static_cast<mysqlx::string>(row.get(count++))),
 			_card_number(static_cast<int>(row.get(count++)))
 		{}
+		Mysql_Employee_Data_Type(Mysql_Employee_Data_Type&& other)
+			:
+			Mysql_Generic_Type(std::move(other)),
+			_name(other._name),
+			_surname(other._surname),
+			_patronymic(other._patronymic),
+			_card_number(other._card_number)
+		{
+			other._name.clear();
+			other._surname.clear();
+			other._patronymic.clear();
+			other._card_number = 0;
+		}
+		Mysql_Employee_Data_Type& operator=(const Mysql_Employee_Data_Type& other) = default;
+		Mysql_Employee_Data_Type& operator=(Mysql_Employee_Data_Type&& other) = default;
+
+		explicit operator POD_type()
+		{
+			Mysql_POD_Employee_Data_Type ret = {
+				this->_id,
+				this->_name,
+				this->_surname,
+				this->_patronymic,
+				this->_card_number,
+			};
+			return ret;
+		}
+
+		static std::string* _table_name;
+		
 	};
 
+	struct Mysql_Group_In_Controller_Data_Type : public Mysql_Generic_Type { // TODO move
+		using POD_type = Mysql_POD_Group_In_Controller_Data_Type;
 
-	struct Mysql_Group_In_Controller_Data_Type : public Mysql_Generic_Type {
 #define X(type, name) type name;
 		Mysql_Group_In_Controller_Data_Type_Fields
 #undef X
 		Mysql_Group_In_Controller_Data_Type() {};
+		Mysql_Group_In_Controller_Data_Type(const POD_type& pod)
+			:
+			Mysql_Generic_Type(std::move(pod._id)),
+			_id_groups(std::move(pod._id_groups)),
+			_id_controllers(std::move(pod._id_controllers)),
+			_id_converter(std::move(pod._id_converter)),
+			_position_in_controller(std::move(pod._position_in_controller))
+		{}
+		Mysql_Group_In_Controller_Data_Type(const Mysql_Group_In_Controller_Data_Type& other) = default;
 		Mysql_Group_In_Controller_Data_Type(mysqlx::Row& row, int&& count)
 			: Mysql_Generic_Type(row.get(count++)),
 			_id_groups(static_cast<int>(row.get(count++))),
@@ -393,15 +384,38 @@ namespace Common_Database_Types {
 			_id_converter(static_cast<int>(row.get(count++))),
 			_position_in_controller(static_cast<int>(row.get(count++)))
 		{}
+		Mysql_Group_In_Controller_Data_Type(Mysql_Group_In_Controller_Data_Type&& other) 
+			:
+			Mysql_Generic_Type(std::move(other)),
+			_id_groups(other._id_groups),
+			_id_controllers(other._id_controllers),
+			_id_converter(other._id_converter),
+			_position_in_controller(other._position_in_controller)
+		{
+			other._id_groups = 0;
+			other._id_controllers = 0;
+			other._id_converter = 0;
+			other._position_in_controller = 0;
+		}
+		Mysql_Group_In_Controller_Data_Type& operator=(const Mysql_Group_In_Controller_Data_Type& other) = default;
+		Mysql_Group_In_Controller_Data_Type& operator=(Mysql_Group_In_Controller_Data_Type&& other) = default;
+
+		explicit operator POD_type()
+		{
+			Mysql_POD_Group_In_Controller_Data_Type ret = {
+				this->_id,
+				this->_id_groups,
+				this->_id_controllers,
+				this->_id_converter,
+				this->_position_in_controller
+			};
+			return ret;
+		}
+
+		static std::string* _table_name;
+		
 	};
 
-	static const std::string TablesNames[] = {
-		"converters",
-		"controllers",
-		"groups",
-		"employees",
-		"groups_in_controllers"
-	};
 
 	//Lists of types
 	using Converters_Data_List = std::vector<Mysql_Converter_Data_Type>;
@@ -413,14 +427,15 @@ namespace Common_Database_Types {
 
 
 namespace Common_DataBaseLayer_Types {
+
 	struct Basic_Info {
 
 	public:
 		Common_Database_Types::Mysql_Converter_Data_Type _mysql_converter_data;
 		Common_Database_Types::Controllers_Data_List _mysql_controllers_data_list;
 
-		Basic_Info(Common_Database_Types::Mysql_Converter_Data_Type mysql_converter_data, const Common_Database_Types::Controllers_Data_List& mysql_controllers_data_list)
-			:
+		Basic_Info(const Common_Database_Types::Mysql_Converter_Data_Type& mysql_converter_data, const Common_Database_Types::Controllers_Data_List& mysql_controllers_data_list)
+		:	
 			_mysql_converter_data(mysql_converter_data),
 			_mysql_controllers_data_list()
 		{
@@ -442,6 +457,16 @@ namespace Common_DataBaseLayer_Types {
 				start_from = result + 1;
 			}
 		}
+		Basic_Info(Basic_Info&& other) 
+		: 
+			_mysql_converter_data(std::move(other._mysql_converter_data)),
+			_mysql_controllers_data_list(std::move(other._mysql_controllers_data_list))
+		{
+			other._mysql_converter_data;
+		}
+
+		Basic_Info& operator=(Basic_Info&& other) = default;
+		Basic_Info& operator=(const Basic_Info& other) = default;
 	};
 
 	// Basic usage
