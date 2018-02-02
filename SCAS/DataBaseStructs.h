@@ -6,41 +6,81 @@
 namespace Common_Database_Types {
 
 ////////// Next new veiw of data_type
+	
+	using std::string;
 
 #define Mysql_Generic_Type_Fields \
 	/*Done*/X(unsigned int, _id)
 
 #define Mysql_Converter_Data_Type_Field \
 	/*Done*/X(unsigned int, _nSn) \
-	/*Done*/X(std::string, _type_name) \
+	/*Done*/X(string, _type_name) \
 	/*Done*/X(unsigned int, _version) \
-	/*Done*/X(std::string, _first_ip_port) \
-	/*Done*/X(std::string, _second_ip_port)
+	/*Done*/X(string, _first_ip_port) \
+	/*Done*/X(string, _second_ip_port)
 
 #define Mysql_Controller_Data_Type_Fields \
 	/*Done*/X(unsigned int, _nSn) \
-	/*Done*/X(std::string, _type_name) \
+	/*Done*/X(string, _type_name) \
 	/*Done*/X(unsigned int, _type_code) \
-	/*Done*/X(std::string, _name) \
+	/*Done*/X(string, _name) \
 	/*Done*/X(unsigned int, _max_groups) \
 	/*Done*/X(unsigned int, _max_keys) \
 	/*Done*/X(unsigned int, _max_events) \
-	/*Done*/X(unsigned int,	_max_r_event_at_time) \
+	/*Done*/X(unsigned int, _max_r_event_at_time) \
 	/*Done*/X(unsigned int, _max_w_event_at_time) \
 	/*Done*/X(unsigned int, _id_converter)
 
 #define Mysql_Group_Data_Type_Fields \
-	/*Done*/X(std::string, _name) \
+	/*Done*/X(string, _name) \
 	/*Done*/X(unsigned int, _time_zone)
 
 #define Mysql_Employee_Data_Type_Fields \
-	/*Done*/X(std::string, _name) \
-	/*Done*/X(std::string, _surname) \
-	/*Done*/X(std::string, _patronymic) \
+	/*Done*/X(string, _name) \
+	/*Done*/X(string, _surname) \
+	/*Done*/X(string, _patronymic) \
 	/*Done*/X(unsigned int, _card_number) \
 	/*Done*/X(unsigned int, _id_groups)
 
 #define Mysql_Group_In_Controller_Data_Type_Fields \
+	/*Done*/X(unsigned int, _id_groups) \
+	/*Done*/X(unsigned int, _id_controllers) \
+	/*Done*/X(unsigned int, _id_converter) \
+	/*Done*/X(unsigned int, _position_in_controller)
+
+	//// POD defines
+
+#define Mysql_POD_Converter_Data_Type_Field \
+	/*Done*/X(unsigned int, _nSn) \
+	/*Done*/X(char, _type_name[45])\
+	/*Done*/X(unsigned int, _version) \
+	/*Done*/X(char, _first_ip_port[45]) \
+	/*Done*/X(char, _second_ip_port[45])
+
+#define Mysql_POD_Controller_Data_Type_Fields \
+	/*Done*/X(unsigned int, _nSn) \
+	/*Done*/X(char, _type_name[45]) \
+	/*Done*/X(unsigned int, _type_code) \
+	/*Done*/X(char, _name[45]) \
+	/*Done*/X(unsigned int, _max_groups) \
+	/*Done*/X(unsigned int, _max_keys) \
+	/*Done*/X(unsigned int, _max_events) \
+	/*Done*/X(unsigned int, _max_r_event_at_time) \
+	/*Done*/X(unsigned int, _max_w_event_at_time) \
+	/*Done*/X(unsigned int, _id_converter)
+
+#define Mysql_POD_Group_Data_Type_Fields \
+	/*Done*/X(char, _name[45]) \
+	/*Done*/X(unsigned int, _time_zone)
+
+#define Mysql_POD_Employee_Data_Type_Fields \
+	/*Done*/X(char, _name[45]) \
+	/*Done*/X(char, _surname[45]) \
+	/*Done*/X(char, _patronymic[45]) \
+	/*Done*/X(unsigned int, _card_number) \
+	/*Done*/X(unsigned int, _id_groups)
+
+#define Mysql_POD_Group_In_Controller_Data_Type_Fields \
 	/*Done*/X(unsigned int, _id_groups) \
 	/*Done*/X(unsigned int, _id_controllers) \
 	/*Done*/X(unsigned int, _id_converter) \
@@ -59,36 +99,41 @@ namespace Common_Database_Types {
 	struct Mysql_POD_Converter_Data_Type {
 #define X(type, name) type name;
 		Mysql_Generic_Type_Fields
-		Mysql_Converter_Data_Type_Field
+		Mysql_POD_Converter_Data_Type_Field
 #undef X
 	};
 
 	struct Mysql_POD_Controller_Data_Type {
 #define X(type, name) type name;
 		Mysql_Generic_Type_Fields
-		Mysql_Controller_Data_Type_Fields
+		Mysql_POD_Controller_Data_Type_Fields
 #undef X
 	};
 
 	struct Mysql_POD_Group_Data_Type {
+
 #define X(type, name) type name;
 		Mysql_Generic_Type_Fields
-		Mysql_Group_Data_Type_Fields
+		Mysql_POD_Group_Data_Type_Fields
 #undef X
 	};
 
 	struct Mysql_POD_Employee_Data_Type {
+
 #define X(type, name) type name;
 		Mysql_Generic_Type_Fields
-		Mysql_Employee_Data_Type_Fields
+		Mysql_POD_Employee_Data_Type_Fields
 #undef X
+
 	};
 
 	struct Mysql_POD_Group_In_Controller_Data_Type {
+
 #define X(type, name) type name;
 		Mysql_Generic_Type_Fields
-		Mysql_Group_In_Controller_Data_Type_Fields
+		Mysql_POD_Group_In_Controller_Data_Type_Fields
 #undef X
+
 	};
 
 	///
@@ -163,17 +208,17 @@ namespace Common_Database_Types {
 
 		explicit operator POD_type()
 		{
-			POD_type ret = {
-				this->_id,
-				this->_nSn,
-				this->_type_name,
-				this->_version,
-				this->_first_ip_port,
-				this->_second_ip_port
-			};
+			POD_type ret;
+			ret._id = this->_id;
+			ret._nSn = this->_nSn;
+			strncpy_s(ret._type_name, this->_type_name.c_str(), sizeof(ret._type_name));
+			ret._version = this->_version;
+			strncpy_s(ret._first_ip_port, this->_first_ip_port.c_str(), sizeof(ret._first_ip_port));
+			strncpy_s(ret._second_ip_port, this->_second_ip_port.c_str(), sizeof(ret._second_ip_port));
 			return ret;
 		}
-
+		/*friend std::ofstream& operator<<(std::ofstream& stream, Mysql_Converter_Data_Type& object);
+		friend std::ifstream& operator>>(std::ifstream& stream, Mysql_Converter_Data_Type& object);*/
 		static std::string* _table_name;
 	};
 
@@ -242,22 +287,20 @@ namespace Common_Database_Types {
 
 		explicit operator POD_type()
 		{
-			POD_type ret = {
-				this->_id,
-				this->_nSn,
-				this->_type_name,
-				this->_type_code,
-				this->_name,
-				this->_max_groups,
-				this->_max_keys,
-				this->_max_events,
-				this->_max_r_event_at_time,
-				this->_max_w_event_at_time,
-				this->_id_converter
-			};
+			POD_type ret;
+			ret._id = this->_id;
+			ret._nSn = this->_nSn;
+			strcpy_s(ret._type_name, this->_type_name.c_str());
+			ret._type_code = this->_type_code;
+			strcpy_s(ret._name, this->_name.c_str());
+			ret._max_groups = this->_max_groups;
+			ret._max_keys = this->_max_keys;
+			ret._max_events = this->_max_events;
+			ret._max_r_event_at_time = this->_max_r_event_at_time;
+			ret._max_w_event_at_time = this->_max_w_event_at_time;
+			ret._id_converter = this->_id_converter;
 			return ret;
 		}
-
 		static std::string* _table_name;
 	};
 
@@ -294,14 +337,14 @@ namespace Common_Database_Types {
 
 		explicit operator POD_type()
 		{
-			Mysql_POD_Group_Data_Type ret = {
-				this->_id,
-				this->_name,
-				this->_time_zone
-			};
+			Mysql_POD_Group_Data_Type ret;
+			ret._id = this->_id;
+			strncpy_s(ret._name, this->_name.c_str(), sizeof(ret._name));
+			ret._time_zone = this->_time_zone;
 			return ret;
 		}
-
+		/*friend std::ofstream& operator<<(std::ofstream& stream, Mysql_Group_Data_Type& object);
+		friend std::ifstream& operator>>(std::ifstream& stream, Mysql_Group_Data_Type& object);*/
 		static std::string* _table_name;
 		
 	};
@@ -315,11 +358,11 @@ namespace Common_Database_Types {
 		Mysql_Employee_Data_Type() {};
 		Mysql_Employee_Data_Type(const POD_type& pod)
 			:
-			Mysql_Generic_Type(std::move(pod._id)),
-			_name(std::move(pod._name)),
-			_surname(std::move(pod._surname)),
-			_patronymic(std::move(pod._patronymic)),
-			_card_number(std::move(pod._card_number))
+			Mysql_Generic_Type(pod._id),
+			_name(pod._name),
+			_surname(pod._surname),
+			_patronymic(pod._patronymic),
+			_card_number(pod._card_number)
 		{}
 		Mysql_Employee_Data_Type(const Mysql_Employee_Data_Type& other) = default;
 		Mysql_Employee_Data_Type(mysqlx::Row& row, int&& count)
@@ -347,16 +390,16 @@ namespace Common_Database_Types {
 
 		explicit operator POD_type()
 		{
-			Mysql_POD_Employee_Data_Type ret = {
-				this->_id,
-				this->_name,
-				this->_surname,
-				this->_patronymic,
-				this->_card_number,
-			};
+			Mysql_POD_Employee_Data_Type ret;
+			ret._id = this->_id;
+			strncpy_s(ret._name, this->_name.c_str(), sizeof(ret._name));
+			strncpy_s(ret._surname, this->_surname.c_str(), sizeof(ret._surname));
+			strncpy_s(ret._patronymic, this->_patronymic.c_str(), sizeof(ret._patronymic));
+			ret._card_number = this->_card_number;
 			return ret;
 		}
-
+		/*friend std::ofstream& operator<<(std::ofstream& stream, Mysql_Employee_Data_Type& object);
+		friend std::ifstream& operator>>(std::ifstream& stream, Mysql_Employee_Data_Type& object);*/
 		static std::string* _table_name;
 		
 	};
@@ -411,9 +454,9 @@ namespace Common_Database_Types {
 			};
 			return ret;
 		}
-
+		/*friend std::ofstream& operator<<(std::ofstream& stream, Mysql_Group_In_Controller_Data_Type& object);
+		friend std::ifstream& operator>>(std::ifstream& stream, Mysql_Group_In_Controller_Data_Type& object);*/
 		static std::string* _table_name;
-		
 	};
 
 
