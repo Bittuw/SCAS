@@ -2,6 +2,7 @@
 /ipch/
 /SCAS/Debug/
 /SCAS/x64/
+/SCAS/Backup/
 *.swp
 *.opendb
 *.db
