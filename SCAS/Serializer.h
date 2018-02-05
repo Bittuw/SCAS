@@ -3,7 +3,7 @@
 #ifndef SERIALIZER
 #define SERIALIZER
 
-#include "DataBaseStructs.h"
+#include "Mysql_Types.h"
 
 namespace Serialization {
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DataStructs.h"
+#include "Main_Connection_Info.h"
 
 struct Available_Connection;
 
@@ -34,21 +35,21 @@ public:
 	void setNewConnactionInfo(std::unique_ptr<Available_Connection>);
 	//int addController(_ZG_FIND_CTR_INFO); // TODO сделать условие
 	//void removeController(const int);
-	Common_Connection_Types::Connection_Error_Code initialConnections() noexcept; // Отрытие конвертора и создание/открытие контроллеров DONE
-	Common_Connection_Types::Connection_Error_Code closeConnections() noexcept; // Закрыть все подключения DONE
-	Common_Connection_Types::Connection_Error_Code reconnect() noexcept; // Пересоздать соединение DONE
-	Common_Connection_Types::Connection_Error_Code getConnectionStatus(_Out_ bool&) noexcept; // Статус подключения конвертора DONE
-	Common_Connection_Types::Connection_Error_Code setNotifications(_Out_ std::vector<HANDLE>&) noexcept; // Установка уведомлений
-	Common_Connection_Types::Connection_Error_Code closeNotifications(); // Закрыть уведомления DONE
-	Common_Connection_Types::Connection_Error_Code readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомлений конвертора DONE
-	Common_Connection_Types::Connection_Error_Code addController(_ZG_FIND_CTR_INFO);
-	Common_Connection_Types::Connection_Error_Code removeController(_ZG_FIND_CTR_INFO);
+	Main_Connection_Basic_Info_Types::Connection_Error_Code initialConnections() noexcept; // Отрытие конвертора и создание/открытие контроллеров DONE
+	Main_Connection_Basic_Info_Types::Connection_Error_Code closeConnections() noexcept; // Закрыть все подключения DONE
+	Main_Connection_Basic_Info_Types::Connection_Error_Code reconnect() noexcept; // Пересоздать соединение DONE
+	Main_Connection_Basic_Info_Types::Connection_Error_Code getConnectionStatus(_Out_ bool&) noexcept; // Статус подключения конвертора DONE
+	Main_Connection_Basic_Info_Types::Connection_Error_Code setNotifications(_Out_ std::vector<HANDLE>&) noexcept; // Установка уведомлений
+	Main_Connection_Basic_Info_Types::Connection_Error_Code closeNotifications(); // Закрыть уведомления DONE
+	Main_Connection_Basic_Info_Types::Connection_Error_Code readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомлений конвертора DONE
+	Main_Connection_Basic_Info_Types::Connection_Error_Code addController(_ZG_FIND_CTR_INFO);
+	Main_Connection_Basic_Info_Types::Connection_Error_Code removeController(_ZG_FIND_CTR_INFO);
 	//ErrorCode setControllerKeysBase(const int, std::vector<type-error>); // Установка базы ключей
 	//ErrorCode getControllerKeyBase(const int, _Out_ std::vector<type-error>); // Получение базу ключей
-	Common_Connection_Types::Connection_Error_Code readControllerNotifies(const int, _Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомления контроллера DONE
-	Common_Connection_Types::Connection_Error_Code readControllerEvent(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий контроллера
+	Main_Connection_Basic_Info_Types::Connection_Error_Code readControllerNotifies(const int, _Out_ std::vector<std::pair<UINT, LPARAM>>&) noexcept; // Чтение уведомления контроллера DONE
+	Main_Connection_Basic_Info_Types::Connection_Error_Code readControllerEvent(const int, _Out_ std::vector<_ZG_CTR_EVENT>&); // Чтение событий контроллера
 	//ErrorCode readControllerEvents(const int, _Out_ std::vector<_ZG_EVENT>&) // Чтение всех событий
-	Common_Connection_Types::Connection_Error_Code setControllerTime(const int); // Установка времени контроллера DONE
+	Main_Connection_Basic_Info_Types::Connection_Error_Code setControllerTime(const int); // Установка времени контроллера DONE
 	//AvailableConnection storeData();
 	//AvailableConnection restoreData();
 	///////////////
@@ -67,7 +68,7 @@ public:
 	std::shared_ptr<HANDLE> _e_destroyed = nullptr; // Событие уничтожения объекта **оставить
 	///////////////
 
-	Common_Connection_Types::Connection_Error_Code errorStatus;
+	Main_Connection_Basic_Info_Types::Connection_Error_Code errorStatus;
 
 private:
 	

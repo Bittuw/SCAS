@@ -1,12 +1,13 @@
 #pragma once
 #include "stdafx.h"
 #include "Connection.h"
+#include "Main_Connection_Info.h"
 #include "DataStructs.h"
 
 Connection::Connection(std::unique_ptr<Available_Connection>& availableConnection) :
 _e_newInfo(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
 _e_destroyed(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
-errorStatus(Common_Connection_Types::Connection_Error_Code::UNDEFINE),
+errorStatus(Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE),
 _converterMessageList({}),
 _controllerMessageList({})
 {
@@ -50,8 +51,8 @@ void Connection::setNewConnactionInfo(std::unique_ptr<Available_Connection> poin
 }
 
 /////////////// Открытые сценарии
-Common_Connection_Types::Connection_Error_Code Connection::initialConnections() noexcept {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::initialConnections() noexcept {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		if (tryOpenConverter()) {
@@ -59,7 +60,7 @@ Common_Connection_Types::Connection_Error_Code Connection::initialConnections() 
 			openControllers();
 			SetEvent(*_e_newInfo);
 			updateControllerInfo(CLEAR);
-			result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+			result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 		}
 	}
 	catch (const std::exception& error) {
@@ -70,13 +71,13 @@ Common_Connection_Types::Connection_Error_Code Connection::initialConnections() 
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::closeConnections() noexcept  {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::closeConnections() noexcept  {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		tryCloseConverter();
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -85,8 +86,8 @@ Common_Connection_Types::Connection_Error_Code Connection::closeConnections() no
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::reconnect() noexcept {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::reconnect() noexcept {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 	
 	try {
 		tryCloseConverter();
@@ -96,7 +97,7 @@ Common_Connection_Types::Connection_Error_Code Connection::reconnect() noexcept 
 			SetEvent(*_e_newInfo);
 		}
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch(const std::exception& error) {
 		result = errorStatus;
@@ -106,13 +107,13 @@ Common_Connection_Types::Connection_Error_Code Connection::reconnect() noexcept 
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::getConnectionStatus(_Out_ bool& connection) noexcept {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		(getStatus() != ZP_CS_DISCONNECTED) ? connection = true : connection = false;
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch(const std::exception& error) {
 		result = errorStatus;
@@ -122,13 +123,13 @@ Common_Connection_Types::Connection_Error_Code Connection::getConnectionStatus(_
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::setNotifications(_Out_ std::vector<HANDLE>& waitingArray) noexcept {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::setNotifications(_Out_ std::vector<HANDLE>& waitingArray) noexcept {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		trySetNotifications(waitingArray);
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -138,13 +139,13 @@ Common_Connection_Types::Connection_Error_Code Connection::setNotifications(_Out
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::closeNotifications() {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::closeNotifications() {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		tryCloseNotifications();
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -154,13 +155,13 @@ Common_Connection_Types::Connection_Error_Code Connection::closeNotifications() 
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>& converterMessageList) noexcept {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::readConverterNotifies(_Out_ std::vector<std::pair<UINT, LPARAM>>& converterMessageList) noexcept {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		readConverterNotify(converterMessageList);
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -169,13 +170,13 @@ Common_Connection_Types::Connection_Error_Code Connection::readConverterNotifies
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::addController(_ZG_FIND_CTR_INFO controllerInfo) {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::addController(_ZG_FIND_CTR_INFO controllerInfo) {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		openController(controllerInfo);
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -184,13 +185,13 @@ Common_Connection_Types::Connection_Error_Code Connection::addController(_ZG_FIN
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::removeController(_ZG_FIND_CTR_INFO controllerInfo) {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::removeController(_ZG_FIND_CTR_INFO controllerInfo) {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		deactivateController(controllerInfo);
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -199,13 +200,13 @@ Common_Connection_Types::Connection_Error_Code Connection::removeController(_ZG_
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::readControllerNotifies(const int controller, _Out_ std::vector<std::pair<UINT, LPARAM>>& controllerMessageList) noexcept {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::readControllerNotifies(const int controller, _Out_ std::vector<std::pair<UINT, LPARAM>>& controllerMessageList) noexcept {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		readControllerNotify(controller, controllerMessageList);
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -214,13 +215,13 @@ Common_Connection_Types::Connection_Error_Code Connection::readControllerNotifie
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::readControllerEvent(const int controller, _Out_ std::vector<_ZG_CTR_EVENT>& controllerEventsList) {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::readControllerEvent(const int controller, _Out_ std::vector<_ZG_CTR_EVENT>& controllerEventsList) {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		ReadControllerEvents(controller, controllerEventsList);
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -229,13 +230,13 @@ Common_Connection_Types::Connection_Error_Code Connection::readControllerEvent(c
 	return result;
 }
 
-Common_Connection_Types::Connection_Error_Code Connection::setControllerTime(const int controller) {
-	auto result = Common_Connection_Types::Connection_Error_Code::UNDEFINE;
+Main_Connection_Basic_Info_Types::Connection_Error_Code Connection::setControllerTime(const int controller) {
+	auto result = Main_Connection_Basic_Info_Types::Connection_Error_Code::UNDEFINE;
 
 	try {
 		setControllerCurrentTime(controller);
 		updateControllerInfo(CLEAR);
-		result = Common_Connection_Types::Connection_Error_Code::SUCCESS;
+		result = Main_Connection_Basic_Info_Types::Connection_Error_Code::SUCCESS;
 	}
 	catch (const std::exception& error) {
 		result = errorStatus;
@@ -274,7 +275,7 @@ bool Connection::tryOpenConverter() {
 		}
 	}
 
-	errorStatus = Common_Connection_Types::Connection_Error_Code::CONVERTER_OPEN_FAIL;
+	errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONVERTER_OPEN_FAIL;
 	updateConverterInfo(false);
 	return false;
 }
@@ -301,7 +302,7 @@ void Connection::scanControllers() {
 	}
 
 	if (hrController != ZP_S_NOTFOUND) {
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONVERTER_COMMAND_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONVERTER_COMMAND_FAIL;
 		throw SearchError(std::string("Error while search controllers"));
 	}
 }
@@ -403,7 +404,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 			ZeroMemory(&_data->controllersIndexWriteRead->at(controller), sizeof(&_data->controllersIndexWriteRead->at(controller)));
 		}
 		else {
-			errorStatus = Common_Connection_Types::Connection_Error_Code::CONNECTION_FAIL;
+			errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONNECTION_FAIL;
 			throw CommandError(std::string("updateControllerInfo number: " + controller + ' ' + ActionList[action]));
 		}
 		break;
@@ -424,7 +425,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 			_data->controllersIndexWriteRead->at(controller) = temp_controlerIndexWriteRead;
 		}
 		else {
-			errorStatus = Common_Connection_Types::Connection_Error_Code::CONNECTION_FAIL;
+			errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONNECTION_FAIL;
 			throw CommandError(std::string("updateControllerInfo number: " + controller + ' ' + ActionList[action]));
 		}
 		break;
@@ -436,7 +437,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 			_data->controllersIndexWriteRead->at(controller) = temp_controlerIndexWriteRead;
 		}
 		else {
-			errorStatus = Common_Connection_Types::Connection_Error_Code::CONNECTION_FAIL;
+			errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONNECTION_FAIL;
 			throw CommandError(std::string("updateControllerInfo number: " + controller + ' ' + ActionList[action]));
 		}
 		break;
@@ -451,7 +452,7 @@ void Connection::updateControllerInfo(Action action, int controller ) {
 		_data->controllersIndexWriteRead->clear();
 		break;
 	default:
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONNECTION_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONNECTION_FAIL;
 		throw CommandError(std::string("updateControllerInfo number: " + controller + ' ' + action));
 		break;
 	}
@@ -478,7 +479,7 @@ void Connection::trySetNotifications(_Out_ std::vector<HANDLE>& waitingArray) {
 				waitingArray.push_back(eventController);
 			}
 			catch (const std::exception& error) {
-				errorStatus = Common_Connection_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
+				errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
 				Log(MessageTypes::ERR) << error.what();
 			}
 	}
@@ -536,7 +537,7 @@ void Connection::openConverter() {
 	_data->mutex->lock();
 	if (ZG_Cvt_Open(&_hConvector, &temp_Params, &*_data->converterDetailInfo) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONVERTER_OPEN_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONVERTER_OPEN_FAIL;
 		throw OpenFailed(std::string("ZG_Cvt_Open"), std::string("Converter: " + std::to_string(_data->converterInfo->nSn)));
 	}
 	_data->mutex->unlock();
@@ -553,7 +554,7 @@ ZP_CONNECTION_STATUS Connection::getStatus() {
 	_data->mutex->lock();
 	if (ZG_Cvt_GetConnectionStatus(_hConvector, &status) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONNECTION_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONNECTION_FAIL;
 		throw CommandError(std::string("getStatus"));
 	}
 	_data->mutex->unlock();
@@ -565,7 +566,7 @@ void Connection::openController(const int controller) {
 	_data->mutex->lock();
 	if (ZG_Ctr_Open(&temp_hController, _hConvector, address, 0, &temp_controllersDetailInfo, ZG_CTR_UNDEF) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONTROLLER_OPEN_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONTROLLER_OPEN_FAIL;
 		throw OpenFailed(std::string("ZG_Ctr_Open"), std::string("Controller: " + std::to_string(_data->controllersInfo->at(controller).nAddr) + std::string(" at Converter: ") + std::to_string(_data->converterInfo->nSn)));
 	}
 	_data->mutex->unlock();
@@ -575,7 +576,7 @@ void Connection::readControllerIdxs() {
 	_data->mutex->lock();
 	if (ZG_Ctr_ReadEventIdxs(temp_hController, &temp_writeIndex, &temp_readIndex) != S_OK) {
 		_data->mutex->lock();
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
 		throw OpenFailed(std::string("Connection controller address: " + std::to_string(_data->controllersDetailInfo->at(currentControllerNumber).nAddr)), std::string("Controller"));
 	}
 	_data->mutex->unlock();
@@ -601,7 +602,7 @@ int Connection::readEvents(int& startFrom, const int read, const int needToReed)
 	_data->mutex->lock();
 	if (ZG_Ctr_ReadEvents(temp_hController, startFrom, temp_controllerEvents.data(), reading, NULL, NULL) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
 		throw CommandError(std::string("ZG_Ctr_ReadEvents at: " + std::to_string(_data->converterDetailInfo->nSn)));
 	}
 	_data->mutex->unlock();
@@ -630,7 +631,7 @@ void Connection::setTime(_ZG_CTR_CLOCK& newTime) {
 	_data->mutex->lock();
 	if (ZG_Ctr_SetClock(temp_hController, &newTime) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
 		throw CommandError(std::string("Error with ZG_Ctr_SetClock"));
 	}
 	_data->mutex->unlock();
@@ -646,7 +647,7 @@ void Connection::cvt_SetNotification(_ZG_CVT_NOTIFY_SETTINGS settings) {
 	_data->mutex->lock();
 	if (ZG_Cvt_SetNotification(_hConvector, &settings) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONVERTER_COMMAND_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONVERTER_COMMAND_FAIL;
 		throw CommandError(std::string("ZG_Cvt_SetNotification"));
 	}
 	_data->mutex->unlock();
@@ -656,7 +657,7 @@ void Connection::ctr_SetNotification(_ZG_CTR_NOTIFY_SETTINGS settings) {
 	_data->mutex->lock();
 	if (ZG_Ctr_SetNotification(temp_hController, &settings) != S_OK) {
 		_data->mutex->unlock();
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONTROLLER_COMMAND_FAIL;
 		throw CommandError(std::string("ZG_Ctr_SetNotification at: " + std::to_string(currentControllerNumber)));
 	}
 	_data->mutex->unlock();
@@ -677,7 +678,7 @@ HRESULT Connection::cvt_GetNextMessage() {
 	if (result == ZP_S_NOTFOUND)
 		result = S_OK;
 	else {
-		errorStatus = Common_Connection_Types::Connection_Error_Code::CONVERTER_COMMAND_FAIL;
+		errorStatus = Main_Connection_Basic_Info_Types::Connection_Error_Code::CONVERTER_COMMAND_FAIL;
 		throw CommandError(std::string("ZG_Cvt_GetNextMessage"));
 	}
 

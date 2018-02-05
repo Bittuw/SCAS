@@ -11,7 +11,7 @@
 
 namespace Seach_Device {
 
-	using namespace Zguard_Types;
+	using namespace Zguard_Basic_Info_Types;
 
 	enum class Seach_Type {
 		Search_Client_Device,

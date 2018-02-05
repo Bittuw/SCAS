@@ -38,7 +38,7 @@ void Search_Server_Device::search_converters(Seach_Device::Zguard_Basic_Info_Lis
 
 	INT_PTR ports_count = 2;
 	Seach_Device::Zguard_Converter_Data_Type converter_info;
-	Seach_Device::Zguard_Converter_Ports_Data_Type converter_ports;
+	Seach_Device::Zguard_Converter_Ports_Data_List converter_ports;
 
 	while ((result_search = ZG_FindNextDevice(&handle_search, &converter_info, converter_ports.data(), converter_ports.size(), &ports_count)) == S_OK) {
 		zguard_basic_info_list_ref->emplace_back(converter_info, converter_ports);
@@ -52,7 +52,7 @@ void Search_Server_Device::search_converters(Seach_Device::Zguard_Basic_Info_Lis
 	ZG_CloseHandle(&handle_search);
 }
 
-void Search_Server_Device::search_controllers(Zguard_Types::Zguard_Basic_Info_List_uRef& zguard_basic_info_list_ref) {
+void Search_Server_Device::search_controllers(Seach_Device::Zguard_Basic_Info_List_uRef& zguard_basic_info_list_ref) {
 	for (Seach_Device::Zguard_Basic_Info& converter_data : *zguard_basic_info_list_ref) {
 
 		Seach_Device::Zguard_Open_Params open_params;
@@ -85,7 +85,7 @@ void Search_Server_Device::search_controllers(Zguard_Types::Zguard_Basic_Info_Li
 	}
 }
 
-bool Search_Server_Device::open_converter(Zguard_Types::Zguard_Basic_Info &converter_info, HANDLE& handle_converter, _ZG_CVT_INFO& converter_detail_info, Zguard_Types::Zguard_Open_Params& open_params) {
+bool Search_Server_Device::open_converter(Seach_Device::Zguard_Basic_Info &converter_info, HANDLE& handle_converter, _ZG_CVT_INFO& converter_detail_info, Seach_Device::Zguard_Open_Params& open_params) {
 	ZeroMemory(&open_params, sizeof(open_params));
 	open_params.nType = _port_type;
 	for (size_t i = 0; i < converter_info._zguard_converter_ports_data.size(); i++) {

@@ -3,7 +3,8 @@
 #ifndef DATA_BASE_STRUCTS
 #define DATA_BASE_STRUCTS
 
-#include "Zguard_Types.h"
+#include <algorithm>
+#include <mysql_devapi.h>
 
 namespace Mysql_Types {
 
@@ -147,17 +148,15 @@ namespace Mysql_Types {
 		Mysql_Generic_Type_Fields
 #undef X
 		Mysql_Generic_Type() {};
-		Mysql_Generic_Type(int id)
-			: _id(id)
-		{}
-		Mysql_Generic_Type(const Mysql_Generic_Type& other) = default;
 		Mysql_Generic_Type(mysqlx::Value id) : _id(static_cast<int>(id)){};
+
 		Mysql_Generic_Type(Mysql_Generic_Type&& other)
 			:
 			_id(other._id)
 		{
 			other._id = 0;
 		}
+		Mysql_Generic_Type(const Mysql_Generic_Type& other) = default;
 		Mysql_Generic_Type& operator=(const Mysql_Generic_Type& other) = default;
 		Mysql_Generic_Type& operator=(Mysql_Generic_Type&& other) = default;
 		virtual ~Mysql_Generic_Type() = default;
@@ -180,8 +179,6 @@ namespace Mysql_Types {
 			_second_ip_port(pod._second_ip_port)
 
 		{}
-
-		Mysql_Converter_Data_Type(const Mysql_Converter_Data_Type& other) = default;
 		Mysql_Converter_Data_Type(mysqlx::Row& row,	int&& count)
 			: 
 			Mysql_Generic_Type(row.get(count++)),
@@ -191,6 +188,7 @@ namespace Mysql_Types {
 			_first_ip_port(static_cast<mysqlx::string>(row.get(count++))),
 			_second_ip_port(static_cast<mysqlx::string>(row.get(count++)))
 		{}
+
 		Mysql_Converter_Data_Type(Mysql_Converter_Data_Type&& other) 
 			: 
 			Mysql_Generic_Type(std::move(other)),
@@ -206,7 +204,7 @@ namespace Mysql_Types {
 			other._first_ip_port.clear();
 			other._second_ip_port.clear();
 		}
-
+		Mysql_Converter_Data_Type(const Mysql_Converter_Data_Type& other) = default;
 		Mysql_Converter_Data_Type& operator=(const Mysql_Converter_Data_Type& other) = default;
 		Mysql_Converter_Data_Type& operator=(Mysql_Converter_Data_Type&& other) = default;
 
@@ -223,6 +221,7 @@ namespace Mysql_Types {
 		}
 		/*friend std::ofstream& operator<<(std::ofstream& stream, Mysql_Converter_Data_Type& object);
 		friend std::ifstream& operator>>(std::ifstream& stream, Mysql_Converter_Data_Type& object);*/
+
 		static std::string* _table_name;
 	};
 
@@ -247,7 +246,6 @@ namespace Mysql_Types {
 			_max_w_event_at_time(pod._max_w_event_at_time),
 			_id_converter(pod._id_converter)
 		{}
-		Mysql_Controller_Data_Type(const Mysql_Controller_Data_Type& other) = default;
 		Mysql_Controller_Data_Type(mysqlx::Row& row, int&& count)
 			: Mysql_Generic_Type(row.get(count++)),
 			_nSn(static_cast<int>(row.get(count++))),
@@ -261,6 +259,7 @@ namespace Mysql_Types {
 			_max_w_event_at_time(static_cast<int>(row.get(count++))),
 			_id_converter(static_cast<int>(row.get(count++)))
 		{}
+
 		Mysql_Controller_Data_Type(Mysql_Controller_Data_Type&& other) 
 			:
 			Mysql_Generic_Type(std::move(other)),
@@ -286,6 +285,7 @@ namespace Mysql_Types {
 			other._max_w_event_at_time = 0;
 			other._id_converter = 0;
 		}
+		Mysql_Controller_Data_Type(const Mysql_Controller_Data_Type& other) = default;
 		Mysql_Controller_Data_Type& operator=(const Mysql_Controller_Data_Type& other) = default;
 		Mysql_Controller_Data_Type& operator=(Mysql_Controller_Data_Type&& other) = default;
 
@@ -321,12 +321,12 @@ namespace Mysql_Types {
 			_name(pod._name),
 			_time_zone(pod._time_zone)
 		{}
-		Mysql_Group_Data_Type(const Mysql_Group_Data_Type& other) = default;
 		Mysql_Group_Data_Type(mysqlx::Row& row, int&& count)
 			: Mysql_Generic_Type(row.get(count++)),
 			_name(static_cast<mysqlx::string>(row.get(count++))),
 			_time_zone(static_cast<int>(row.get(count++)))
 		{}
+
 		Mysql_Group_Data_Type(Mysql_Group_Data_Type&& other) 
 			:
 			Mysql_Generic_Type(std::move(other)),
@@ -336,6 +336,7 @@ namespace Mysql_Types {
 			other._name.clear();
 			other._time_zone = 0;
 		}
+		Mysql_Group_Data_Type(const Mysql_Group_Data_Type& other) = default;
 		Mysql_Group_Data_Type& operator=(const Mysql_Group_Data_Type& other) = default;
 		Mysql_Group_Data_Type& operator=(Mysql_Group_Data_Type&& other) = default;
 
@@ -350,7 +351,6 @@ namespace Mysql_Types {
 		/*friend std::ofstream& operator<<(std::ofstream& stream, Mysql_Group_Data_Type& object);
 		friend std::ifstream& operator>>(std::ifstream& stream, Mysql_Group_Data_Type& object);*/
 		static std::string* _table_name;
-		
 	};
 
 	struct Mysql_Employee_Data_Type : public Mysql_Generic_Type { // TODO move
@@ -368,7 +368,6 @@ namespace Mysql_Types {
 			_patronymic(pod._patronymic),
 			_card_number(pod._card_number)
 		{}
-		Mysql_Employee_Data_Type(const Mysql_Employee_Data_Type& other) = default;
 		Mysql_Employee_Data_Type(mysqlx::Row& row, int&& count)
 			: Mysql_Generic_Type(row.get(count++)),
 			_name(static_cast<mysqlx::string>(row.get(count++))),
@@ -376,6 +375,7 @@ namespace Mysql_Types {
 			_patronymic(static_cast<mysqlx::string>(row.get(count++))),
 			_card_number(static_cast<int>(row.get(count++)))
 		{}
+
 		Mysql_Employee_Data_Type(Mysql_Employee_Data_Type&& other)
 			:
 			Mysql_Generic_Type(std::move(other)),
@@ -389,6 +389,7 @@ namespace Mysql_Types {
 			other._patronymic.clear();
 			other._card_number = 0;
 		}
+		Mysql_Employee_Data_Type(const Mysql_Employee_Data_Type& other) = default;
 		Mysql_Employee_Data_Type& operator=(const Mysql_Employee_Data_Type& other) = default;
 		Mysql_Employee_Data_Type& operator=(Mysql_Employee_Data_Type&& other) = default;
 
@@ -403,7 +404,6 @@ namespace Mysql_Types {
 			return ret;
 		}
 		static std::string* _table_name;
-		
 	};
 
 	struct Mysql_Group_In_Controller_Data_Type : public Mysql_Generic_Type { // TODO move
@@ -421,7 +421,6 @@ namespace Mysql_Types {
 			_id_converter(std::move(pod._id_converter)),
 			_position_in_controller(std::move(pod._position_in_controller))
 		{}
-		Mysql_Group_In_Controller_Data_Type(const Mysql_Group_In_Controller_Data_Type& other) = default;
 		Mysql_Group_In_Controller_Data_Type(mysqlx::Row& row, int&& count)
 			: Mysql_Generic_Type(row.get(count++)),
 			_id_groups(static_cast<int>(row.get(count++))),
@@ -429,6 +428,7 @@ namespace Mysql_Types {
 			_id_converter(static_cast<int>(row.get(count++))),
 			_position_in_controller(static_cast<int>(row.get(count++)))
 		{}
+
 		Mysql_Group_In_Controller_Data_Type(Mysql_Group_In_Controller_Data_Type&& other) 
 			:
 			Mysql_Generic_Type(std::move(other)),
@@ -442,6 +442,7 @@ namespace Mysql_Types {
 			other._id_converter = 0;
 			other._position_in_controller = 0;
 		}
+		Mysql_Group_In_Controller_Data_Type(const Mysql_Group_In_Controller_Data_Type& other) = default;
 		Mysql_Group_In_Controller_Data_Type& operator=(const Mysql_Group_In_Controller_Data_Type& other) = default;
 		Mysql_Group_In_Controller_Data_Type& operator=(Mysql_Group_In_Controller_Data_Type&& other) = default;
 
@@ -513,8 +514,11 @@ namespace Mysql_Basic_Info_Types {
 			other._mysql_converter_data;
 		}
 
+		Mysql_Basic_Info(const Mysql_Basic_Info& other) = default;
 		Mysql_Basic_Info& operator=(Mysql_Basic_Info&& other) = default;
 		Mysql_Basic_Info& operator=(const Mysql_Basic_Info& other) = default;
+
+		~Mysql_Basic_Info() = default;
 	};
 
 	// Basic usage
