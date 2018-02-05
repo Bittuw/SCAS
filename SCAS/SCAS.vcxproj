@@ -72,7 +72,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)API\DEBUG_API\MySQL_API\include\;$(SolutionDir)API\DEBUG_API\ZGuard_API\include;$(SolutionDir)API\DEBUG_API\SimpleLogger\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)API\DEBUG_API\ZGuard_API\lib\;$(SolutionDir)API\DEBUG_API\MySQL_API\lib;C:\work\C++\SCAS\API\DEBUG_API\SimpleLogger\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)API\DEBUG_API\ZGuard_API\lib\;$(SolutionDir)API\DEBUG_API\MySQL_API\lib;$(SolutionDir)API\DEBUG_API\SimpleLogger\lib;$(LibraryPath)</LibraryPath>
     <ReferencePath>$(SolutionDir)API\DEBUG_API\ZGuard_API\include;$(SolutionDir)API\DEBUG_API\MySQL_API\include\;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(SolutionDir)LIB\;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>

@@ -11,11 +11,11 @@ public:
 		: 
 		_session(mysqlx::SessionSettings(options...)), 
 		_database(_session.getDefaultSchema()), 
-		_converters_list(std::make_shared<Common_Database_Types::Converters_Data_List>()),
-		_controllers_list(std::make_shared<Common_Database_Types::Controllers_Data_List>()),
-		_groups_list(std::make_shared<Common_Database_Types::Groups_Data_List>()),
-		_employees_list(std::make_shared<Common_Database_Types::Employees_Data_List>()),
-		_groups_In_Controllers_list(std::make_shared<Common_Database_Types::Groups_In_Controllers_Data_List>())
+		_converters_list(std::make_shared<Mysql_Types::Mysql_Converters_Data_List>()),
+		_controllers_list(std::make_shared<Mysql_Types::Mysql_Controllers_Data_List>()),
+		_groups_list(std::make_shared<Mysql_Types::Mysql_Groups_Data_List>()),
+		_employees_list(std::make_shared<Mysql_Types::Mysql_Employees_Data_List>()),
+		_groups_In_Controllers_list(std::make_shared<Mysql_Types::Mysql_Groups_In_Controllers_Data_List>())
 	{
 		Log(MessageTypes::DEBUG) << LoggerFormat::format(
 			"Open DataBase connection: \n\
@@ -44,11 +44,11 @@ public:
 
 	void downloadTables(); // Can do exception
 
-	std::shared_ptr<Common_Database_Types::Converters_Data_List> _converters_list;
-	std::shared_ptr<Common_Database_Types::Controllers_Data_List> _controllers_list;
-	std::shared_ptr<Common_Database_Types::Groups_Data_List> _groups_list;
-	std::shared_ptr<Common_Database_Types::Employees_Data_List> _employees_list;
-	std::shared_ptr<Common_Database_Types::Groups_In_Controllers_Data_List> _groups_In_Controllers_list;
+	std::shared_ptr<Mysql_Types::Mysql_Converters_Data_List> _converters_list;
+	std::shared_ptr<Mysql_Types::Mysql_Controllers_Data_List> _controllers_list;
+	std::shared_ptr<Mysql_Types::Mysql_Groups_Data_List> _groups_list;
+	std::shared_ptr<Mysql_Types::Mysql_Employees_Data_List> _employees_list;
+	std::shared_ptr<Mysql_Types::Mysql_Groups_In_Controllers_Data_List> _groups_In_Controllers_list;
 
 private:
 	mysqlx::Session _session;
@@ -60,7 +60,7 @@ public:
 
 	DataBaseLayer() 
 		: database("localhost", 33060, "sslroot", "elitaass18A", "test_skud") ,
-		_basic_info_ref_list_ref(std::make_shared<Common_DataBaseLayer_Types::Basic_Info_Ref_List>())
+		_basic_info_ref_list_ref(std::make_shared<Basic_Info_Types::Basic_Info_Ref_List>())
 	{
 		Log(MessageTypes::TRACE) << std::string("Begin serializing mysql data.");
 		Serialization::Serializer ser(
@@ -73,21 +73,21 @@ public:
 		Log(MessageTypes::TRACE) << std::string("End serializing mysql data.");
 	}
 	
-	Common_DataBaseLayer_Types::Basic_Info_Ref_List_Ref make_Basic_Info_List();
+	Basic_Info_Types::Basic_Info_Ref_List_Ref make_Basic_Info_List();
 
 
 private:
-	Common_DataBaseLayer_Types::Basic_Info_Ref_List_Ref _basic_info_ref_list_ref;
+	Basic_Info_Types::Basic_Info_Ref_List_Ref _basic_info_ref_list_ref;
 	//void CreateSerializationThread(Common_DataBaseLayer_Types::Basic_Info_Ref_List_Ref);
 
 	//void make_copies();
 	DataBase database;
 
-	Common_Database_Types::Converters_Data_List _copy_converters_list;
-	Common_Database_Types::Controllers_Data_List _copy_controllers_list;
-	Common_Database_Types::Groups_Data_List _copy_groups_list;
-	Common_Database_Types::Employees_Data_List _copy_employees_list;
-	Common_Database_Types::Groups_In_Controllers_Data_List _copy_groups_In_Controllers_list;
+	Mysql_Types::Mysql_Converters_Data_List _copy_converters_list;
+	Mysql_Types::Mysql_Controllers_Data_List _copy_controllers_list;
+	Mysql_Types::Mysql_Groups_Data_List _copy_groups_list;
+	Mysql_Types::Mysql_Employees_Data_List _copy_employees_list;
+	Mysql_Types::Mysql_Groups_In_Controllers_Data_List _copy_groups_In_Controllers_list;
 };
 
 //class DataBasePresenter {

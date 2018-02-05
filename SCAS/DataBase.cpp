@@ -11,8 +11,8 @@ DataBase::~DataBase()
 
 void DataBase::downloadTables() { // TODO just do it like template
 
-	for (size_t i = 0; i < _countof(Common_Database_Types::TablesNames); i++) {
-		auto table = _database.getTable(Common_Database_Types::TablesNames[i], false);
+	for (size_t i = 0; i < _countof(Mysql_Types::TablesNames); i++) {
+		auto table = _database.getTable(Mysql_Types::TablesNames[i], false);
 		
 		switch (i)
 		{ 
@@ -57,15 +57,15 @@ std::shared_ptr<mysqlx::Table> DataBase::get_table(const std::string& table_name
 	return std::make_shared<mysqlx::Table>(_database.getTable(table_name));
 }
 
-Common_DataBaseLayer_Types::Basic_Info_Ref_List_Ref DataBaseLayer::make_Basic_Info_List() {
+Basic_Info_Types::Basic_Info_Ref_List_Ref DataBaseLayer::make_Basic_Info_List() {
 	for (auto _converter_data : *database._converters_list) {
-		_basic_info_ref_list_ref->emplace_back(std::make_shared<Common_DataBaseLayer_Types::Basic_Info>(_converter_data, *database._controllers_list));
+		_basic_info_ref_list_ref->emplace_back(std::make_shared<Basic_Info_Types::Basic_Info>(_converter_data, *database._controllers_list));
 	}
 	return _basic_info_ref_list_ref;
 }
 
-std::string* Common_Database_Types::Mysql_Converter_Data_Type::_table_name = const_cast<std::string*>(Common_Database_Types::TablesNames);
-std::string* Common_Database_Types::Mysql_Controller_Data_Type::_table_name = const_cast<std::string*>(Common_Database_Types::TablesNames + 1);
-std::string* Common_Database_Types::Mysql_Group_Data_Type::_table_name = const_cast<std::string*>(Common_Database_Types::TablesNames + 2);
-std::string* Common_Database_Types::Mysql_Employee_Data_Type::_table_name = const_cast<std::string*>(Common_Database_Types::TablesNames + 3);
-std::string* Common_Database_Types::Mysql_Group_In_Controller_Data_Type::_table_name = const_cast<std::string*>(Common_Database_Types::TablesNames + 4);
+std::string* Mysql_Types::Mysql_Converter_Data_Type::_table_name = const_cast<std::string*>(Mysql_Types::TablesNames);
+std::string* Mysql_Types::Mysql_Controller_Data_Type::_table_name = const_cast<std::string*>(Mysql_Types::TablesNames + 1);
+std::string* Mysql_Types::Mysql_Group_Data_Type::_table_name = const_cast<std::string*>(Mysql_Types::TablesNames + 2);
+std::string* Mysql_Types::Mysql_Employee_Data_Type::_table_name = const_cast<std::string*>(Mysql_Types::TablesNames + 3);
+std::string* Mysql_Types::Mysql_Group_In_Controller_Data_Type::_table_name = const_cast<std::string*>(Mysql_Types::TablesNames + 4);

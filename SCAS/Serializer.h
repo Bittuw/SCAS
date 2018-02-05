@@ -7,7 +7,7 @@
 
 namespace Serialization {
 
-	using namespace Common_Database_Types;
+	using namespace Mysql_Types;
 
 	template <typename T> 
 	struct Indentity {

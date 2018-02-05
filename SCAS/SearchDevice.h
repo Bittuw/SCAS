@@ -1,42 +1,56 @@
 #pragma once
-struct Available_Connection;
 
-//template <typename Ret_data>
-//struct Return_Data {
-//	Connection_Error_Code _code;
-//	std::shared_ptr<Ret_data> _data = nullptr;
-//
-//	Return_Data(const Connection_Error_Code& code, std::shared_ptr<Ret_data>& data)
-//		: _code(code), _data(data) {}
-//};
-//
-//using AV_list = std::vector<std::shared_ptr<Available_Connection>>;
+#ifndef SEARCH_DEVICE
+#define SERACH_DEVICE
 
-class SearchDevice 
-{
+#include "DataStructs.h"
 
-	//TODO Главная задача: вернуть список AV
+namespace Seach_Device {
 
-public:
-	SearchDevice(_ZG_CVT_OPEN_PARAMS);
-	~SearchDevice();
+	using namespace Zguard_Types;
 
-	//SearchDevice_RetrurnData<AV_list> scanNetwork();
+	enum class Seach_Type {
+		Search_Client_Device,
+		Search_Server_Device
+	};
 
+	class Basic_Search_Device {
+	protected:
+		Basic_Search_Device(const _ZP_SEARCH_PARAMS& search_params, const ZP_PORT_TYPE& port_type) 
+			:
+			_port_type(port_type),
+			_search_params(search_params)
+		{}
+		virtual void search_converters(const Zguard_Basic_Info_List_Ref&) { throw std::logic_error("Need to implement this method!"); };
+		virtual void search_controllers(const Zguard_Basic_Info_List_Ref&) { throw std::logic_error("Need to implement this method!"); };
+		
+		ZP_PORT_TYPE _port_type;
+		_ZP_SEARCH_PARAMS _search_params;
 
-#ifdef _DEBUG
-	static bool StaticTest();
+	public:
+		Zguard_Basic_Info_List_Ref execute();
+		static std::unique_ptr<Basic_Search_Device> create_searcher_object(const Seach_Type&, _ZP_SEARCH_PARAMS = {});
+		virtual ~Basic_Search_Device() {}
+
+	};
+
+	class Search_Client_Device : public Basic_Search_Device {
+		Search_Client_Device(const _ZP_SEARCH_PARAMS& search_params, const ZP_PORT_TYPE& port_type);
+	};
+
+	class Search_Server_Device : public Basic_Search_Device {
+
+		Search_Server_Device(const _ZP_SEARCH_PARAMS& search_params, const ZP_PORT_TYPE& port_type)
+			: 
+			Basic_Search_Device(search_params, port_type)
+		{};
+
+		void search_converters(const Zguard_Basic_Info_List_Ref&) override;
+		void search_controllers(const Zguard_Basic_Info_List_Ref&) override;
+
+	private:
+		bool open_converter(const HANDLE&, const _ZG_CVT_INFO&, const Zguard_Open_Params&); // TODO
+
+	};
+}
 #endif
-
-private:
-	
-	HANDLE _handle_Search; // Дескриптор поиска
-	std::shared_ptr<Available_Connection> _connection_Data; // Текущий найденный конвертер
-	std::shared_ptr<Connection> _current_Connection; // Текущий подключенный конвертер
-
-	_ZG_CVT_OPEN_PARAMS _search_Params; // Параметры поиска
-
-	static void custome_seach_converter();
-	static void custome_search_controllers(HANDLE&);
-};
-

@@ -67,7 +67,7 @@ namespace Common_Connection_Types {
 	using Connection_Type = ZP_PORT_TYPE;
 
 	using Global_Connections_List_Ref = std::unique_ptr<SpecialList>;
-
+	
 
 	struct Runtime_Info {
 		//Converter info
@@ -119,9 +119,9 @@ namespace Common_Connection_Types {
 	
 	//Only for Connection
 	struct Common_Connection_Info : Runtime_Info {
-		Common_DataBaseLayer_Types::Basic_Info_Ref _basic_info;
+		Basic_Info_Types::Basic_Info_Ref _basic_info;
 		Common_Connection_Info() = delete;
-		Common_Connection_Info(const Common_DataBaseLayer_Types::Basic_Info_Ref& basic_info) 
+		Common_Connection_Info(const Basic_Info_Types::Basic_Info_Ref& basic_info) 
 			: Runtime_Info(), 
 			_basic_info(basic_info) 
 		{}

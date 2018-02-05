@@ -50,7 +50,7 @@ int MainLoop() {
 				break;
 			case 2: 
 				try {
-					SearchDevice::StaticTest();
+					
 				}
 				catch (const std::exception& error) {
 					std::cout << error.what() << "\n";

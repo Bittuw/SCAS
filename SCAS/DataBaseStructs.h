@@ -3,7 +3,7 @@
 #ifndef DATA_BASE_STRUCTS
 #define DATA_BASE_STRUCTS
 
-namespace Common_Database_Types {
+namespace Mysql_Types {
 
 ////////// Next new veiw of data_type
 	
@@ -178,6 +178,7 @@ namespace Common_Database_Types {
 			_second_ip_port(pod._second_ip_port)
 
 		{}
+
 		Mysql_Converter_Data_Type(const Mysql_Converter_Data_Type& other) = default;
 		Mysql_Converter_Data_Type(mysqlx::Row& row,	int&& count)
 			: 
@@ -203,6 +204,7 @@ namespace Common_Database_Types {
 			other._first_ip_port.clear();
 			other._second_ip_port.clear();
 		}
+
 		Mysql_Converter_Data_Type& operator=(const Mysql_Converter_Data_Type& other) = default;
 		Mysql_Converter_Data_Type& operator=(Mysql_Converter_Data_Type&& other) = default;
 
@@ -461,36 +463,57 @@ namespace Common_Database_Types {
 
 
 	//Lists of types
-	using Converters_Data_List = std::vector<Mysql_Converter_Data_Type>;
-	using Controllers_Data_List = std::vector<Mysql_Controller_Data_Type>;
-	using Groups_Data_List = std::vector<Mysql_Group_Data_Type>;
-	using Employees_Data_List = std::vector<Mysql_Employee_Data_Type>;
-	using Groups_In_Controllers_Data_List = std::vector<Mysql_Group_In_Controller_Data_Type>;
+	using Mysql_Converters_Data_List = std::vector<Mysql_Converter_Data_Type>;
+	using Mysql_Controllers_Data_List = std::vector<Mysql_Controller_Data_Type>;
+	using Mysql_Groups_Data_List = std::vector<Mysql_Group_Data_Type>;
+	using Mysql_Employees_Data_List = std::vector<Mysql_Employee_Data_Type>;
+	using Mysql_Groups_In_Controllers_Data_List = std::vector<Mysql_Group_In_Controller_Data_Type>;
 }
 
+namespace Zguard_Types {
 
-namespace Common_DataBaseLayer_Types {
+	using Zguard_Converter_Data_Type = _ZG_ENUM_IPCVT_INFO;
+	using Zguard_Converter_Ports_Data_Type = std::vector<_ZP_PORT_INFO>;
+	using Zguard_Controller_Data_Type = _ZG_FIND_CTR_INFO;
+	using Zguard_Open_Params = _ZG_CVT_OPEN_PARAMS;
 
-	struct Basic_Info {
+	using Zguard_Controller_Data_List = std::vector<Zguard_Controller_Data_Type>;
+
+	struct Zguard_Info {
+		Zguard_Converter_Data_Type _zguard_conveter_data;
+		Zguard_Converter_Ports_Data_Type _zguard_converter_ports_data;
+		Zguard_Controller_Data_List _zguard_controllers_data_list;
+	};
+
+	using Zguard_Basic_Info_List = std::vector<Zguard_Info>;
+	using Zguard_Basic_Info_List_Ref = std::unique_ptr<Zguard_Basic_Info_List>;
+}
+
+namespace Basic_Info_Types {
+	
+	using namespace Mysql_Types;
+	using namespace Zguard_Types;
+
+	struct Basic_Info { // TODO id нет при инициализации из zguard (нужно 2 типа Mysql, но без id)
 
 	public:
-		Common_Database_Types::Mysql_Converter_Data_Type _mysql_converter_data;
-		Common_Database_Types::Controllers_Data_List _mysql_controllers_data_list;
+		Mysql_Converter_Data_Type _mysql_converter_data;
+		Mysql_Controllers_Data_List _mysql_controllers_data_list;
 
-		Basic_Info(const Common_Database_Types::Mysql_Converter_Data_Type& mysql_converter_data, const Common_Database_Types::Controllers_Data_List& mysql_controllers_data_list)
+		Basic_Info(const Mysql_Converter_Data_Type& mysql_converter_data, const Mysql_Controllers_Data_List& mysql_controllers_data_list)
 		:	
 			_mysql_converter_data(mysql_converter_data),
 			_mysql_controllers_data_list()
 		{
-			Common_Database_Types::Controllers_Data_List::const_iterator result;
-			Common_Database_Types::Controllers_Data_List::const_iterator start_from = mysql_controllers_data_list.cbegin();
+			Mysql_Types::Mysql_Controllers_Data_List::const_iterator result;
+			Mysql_Types::Mysql_Controllers_Data_List::const_iterator start_from = mysql_controllers_data_list.cbegin();
 			while (
 				(
 					result = std::find_if
 					(
 						start_from,
 						mysql_controllers_data_list.cend(),
-						[this](const Common_Database_Types::Mysql_Controller_Data_Type& _constroller)
+						[this](const Mysql_Types::Mysql_Controller_Data_Type& _constroller)
 						{ return _constroller._id_converter == _mysql_converter_data._id; }
 					)
 				) != mysql_controllers_data_list.end()
@@ -500,6 +523,7 @@ namespace Common_DataBaseLayer_Types {
 				start_from = result + 1;
 			}
 		}
+		Basic_Info(const Zguard_Converter_Data_Type& zguard_converter_data, const Zguard_Controller_Data_List& zguard_controllers_data_list) {}
 		Basic_Info(Basic_Info&& other) 
 		: 
 			_mysql_converter_data(std::move(other._mysql_converter_data)),
