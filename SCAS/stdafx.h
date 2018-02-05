@@ -28,11 +28,6 @@
 #include <ZGuard.h>
 #include <ZPort.h>
 #include "Logger.h"
-#if !defined(ZGUARD_LINKONREQUEST)
-#pragma comment(lib, "ZGuard.lib")
-#elif !defined(ZPORT_LINKONREQUEST)
-#pragma comment(lib, "ZGuard.lib")
-#endif // !ZGUARD_LINKONREQUEST
 #include "Exceptions.h"
 #include "SpecialList.h"
 

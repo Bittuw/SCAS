@@ -3,7 +3,6 @@
 #include "stdafx.h"
 #include "DataStructs.h"
 #include "Connection.h"
-#include "SearchDevice.h"
 #include "SpecialList.h"
 #include "NotifyThreads.h"
 #include "Utils.h"

@@ -119,9 +119,9 @@ namespace Common_Connection_Types {
 	
 	//Only for Connection
 	struct Common_Connection_Info : Runtime_Info {
-		Basic_Info_Types::Basic_Info_Ref _basic_info;
+		Mysql_Basic_Info_Types::Basic_Info_Ref _basic_info;
 		Common_Connection_Info() = delete;
-		Common_Connection_Info(const Basic_Info_Types::Basic_Info_Ref& basic_info) 
+		Common_Connection_Info(const Mysql_Basic_Info_Types::Basic_Info_Ref& basic_info) 
 			: Runtime_Info(), 
 			_basic_info(basic_info) 
 		{}

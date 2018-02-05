@@ -26,8 +26,7 @@ namespace Serialization {
 			list.clear();
 			list.shrink_to_fit();
 		}
-		~Serializer() {
-		};
+		~Serializer() {	};
 
 	protected:
 

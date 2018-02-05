@@ -73,3 +73,6 @@ private:
 };
 
 extern LOGGER_API Logger& Log;
+
+#undef LOGGER_API
+#undef EXPIMP_TEMPLATE
