@@ -155,7 +155,6 @@
     <ClInclude Include="Main_Connection_Info.h" />
     <ClInclude Include="NotifiedThread.h" />
     <ClInclude Include="NotifyThreads.h" />
-    <ClInclude Include="SaveInfo.h" />
     <ClInclude Include="Serializer.h" />
     <ClInclude Include="SpecialList.h" />
     <ClInclude Include="stdafx.h" />
@@ -170,7 +169,6 @@
     <ClCompile Include="Main_Connection_Info.cpp" />
     <ClCompile Include="NotifiedThread.cpp" />
     <ClCompile Include="NotifyThreads.cpp" />
-    <ClCompile Include="SaveInfo.cpp" />
     <ClCompile Include="SCAS.cpp" />
     <ClCompile Include="Serializer.cpp" />
     <ClCompile Include="SpecialList.cpp" />

@@ -193,10 +193,10 @@ namespace Mysql_Types {
 			: 
 			Mysql_Generic_Type(std::move(other)),
 			_nSn(other._nSn),
-			_type_name(other._type_name),
+			_type_name(std::move(other._type_name)),
 			_version(other._version),
-			_first_ip_port(other._first_ip_port),
-			_second_ip_port(other._second_ip_port)
+			_first_ip_port(std::move(other._first_ip_port)),
+			_second_ip_port(std::move(other._second_ip_port))
 		{
 			other._nSn = 0;
 			other._type_name.clear();
@@ -264,9 +264,9 @@ namespace Mysql_Types {
 			:
 			Mysql_Generic_Type(std::move(other)),
 			_nSn(other._nSn),
-			_type_name(other._type_name),
+			_type_name(std::move(other._type_name)),
 			_type_code(other._type_code),
-			_name(other._name),
+			_name(std::move(other._name)),
 			_max_groups(other._max_groups),
 			_max_keys(other._max_keys),
 			_max_events(other._max_events),
@@ -330,7 +330,7 @@ namespace Mysql_Types {
 		Mysql_Group_Data_Type(Mysql_Group_Data_Type&& other) 
 			:
 			Mysql_Generic_Type(std::move(other)),
-			_name(other._name),
+			_name(std::move(other._name)),
 			_time_zone(other._time_zone)
 		{
 			other._name.clear();
@@ -379,9 +379,9 @@ namespace Mysql_Types {
 		Mysql_Employee_Data_Type(Mysql_Employee_Data_Type&& other)
 			:
 			Mysql_Generic_Type(std::move(other)),
-			_name(other._name),
-			_surname(other._surname),
-			_patronymic(other._patronymic),
+			_name(std::move(other._name)),
+			_surname(std::move(other._surname)),
+			_patronymic(std::move(other._patronymic)),
 			_card_number(other._card_number)
 		{
 			other._name.clear();
@@ -506,14 +506,15 @@ namespace Mysql_Basic_Info_Types {
 				start_from = result + 1;
 			}
 		}
+
 		Mysql_Basic_Info(Mysql_Basic_Info&& other) 
 		: 
 			_mysql_converter_data(std::move(other._mysql_converter_data)),
 			_mysql_controllers_data_list(std::move(other._mysql_controllers_data_list))
 		{
-			other._mysql_converter_data;
+			/*other._mysql_controllers_data_list.clear();
+			other._mysql_controllers_data_list.shrink_to_fit();*/
 		}
-
 		Mysql_Basic_Info(const Mysql_Basic_Info& other) = default;
 		Mysql_Basic_Info& operator=(Mysql_Basic_Info&& other) = default;
 		Mysql_Basic_Info& operator=(const Mysql_Basic_Info& other) = default;

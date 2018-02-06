@@ -30,9 +30,6 @@
     <ClInclude Include="TemplateDefine.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="SaveInfo.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="Connection.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
@@ -72,9 +69,6 @@
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
     <ClCompile Include="SCAS.cpp">
-      <Filter>Файлы исходного кода</Filter>
-    </ClCompile>
-    <ClCompile Include="SaveInfo.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
     <ClCompile Include="Connection.cpp">

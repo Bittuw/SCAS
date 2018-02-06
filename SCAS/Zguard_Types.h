@@ -35,10 +35,10 @@ namespace Zguard_Basic_Info_Types {
 
 		Zguard_Basic_Info(Zguard_Basic_Info&& other)
 			:
-			_zguard_conveter_data(other._zguard_conveter_data),
+			_zguard_conveter_data(std::move(other._zguard_conveter_data)),
 			_zguard_converter_ports_data(std::move(other._zguard_converter_ports_data)),
 			_zguard_controllers_data_list(std::move(other._zguard_controllers_data_list)),
-			_zguard_converter_available(other._zguard_converter_available),
+			_zguard_converter_available(std::move(other._zguard_converter_available)),
 			_zguard_controllers_available_list(std::move(other._zguard_controllers_available_list))
 		{
 			other._zguard_conveter_data = {};

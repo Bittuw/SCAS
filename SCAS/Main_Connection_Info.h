@@ -112,26 +112,28 @@ namespace Main_Connection_Basic_Info_Types {
 			_connection_type(),
 			_mutex(std::make_shared<std::mutex>())
 		{}
+
 		Runtime_Info(Runtime_Info&& other)
 			:
-			_converter_detail_info(other._converter_detail_info),
-			_converter_connection_info(other._converter_connection_info),
-			_controllers_detail_info_list(other._controllers_detail_info_list),
-			_controllers_connection_status_list(other._controllers_connection_status_list),
-			_controllers_index_read_write_list(other._controllers_index_read_write_list),
-			_connection_type(other._connection_type),
-			_mutex(other._mutex)
+			_converter_detail_info(std::move(other._converter_detail_info)),
+			_converter_connection_info(std::move(other._converter_connection_info)),
+			_controllers_detail_info_list(std::move(other._controllers_detail_info_list)),
+			_controllers_connection_status_list(std::move(other._controllers_connection_status_list)),
+			_controllers_index_read_write_list(std::move(other._controllers_index_read_write_list)),
+			_connection_type(std::move(other._connection_type)),
+			_mutex(std::move(other._mutex))
 		{
-			other._converter_detail_info;
-			other._converter_connection_info;
-			other._controllers_detail_info_list;
-			other._controllers_connection_status_list;
-			other._controllers_index_read_write_list;
-			other._connection_type;
-			other._mutex;
+			memset(&other._converter_detail_info, 0, sizeof(other._converter_detail_info));
+			memset(&other._converter_connection_info, 0, sizeof(other._converter_connection_info));
+			//other._controllers_detail_info_list;
+			//other._controllers_connection_status_list;
+			//other._controllers_index_read_write_list;
+			other._connection_type = {};
 		}
+		Runtime_Info(const Runtime_Info& other) = default;
 		Runtime_Info& operator=(Runtime_Info&& other) = default;
-		virtual ~Runtime_Info() {};
+		Runtime_Info& operator=(const Runtime_Info& other) = default;
+		virtual ~Runtime_Info() = default;
 	};
 
 	// —труктура, котора€ получает из базовых типов Mysql или Zguard нужные данные про конвертер
@@ -158,14 +160,14 @@ namespace Main_Connection_Basic_Info_Types {
 		Basic_Converter_Data_Type(Basic_Converter_Data_Type&& other) 
 			:
 			_nSn(other._nSn),
-			_type_name(other._type_name),
-			_first_ip_port(other._first_ip_port),
-			_second_ip_port(other._second_ip_port)
+			_type_name(std::move(other._type_name)),
+			_first_ip_port(std::move(other._first_ip_port)),
+			_second_ip_port(std::move(other._second_ip_port))
 		{
 			other._nSn = 0;
-			other._type_name.clear();
+			/*other._type_name.clear();
 			other._first_ip_port.clear();
-			other._second_ip_port.clear();
+			other._second_ip_port.clear();*/
 		}
 		Basic_Converter_Data_Type(const Basic_Converter_Data_Type& other) = default;
 		Basic_Converter_Data_Type& operator=(Basic_Converter_Data_Type&& other) = default;
@@ -185,18 +187,18 @@ namespace Main_Connection_Basic_Info_Types {
 
 		Basic_Controller_Data_Type(Basic_Controller_Data_Type&& other)
 			:
-			_nSn(other._nSn),
-			_type_name(other._type_name),
-			 _name(other._name),
+			_nSn(std::move(other._nSn)),
+			_type_name(std::move(other._type_name)),
+			 _name(std::move(other._name)),
 			_max_groups(other._max_groups),
 			_max_keys(other._max_keys),
 			_max_events(other._max_events),
 			_max_r_event_at_time(other._max_r_event_at_time),
-			_max_w_event_at_time(other._max_w_event_at_time)
+			_max_w_event_at_time(std::move(other._max_w_event_at_time))
 		{
 			other._nSn = 0;
-			other._type_name.clear();
-			other._name.clear();
+			/*other._type_name.clear();
+			other._name.clear();*/
 			other._max_groups = 0 ;
 			other._max_keys = 0 ;
 			other._max_events = 0;
