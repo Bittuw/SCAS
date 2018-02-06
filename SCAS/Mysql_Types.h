@@ -523,10 +523,10 @@ namespace Mysql_Basic_Info_Types {
 	};
 
 	// Basic usage
-	using Basic_Info_Ref = std::shared_ptr<Mysql_Basic_Info>;
-	using Basic_Info_List = std::vector<Mysql_Basic_Info>;
-	using Basic_Info_List_Ref = std::shared_ptr<Basic_Info_List>;
-	using Basic_Info_Ref_List = std::vector<Basic_Info_Ref>;
-	using Basic_Info_Ref_List_Ref = std::shared_ptr<Basic_Info_Ref_List>;
+	using Mysql_Basic_Info_Ref = std::shared_ptr<Mysql_Basic_Info>;
+	using Mysql_Basic_Info_List = std::vector<Mysql_Basic_Info>;
+	using Mysql_Basic_Info_List_Ref = std::shared_ptr<Mysql_Basic_Info_List>;
+	using Mysql_Basic_Info_Ref_List = std::vector<Mysql_Basic_Info_Ref>;
+	using Mysql_Basic_Info_Ref_List_Ref = std::shared_ptr<Mysql_Basic_Info_Ref_List>;
 }
 #endif

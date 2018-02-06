@@ -7,6 +7,7 @@
 #include "NotifyThreads.h"
 #include "Utils.h"
 #include "DataBase.h"
+#include "Main_Connection_Info.h"
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
 
@@ -16,8 +17,7 @@ int MainLoop() {
 
 	DataBaseLayer base;
 	auto list = base.make_Basic_Info_List();
-	/*Common_Connection_Types::Main_Connection_Info info(list->at(0));*/
-	//base.deleteRow();
+	auto upoint = Main_Connection_Basic_Info_Types::FromMysqlToMain(list);
 
 	while (1) {
 		ResetEvent(*_globalExitThread);

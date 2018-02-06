@@ -182,8 +182,18 @@ namespace Main_Connection_Basic_Info_Types {
 		Main_Basic_Controller_Data_Type_Fields
 #undef X
 		Basic_Controller_Data_Type() = delete;
-		Basic_Controller_Data_Type(const Mysql_Controller_Data_Type& mysql_controller_data) {}
-		Basic_Controller_Data_Type(const Zguard_Controller_Data_Type& zguard_controller_data) {}
+		Basic_Controller_Data_Type(const Mysql_Controller_Data_Type& mysql_controller_data)
+			:
+			_nSn(mysql_controller_data._nSn),
+			_type_name(mysql_controller_data._type_name.cbegin(), mysql_controller_data._type_name.cend()),
+			_name(mysql_controller_data._name.cbegin(), mysql_controller_data._name.cend()),
+			_max_groups(mysql_controller_data._max_groups),
+			_max_keys(mysql_controller_data._max_keys),
+			_max_events(mysql_controller_data._max_events),
+			_max_r_event_at_time(mysql_controller_data._max_r_event_at_time),
+			_max_w_event_at_time(mysql_controller_data._max_w_event_at_time)
+		{}
+		Basic_Controller_Data_Type(const Zguard_Controller_Data_Type& zguard_controller_data) {} // TODO
 
 		Basic_Controller_Data_Type(Basic_Controller_Data_Type&& other)
 			:
@@ -230,7 +240,7 @@ namespace Main_Connection_Basic_Info_Types {
 				mysql_basic_info._mysql_controllers_data_list.cend(),
 				std::back_inserter(_controllers_main_info_list),
 				[](const Mysql_Controller_Data_Type& mysql_controller_data) -> decltype(auto) {
-					return std::move(Basic_Controller_Data_Type(mysql_controller_data));
+					return Basic_Controller_Data_Type(mysql_controller_data);
 				}
 			);
 		}
@@ -244,7 +254,7 @@ namespace Main_Connection_Basic_Info_Types {
 				zguard_basic_info._zguard_controllers_data_list.cend(),
 				std::back_inserter(_controllers_main_info_list),
 				[](const Zguard_Controller_Data_Type& zguard_controller_data) -> decltype(auto) {
-					return std::move(Zguard_Controller_Data_Type(zguard_controller_data));
+					return Basic_Controller_Data_Type(zguard_controller_data);
 				}
 			);
 		}
@@ -252,7 +262,10 @@ namespace Main_Connection_Basic_Info_Types {
 		~Main_Connection_Basic_Info_Types() = default;
 	};
 
-	using Connection_Info_Ref = std::shared_ptr<Main_Connection_Basic_Info_Types>;
+	using Main_Connection_Basic_Info_Ref = std::shared_ptr<Main_Connection_Basic_Info_Types>;
+	using Main_Connection_Basic_Info_List = std::vector<Main_Connection_Basic_Info_Types>;
+	using Main_Connection_basic_Info_List_uRef = std::unique_ptr<Main_Connection_Basic_Info_List>;
 
+	extern Main_Connection_basic_Info_List_uRef FromMysqlToMain(const Mysql_Basic_Info_List_Ref&);
 }
 #endif

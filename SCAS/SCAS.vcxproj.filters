@@ -27,9 +27,6 @@
     <ClInclude Include="..\API\Utils.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="TemplateDefine.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="Connection.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>

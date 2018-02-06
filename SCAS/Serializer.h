@@ -18,13 +18,13 @@ namespace Serialization {
 	{
 	public:
 		template <typename L, typename...Args>
-		Serializer(L& list, Args&...args)
+		Serializer(const L& list, Args&...args)
 			:
 			Serializer(args...)
 		{
 			write(list);
-			list.clear();
-			list.shrink_to_fit();
+			/*list.clear();
+			list.shrink_to_fit();*/
 		}
 		~Serializer() {	};
 

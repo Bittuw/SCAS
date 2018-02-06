@@ -57,11 +57,11 @@ std::shared_ptr<mysqlx::Table> DataBase::get_table(const std::string& table_name
 	return std::make_shared<mysqlx::Table>(_database.getTable(table_name));
 }
 
-Mysql_Basic_Info_Types::Basic_Info_Ref_List_Ref DataBaseLayer::make_Basic_Info_List() {
+Mysql_Basic_Info_Types::Mysql_Basic_Info_List_Ref DataBaseLayer::make_Basic_Info_List() {
 	for (auto _converter_data : *database._converters_list) {
-		_basic_info_ref_list_ref->emplace_back(std::make_shared<Mysql_Basic_Info_Types::Mysql_Basic_Info>(_converter_data, *database._controllers_list));
+		_basic_info_list_ref->emplace_back(_converter_data, *database._controllers_list);
 	}
-	return _basic_info_ref_list_ref;
+	return _basic_info_list_ref;
 }
 
 std::string* Mysql_Types::Mysql_Converter_Data_Type::_table_name = const_cast<std::string*>(Mysql_Types::TablesNames);

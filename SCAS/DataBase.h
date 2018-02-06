@@ -60,7 +60,7 @@ public:
 
 	DataBaseLayer() 
 		: database("localhost", 33060, "sslroot", "elitaass18A", "test_skud") ,
-		_basic_info_ref_list_ref(std::make_shared<Mysql_Basic_Info_Types::Basic_Info_Ref_List>())
+		_basic_info_list_ref(std::make_shared<Mysql_Basic_Info_Types::Mysql_Basic_Info_List>())
 	{
 		Log(MessageTypes::TRACE) << std::string("Begin serializing mysql data.");
 		Serialization::Serializer ser(
@@ -73,14 +73,13 @@ public:
 		Log(MessageTypes::TRACE) << std::string("End serializing mysql data.");
 	}
 	
-	Mysql_Basic_Info_Types::Basic_Info_Ref_List_Ref make_Basic_Info_List();
+	Mysql_Basic_Info_Types::Mysql_Basic_Info_List_Ref make_Basic_Info_List();
 
 
 private:
-	Mysql_Basic_Info_Types::Basic_Info_Ref_List_Ref _basic_info_ref_list_ref;
+	Mysql_Basic_Info_Types::Mysql_Basic_Info_List_Ref _basic_info_list_ref;
 	//void CreateSerializationThread(Common_DataBaseLayer_Types::Basic_Info_Ref_List_Ref);
 
-	//void make_copies();
 	DataBase database;
 
 	Mysql_Types::Mysql_Converters_Data_List _copy_converters_list;
