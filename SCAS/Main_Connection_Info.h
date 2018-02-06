@@ -38,8 +38,7 @@ namespace Main_Connection_Basic_Info_Types {
 	X(unsigned int, _max_keys)\
 	X(unsigned int, _max_events)\
 	X(unsigned int, _max_r_event_at_time)\
-	X(unsigned int, _max_w_event_at_time) 
-
+	X(unsigned int, _max_w_event_at_time)
 
 	enum class Connection_Error_Code {
 #define X(name, value) name = value,
