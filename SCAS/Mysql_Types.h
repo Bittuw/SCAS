@@ -189,7 +189,7 @@ namespace Mysql_Types {
 			_second_ip_port(static_cast<mysqlx::string>(row.get(count++)))
 		{}
 
-		Mysql_Converter_Data_Type(Mysql_Converter_Data_Type&& other) 
+		Mysql_Converter_Data_Type(Mysql_Converter_Data_Type&& other) noexcept 
 			: 
 			Mysql_Generic_Type(std::move(other)),
 			_nSn(other._nSn),
@@ -260,7 +260,7 @@ namespace Mysql_Types {
 			_id_converter(static_cast<int>(row.get(count++)))
 		{}
 
-		Mysql_Controller_Data_Type(Mysql_Controller_Data_Type&& other) 
+		Mysql_Controller_Data_Type(Mysql_Controller_Data_Type&& other) noexcept  
 			:
 			Mysql_Generic_Type(std::move(other)),
 			_nSn(other._nSn),
@@ -327,7 +327,7 @@ namespace Mysql_Types {
 			_time_zone(static_cast<int>(row.get(count++)))
 		{}
 
-		Mysql_Group_Data_Type(Mysql_Group_Data_Type&& other) 
+		Mysql_Group_Data_Type(Mysql_Group_Data_Type&& other) noexcept 
 			:
 			Mysql_Generic_Type(std::move(other)),
 			_name(std::move(other._name)),
@@ -376,7 +376,7 @@ namespace Mysql_Types {
 			_card_number(static_cast<int>(row.get(count++)))
 		{}
 
-		Mysql_Employee_Data_Type(Mysql_Employee_Data_Type&& other)
+		Mysql_Employee_Data_Type(Mysql_Employee_Data_Type&& other) noexcept
 			:
 			Mysql_Generic_Type(std::move(other)),
 			_name(std::move(other._name)),
@@ -429,7 +429,7 @@ namespace Mysql_Types {
 			_position_in_controller(static_cast<int>(row.get(count++)))
 		{}
 
-		Mysql_Group_In_Controller_Data_Type(Mysql_Group_In_Controller_Data_Type&& other) 
+		Mysql_Group_In_Controller_Data_Type(Mysql_Group_In_Controller_Data_Type&& other) noexcept
 			:
 			Mysql_Generic_Type(std::move(other)),
 			_id_groups(other._id_groups),
@@ -469,6 +469,11 @@ namespace Mysql_Types {
 	using Mysql_Groups_Data_List = std::vector<Mysql_Group_Data_Type>;
 	using Mysql_Employees_Data_List = std::vector<Mysql_Employee_Data_Type>;
 	using Mysql_Groups_In_Controllers_Data_List = std::vector<Mysql_Group_In_Controller_Data_Type>;
+
+	//For Mysql_Users_Basic_Info
+	using Mysql_Controller_Data_Ref = std::shared_ptr<Mysql_Controller_Data_Type>;
+	using Mysql_Groups_Data_List_Ref = std::shared_ptr<Mysql_Groups_Data_List>;
+	using Mysql_Employees_Data_List_Ref = std::shared_ptr<Mysql_Employees_Data_List>;
 }
 
 
@@ -499,7 +504,7 @@ namespace Mysql_Basic_Info_Types {
 						[this](const Mysql_Types::Mysql_Controller_Data_Type& _constroller)
 						{ return _constroller._id_converter == _mysql_converter_data._id; }
 					)
-				) != mysql_controllers_data_list.end()
+				) != mysql_controllers_data_list.cend()
 			)
 			{
 				_mysql_controllers_data_list.push_back(*result);
@@ -528,5 +533,38 @@ namespace Mysql_Basic_Info_Types {
 	using Mysql_Basic_Info_List_Ref = std::shared_ptr<Mysql_Basic_Info_List>;
 	using Mysql_Basic_Info_Ref_List = std::vector<Mysql_Basic_Info_Ref>;
 	using Mysql_Basic_Info_Ref_List_Ref = std::shared_ptr<Mysql_Basic_Info_Ref_List>;
+
+	struct Mysql_Users_Basic_Info { 
+	public:
+		Mysql_Controller_Data_Ref _mysql_controller_data_ref;
+		Mysql_Groups_Data_List_Ref _mysqll_groupd_data_list_ref;
+		Mysql_Employees_Data_List_Ref _mysql_employees_data_list_ref;
+
+		Mysql_Users_Basic_Info(const Mysql_Controller_Data_Type& mysql_controller_data, const Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list, const Mysql_Groups_Data_List& mysql_groups_data_list, const Mysql_Employees_Data_List& mysql_employees_data_list)
+			:
+			_mysql_controller_data_ref(std::make_shared<Mysql_Controller_Data_Type>(mysql_controller_data)),
+			_mysqll_groupd_data_list_ref(std::make_shared<Mysql_Groups_Data_List>()),
+			_mysql_employees_data_list_ref(std::make_shared<Mysql_Employees_Data_List>())
+		{
+			Mysql_Groups_In_Controllers_Data_List::const_iterator result;
+			Mysql_Groups_In_Controllers_Data_List::const_iterator strat_from = mysql_groups_in_controllers_data_list.cbegin();
+			while
+				(
+					(result = std::find_if(
+							strat_from,
+							mysql_groups_in_controllers_data_list.cend(),
+							[this](const Mysql_Group_In_Controller_Data_Type& mysql_group_data)->decltype(auto)
+							{
+								return mysql_group_data;
+							}
+						)
+					) != mysql_groups_in_controllers_data_list.cend()
+				) 
+			{
+				
+			}
+		}
+
+	};
 }
 #endif
