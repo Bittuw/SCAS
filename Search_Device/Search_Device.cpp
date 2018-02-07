@@ -32,8 +32,9 @@ void Search_Server_Device::search_converters(Seach_Device::Zguard_Basic_Info_Lis
 	HRESULT result_search;
 
 	if (ZG_SearchDevices(&handle_search, &(static_cast<_ZP_SEARCH_PARAMS &>(_search_params)))) {
-		Log(MessageTypes::ERR) << "Error in search method with server type of converter!";
-		throw SearchError(std::string("Error in search"));
+		/*Log(MessageTypes::ERR) << ;
+		throw SearchError(std::string("Error in search"));*/
+		throw Zguard_Exceptions("Error initial search function!");
 	}
 
 	INT_PTR ports_count = 2;
@@ -45,8 +46,9 @@ void Search_Server_Device::search_converters(Seach_Device::Zguard_Basic_Info_Lis
 	}
 
 	if (result_search != ZP_S_NOTFOUND) {
-		Log(MessageTypes::ERR) << LoggerFormat::format("Search ended with error: %, see ZGuard errors table!", result_search);
-		throw std::runtime_error("Error!");
+		/*Log(MessageTypes::ERR) << LoggerFormat::format("Search ended with error: %, see ZGuard errors table!", result_search);
+		throw std::runtime_error("Error!");*/
+		throw Zguard_Exceptions(LoggerFormat::format("Search ended with error: %, see ZGuard errors table!", std::to_string(result_search)));
 	}
 
 	ZG_CloseHandle(&handle_search);
@@ -70,8 +72,9 @@ void Search_Server_Device::search_controllers(Seach_Device::Zguard_Basic_Info_Li
 		Seach_Device::Zguard_Controller_Data_Type controller_data;
 
 		if (ZG_Cvt_SearchControllers(handle_converter, NULL, NULL) != S_OK) {
-			Log(MessageTypes::ERR) << LoggerFormat::format("Error while search controllers in converter with nSn %", std::to_string(converter_data._zguard_conveter_data.nSn));
-			throw SearchError(std::string("Error while search controllers"));
+			/*Log(MessageTypes::ERR) << LoggerFormat::format("Error while search controllers in converter with nSn %", std::to_string(converter_data._zguard_conveter_data.nSn));
+			throw SearchError(std::string("Error while search controllers"));*/
+			throw Zguard_Exceptions(LoggerFormat::format("Error while search controllers in converter with nSn %", std::to_string(converter_data._zguard_conveter_data.nSn)));
 		}
 
 		while ((result_controller = ZG_Cvt_FindNextController(handle_converter, &static_cast<_ZG_FIND_CTR_INFO&>(controller_data)) == S_OK)) {
@@ -79,8 +82,9 @@ void Search_Server_Device::search_controllers(Seach_Device::Zguard_Basic_Info_Li
 		}
 
 		if (result_controller != ZP_S_NOTFOUND) {
-			Log(MessageTypes::ERR) << LoggerFormat::format("Error while search controllers in converter with nSn %, error code: %", std::to_string(converter_data._zguard_conveter_data.nSn), std::to_string(result_controller));
-			throw SearchError(std::string("Error while search controllers"));
+			/*Log(MessageTypes::ERR) << LoggerFormat::format("Error while search controllers in converter with nSn %, error code: %", std::to_string(converter_data._zguard_conveter_data.nSn), std::to_string(result_controller));
+			throw SearchError(std::string("Error while search controllers"));*/
+			throw Zguard_Exceptions(LoggerFormat::format("Error while search controllers in converter with nSn %, error code: %", std::to_string(converter_data._zguard_conveter_data.nSn), std::to_string(result_controller)));
 		}
 	}
 }
@@ -90,20 +94,20 @@ bool Search_Server_Device::open_converter(Seach_Device::Zguard_Basic_Info &conve
 	open_params.nType = _port_type;
 	for (size_t i = 0; i < converter_info._zguard_converter_ports_data.size(); i++) {
 		open_params.pszName = converter_info._zguard_converter_ports_data.at(i).szName;
-		try {
-			if (ZG_Cvt_Open(&handle_converter, &open_params, &converter_detail_info) != S_OK) {
-				Log(MessageTypes::WARNING) << LoggerFormat::format("Error while open converter: %", std::to_string(converter_info._zguard_conveter_data.nSn));
-				throw OpenFailed(std::string("ZG_Cvt_Open"), std::string("Converter: " + std::to_string(converter_info._zguard_conveter_data.nSn)));
-			}
-			return true;
+
+		if (ZG_Cvt_Open(&handle_converter, &open_params, &converter_detail_info) != S_OK) {
+			Log(MessageTypes::WARNING) << LoggerFormat::format("Error while open port '%' of converter: %", converter_info._zguard_converter_ports_data.at(i).szName, std::to_string(converter_info._zguard_conveter_data.nSn));
+			//throw Try_Again_Exceptions(std::string("ZG_Cvt_Open"), std::string("Converter: " + std::to_string(converter_info._zguard_conveter_data.nSn)));
+			continue;
 		}
-		catch (const std::exception& error) {
-			if (typeid(error) == typeid(OpenFailed) && i < converter_info._zguard_converter_ports_data.size() - 1)
-				continue;
-			else {
-				Log(MessageTypes::ERR) << error.what();
-			}
-		}
+		return true;
 	}
 	return false;
+	/*	if (typeid(error) == typeid(OpenFailed) && i < converter_info._zguard_converter_ports_data.size() - 1)
+			continue;
+		else {
+			Log(MessageTypes::ERR) << error.what();
+		}
+		
+	}*/	
 }

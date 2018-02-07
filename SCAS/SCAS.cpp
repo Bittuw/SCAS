@@ -42,7 +42,7 @@ int MainLoop() {
 				try {
 					Connection::StaticTest();
 				}
-				catch (const SearchError& error) {
+				catch (const std::exception& error) {
 					std::cout << error.what() << "\n";
 				}
 				//EnumControllers();
