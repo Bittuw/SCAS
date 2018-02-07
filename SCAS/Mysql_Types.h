@@ -1,5 +1,9 @@
 #pragma once
 
+///
+/// Represent mysql's data types
+///
+
 #ifndef DATA_BASE_STRUCTS
 #define DATA_BASE_STRUCTS
 

@@ -1,5 +1,9 @@
 #pragma once
 
+///
+/// Represent main data types
+///
+
 #ifndef MAIN_CONNECION_INFO
 #define MAIN_CONNECION_INFO
 

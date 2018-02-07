@@ -1,5 +1,9 @@
 #pragma once
 
+///
+/// Represent zguard's data types
+///
+
 #ifndef ZGUARD_TYPES
 #define ZGUARD_TYPES
 
