@@ -36,9 +36,6 @@
     <ClInclude Include="DataStructs.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="SpecialList.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="NotifyThreads.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
@@ -78,9 +75,6 @@
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
     <ClCompile Include="DataStructs.cpp">
-      <Filter>Файлы исходного кода</Filter>
-    </ClCompile>
-    <ClCompile Include="SpecialList.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
     <ClCompile Include="DataBase.cpp">

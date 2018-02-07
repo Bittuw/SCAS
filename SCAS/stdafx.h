@@ -29,7 +29,6 @@
 #include <ZPort.h>
 #include "Logger.h"
 #include "Exceptions.h"
-#include "SpecialList.h"
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
