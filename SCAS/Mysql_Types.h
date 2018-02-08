@@ -308,7 +308,7 @@ namespace Mysql_Types {
 		static std::string* _table_name;
 	};
 
-	struct Mysql_Group_Data_Type : public Mysql_Generic_Type { // TODO move
+	struct Mysql_Group_Data_Type : public Mysql_Generic_Type {
 		using POD_type = Mysql_POD_Group_Data_Type;
 
 #define X(type, name) type name;

@@ -1,9 +1,15 @@
-#pragma once
+//#pragma once
 #include "stdafx.h"
 #include "Connection.h"
-#include "Main_Connection_Info.h"
-#include "DataStructs.h"
+//<<<<<<< HEAD
+//#include "Main_Connection_Info.h"
+//#include "DataStructs.h"
+//=======
+////#include "Main_Connection_Info.h"
+////#include "DataStructs.h"
 //
+//>>>>>>> refactor
+////
 //Connection::Connection(std::unique_ptr<Available_Connection>& availableConnection) :
 //_e_newInfo(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),
 //_e_destroyed(std::make_shared<HANDLE>(CreateEvent(NULL, TRUE, FALSE, NULL))),

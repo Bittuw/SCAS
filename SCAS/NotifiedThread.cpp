@@ -1,7 +1,13 @@
 #include "stdafx.h"
 #include "NotifiedThread.h"
-#include "Connection.h"
-#include "DataStructs.h"
+//<<<<<<< HEAD
+//#include "Connection.h"
+//#include "DataStructs.h"
+//=======
+////#include "Connection.h"
+////#include "DataStructs.h"
+//
+//>>>>>>> refactor
 //
 //NotifiedThread::NotifiedThread(std::shared_ptr<Connection> connection) :
 //	_localConnection(connection),
@@ -260,4 +266,8 @@
 //		std::cout << error.what();
 //	}
 //}
-/////////////// Утилиты
+//<<<<<<< HEAD
+///////////////// Утилиты
+//=======
+/////////////////// Утилиты
+//>>>>>>> refactor

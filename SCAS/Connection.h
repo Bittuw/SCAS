@@ -2,7 +2,11 @@
 
 #include "DataStructs.h"
 #include "Main_Connection_Info.h"
+<<<<<<< HEAD
 //
+=======
+
+>>>>>>> refactor
 //struct Available_Connection;
 //
 //enum Action {
@@ -126,4 +130,8 @@
 //	///////////////
 //
 //};
+<<<<<<< HEAD
 //
+=======
+
+>>>>>>> refactor

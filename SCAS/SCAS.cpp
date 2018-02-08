@@ -3,8 +3,6 @@
 #include "stdafx.h"
 #include "DataStructs.h"
 #include "Connection.h"
-#include "SpecialList.h"
-#include "NotifyThreads.h"
 #include "Utils.h"
 #include "DataBase.h"
 #include "Main_Connection_Info.h"
