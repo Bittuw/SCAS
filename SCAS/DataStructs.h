@@ -59,7 +59,7 @@ struct Available_Connection {
 	}
 };
 
-extern const std::unique_ptr<SpecialList> _converterInfoListTest;
+//extern const std::unique_ptr<SpecialList> _converterInfoListTest;
 extern const std::unique_ptr<HANDLE> _globalExitThread;
 extern const std::unique_ptr<HANDLE> _globalNotifiedThreadReset;
 

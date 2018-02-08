@@ -373,7 +373,8 @@ namespace Mysql_Types {
 			_name(static_cast<mysqlx::string>(row.get(count++))),
 			_surname(static_cast<mysqlx::string>(row.get(count++))),
 			_patronymic(static_cast<mysqlx::string>(row.get(count++))),
-			_card_number(static_cast<int>(row.get(count++)))
+			_card_number(static_cast<int>(row.get(count++))),
+			_id_groups(static_cast<int>(row.get(count++)))
 		{}
 
 		Mysql_Employee_Data_Type(Mysql_Employee_Data_Type&& other) noexcept
@@ -382,12 +383,14 @@ namespace Mysql_Types {
 			_name(std::move(other._name)),
 			_surname(std::move(other._surname)),
 			_patronymic(std::move(other._patronymic)),
-			_card_number(other._card_number)
+			_card_number(other._card_number),
+			_id_groups(other._id_groups)
 		{
 			other._name.clear();
 			other._surname.clear();
 			other._patronymic.clear();
 			other._card_number = 0;
+			other._id_groups = 0;
 		}
 		Mysql_Employee_Data_Type(const Mysql_Employee_Data_Type& other) = default;
 		Mysql_Employee_Data_Type& operator=(const Mysql_Employee_Data_Type& other) = default;
@@ -401,6 +404,7 @@ namespace Mysql_Types {
 			strncpy_s(ret._surname, this->_surname.c_str(), sizeof(ret._surname));
 			strncpy_s(ret._patronymic, this->_patronymic.c_str(), sizeof(ret._patronymic));
 			ret._card_number = this->_card_number;
+			ret._id_groups = this->_id_groups;
 			return ret;
 		}
 		static std::string* _table_name;
@@ -471,6 +475,8 @@ namespace Mysql_Types {
 	using Mysql_Groups_In_Controllers_Data_List = std::vector<Mysql_Group_In_Controller_Data_Type>;
 
 	//For Mysql_Users_Basic_Info
+	using Mysql_Groups_In_Controllers_Data_Ref = std::shared_ptr<Mysql_Group_In_Controller_Data_Type>;
+	using Mysql_Groups_In_Controllers_Data_Ref_List = std::vector<Mysql_Groups_In_Controllers_Data_Ref>;
 	using Mysql_Controller_Data_Ref = std::shared_ptr<Mysql_Controller_Data_Type>;
 	using Mysql_Groups_Data_List_Ref = std::shared_ptr<Mysql_Groups_Data_List>;
 	using Mysql_Employees_Data_List_Ref = std::shared_ptr<Mysql_Employees_Data_List>;
@@ -537,34 +543,100 @@ namespace Mysql_Basic_Info_Types {
 	struct Mysql_Users_Basic_Info { 
 	public:
 		Mysql_Controller_Data_Ref _mysql_controller_data_ref;
-		Mysql_Groups_Data_List_Ref _mysqll_groupd_data_list_ref;
+		Mysql_Groups_Data_List_Ref _mysqll_groups_data_list_ref;
 		Mysql_Employees_Data_List_Ref _mysql_employees_data_list_ref;
 
 		Mysql_Users_Basic_Info(const Mysql_Controller_Data_Type& mysql_controller_data, const Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list, const Mysql_Groups_Data_List& mysql_groups_data_list, const Mysql_Employees_Data_List& mysql_employees_data_list)
 			:
 			_mysql_controller_data_ref(std::make_shared<Mysql_Controller_Data_Type>(mysql_controller_data)),
-			_mysqll_groupd_data_list_ref(std::make_shared<Mysql_Groups_Data_List>()),
+			_mysqll_groups_data_list_ref(std::make_shared<Mysql_Groups_Data_List>()),
 			_mysql_employees_data_list_ref(std::make_shared<Mysql_Employees_Data_List>())
 		{
-			Mysql_Groups_In_Controllers_Data_List::const_iterator result;
-			Mysql_Groups_In_Controllers_Data_List::const_iterator strat_from = mysql_groups_in_controllers_data_list.cbegin();
+			Mysql_Groups_In_Controllers_Data_List::const_iterator result_a;
+			Mysql_Groups_In_Controllers_Data_List::const_iterator start_from_a = mysql_groups_in_controllers_data_list.cbegin();
+			Mysql_Groups_In_Controllers_Data_List temp_mysql_groups_in_controllers_data_list;
+
 			while
 				(
-					(result = std::find_if(
-							strat_from,
+					(result_a = std::find_if(
+							start_from_a,
 							mysql_groups_in_controllers_data_list.cend(),
-							[this](const Mysql_Group_In_Controller_Data_Type& mysql_group_data)->decltype(auto)
+							[this](const Mysql_Group_In_Controller_Data_Type& mysql_group_in_controller_data)->decltype(auto)
 							{
-								return mysql_group_data;
+								return _mysql_controller_data_ref->_id == mysql_group_in_controller_data._id_controllers;
 							}
 						)
 					) != mysql_groups_in_controllers_data_list.cend()
 				) 
 			{
-				
+				temp_mysql_groups_in_controllers_data_list.push_back(*result_a);
+				start_from_a = result_a + 1;
 			}
-		}
 
+			for (auto& mysql_groupd_in_controller_data: temp_mysql_groups_in_controllers_data_list) {
+
+				Mysql_Groups_Data_List::const_iterator result_b;
+				Mysql_Groups_Data_List::const_iterator start_from_b = mysql_groups_data_list.cbegin();
+
+				while
+					(
+						(result_b = std::find_if(
+							start_from_b, 
+							mysql_groups_data_list.cend(), 
+							[&mysql_groupd_in_controller_data](const Mysql_Group_Data_Type& mysql_group_data) -> decltype(auto) 
+							{ 
+								return mysql_group_data._id == mysql_groupd_in_controller_data._id_groups;
+							}
+							)
+						) != mysql_groups_data_list.cend()
+					)
+				{
+					_mysqll_groups_data_list_ref->push_back(*result_b);
+					start_from_b = result_b + 1;
+				}
+			}
+
+			for (auto& mysql_group_data : *_mysqll_groups_data_list_ref) 
+			{
+				Mysql_Employees_Data_List::const_iterator result_c;
+				Mysql_Employees_Data_List::const_iterator start_from_c = mysql_employees_data_list.cbegin();
+
+				while 
+					(
+						(result_c = std::find_if(
+							start_from_c,
+							mysql_employees_data_list.cend(),
+							[&mysql_group_data](const Mysql_Employee_Data_Type& mysql_employee_data) -> decltype(auto) 
+							{ 
+								return mysql_employee_data._id_groups == mysql_group_data._id;
+							}
+							)
+						) != mysql_employees_data_list.cend())
+				{
+					_mysql_employees_data_list_ref->push_back(*result_c);
+					start_from_c = result_c + 1;
+				}
+			}
+			
+		}
+		
+		Mysql_Users_Basic_Info(Mysql_Users_Basic_Info&& other) 
+			:
+			_mysql_controller_data_ref(std::move(other._mysql_controller_data_ref)),
+			_mysqll_groups_data_list_ref(std::move(other._mysqll_groups_data_list_ref)),
+			_mysql_employees_data_list_ref(std::move(other._mysql_employees_data_list_ref))
+		{
+
+		}
+		Mysql_Users_Basic_Info(const Mysql_Users_Basic_Info& other) = default;
+		Mysql_Users_Basic_Info& operator=(Mysql_Users_Basic_Info&& other) = default;
+		Mysql_Users_Basic_Info& operator=(const Mysql_Users_Basic_Info& other) = default;
+
+		~Mysql_Users_Basic_Info() = default;
 	};
+
+	using Mysql_Users_Basic_Info_Ref = std::shared_ptr<Mysql_Users_Basic_Info>;
+	using Mysql_Users_Basic_Info_List = std::vector<Mysql_Users_Basic_Info>;
+	using Mysql_Users_Basic_Info_List_ref = std::shared_ptr<Mysql_Users_Basic_Info_List>;
 }
 #endif
