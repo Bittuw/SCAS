@@ -19,7 +19,7 @@ int MainLoop() {
 	auto users_list = base.make_Mysql_Users_basic_Info_List();
 	
 	while (1) {
-		ResetEvent(*_globalExitThread);
+		//ResetEvent(*_globalExitThread);
 		PRINT("Enter commant: \n");
 		PRINT("1 - Test Connection\n");
 		PRINT("2 - Test SearchDevice\n");
@@ -92,7 +92,7 @@ int MainLoop() {
 			case 8:
 				break;
 			case  10:
-				SetEvent(*_globalExitThread);
+				//SetEvent(*_globalExitThread);
 				break;
 			case 0:
 				return 0;
