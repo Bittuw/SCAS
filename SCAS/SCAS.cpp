@@ -12,12 +12,13 @@
 int MainLoop() {
 	if (!CheckZGError(ZG_Initialize(ZP_IF_NO_MSG_LOOP), _T("ZG_Initialize")))
 		return 0;
-
-	DataBaseLayer base;
-	auto conv_list = base.make_Mysql_Basic_Info_List();
-	auto uconv_list = Main_Connection_Basic_Info_Types::FromMysqlToMain(conv_list);
-	auto users_list = base.make_Mysql_Users_basic_Info_List();
 	
+	DataBaseLayer base;
+	/*auto conv_list = base.make_Mysql_Basic_Info_List();
+	auto uconv_list = Main_Connection_Basic_Info_Types::Transorms<Mysql_Basic_Info_Types::Mysql_Basic_Info_List_uRef, Main_Connection_Basic_Info_Types::Main_Connection_basic_Info_List_uRef>::FromTo(conv_list);
+	auto users_list = base.make_Mysql_Users_Basic_Info_List();
+	auto uusers_list = Main_Connection_Basic_Info_Types::Transorms<Mysql_Basic_Info_Types::, Mysql_Basic_Info_Types::>::FromTo(users_list);*/
+
 	while (1) {
 		//ResetEvent(*_globalExitThread);
 		PRINT("Enter commant: \n");

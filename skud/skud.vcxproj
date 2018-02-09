@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3ABB1D62-9CC7-43DF-84C8-D813F0A7EA7C}</ProjectGuid>
+    <ProjectGuid>{3FC33DBC-116F-4AF4-ACF2-7EA7C2FD0BA4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>SCAS</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <RootNamespace>skud</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -71,10 +71,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)API\DEBUG_API\MySQL_API\include\;$(SolutionDir)API\DEBUG_API\ZGuard_API\include;$(SolutionDir)API\DEBUG_API\SimpleLogger\include;$(SolutionDir)API\DEBUG_API\Search_Device\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)API\DEBUG_API\ZGuard_API\lib\;$(SolutionDir)API\DEBUG_API\MySQL_API\lib;$(SolutionDir)API\DEBUG_API\SimpleLogger\lib;$(SolutionDir)API\DEBUG_API\Search_Device\lib;$(LibraryPath)</LibraryPath>
-    <ReferencePath>$(SolutionDir)API\DEBUG_API\ZGuard_API\include;$(SolutionDir)API\DEBUG_API\MySQL_API\include\;$(ReferencePath)</ReferencePath>
-    <ExecutablePath>$(SolutionDir)LIB\;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -91,11 +87,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>mysqlcppconn8.lib;ZGuard.lib;Logger.lib;Search_Device.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -104,6 +100,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +115,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,6 +132,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,35 +145,17 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Connection.h" />
-    <ClInclude Include="DataBase.h" />
-    <ClInclude Include="Mysql_Types.h" />
-    <ClInclude Include="DataStructs.h" />
-    <ClInclude Include="Exceptions.h" />
-    <ClInclude Include="Main_Connection_Info.h" />
-    <ClInclude Include="NotifiedThread.h" />
-    <ClInclude Include="Serializer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Zguard_Types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Connection.cpp" />
-    <ClCompile Include="DataBase.cpp" />
-    <ClCompile Include="DataStructs.cpp" />
-    <ClCompile Include="Main_Connection_Info.cpp" />
-    <ClCompile Include="NotifiedThread.cpp" />
-    <ClCompile Include="SCAS.cpp" />
-    <ClCompile Include="Serializer.cpp" />
+    <ClCompile Include="skud.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Utils.cpp" />
-    <ClCompile Include="ZGuard.cpp" />
-    <ClCompile Include="ZPort.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
