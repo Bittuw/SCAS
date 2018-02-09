@@ -3,8 +3,6 @@
 #include "stdafx.h"
 #include "DataStructs.h"
 #include "Connection.h"
-#include "SpecialList.h"
-#include "NotifyThreads.h"
 #include "Utils.h"
 #include "DataBase.h"
 #include "Main_Connection_Info.h"
@@ -16,11 +14,12 @@ int MainLoop() {
 		return 0;
 
 	DataBaseLayer base;
-	auto list = base.make_Basic_Info_List();
-	auto upoint = Main_Connection_Basic_Info_Types::FromMysqlToMain(list);
-
+	auto conv_list = base.make_Mysql_Basic_Info_List();
+	auto uconv_list = Main_Connection_Basic_Info_Types::FromMysqlToMain(conv_list);
+	auto users_list = base.make_Mysql_Users_basic_Info_List();
+	
 	while (1) {
-		ResetEvent(*_globalExitThread);
+		//ResetEvent(*_globalExitThread);
 		PRINT("Enter commant: \n");
 		PRINT("1 - Test Connection\n");
 		PRINT("2 - Test SearchDevice\n");
@@ -40,7 +39,7 @@ int MainLoop() {
 			case 1: 
 				//EnumConvertors();
 				try {
-					Connection::StaticTest();
+					//Connection::StaticTest();
 				}
 				catch (const std::exception& error) {
 					std::cout << error.what() << "\n";
@@ -57,7 +56,7 @@ int MainLoop() {
 				break;
 			case 3: // TODO Собрать логи
 				try {
-					NotifyThreads::StaticTest();
+					//NotifyThreads::StaticTest();
 				}
 				catch (const std::exception& error) {
 					std::cout << error.what() << "\n";
@@ -74,9 +73,9 @@ int MainLoop() {
 				//Notify.join();
 				break;
 			case 5:
-				_converterInfoListTest->clear();
+				/*_converterInfoListTest->clear();
 				NotifyThreads::runListening();
-				Connection::StaticTest();
+				Connection::StaticTest();*/
 				break;
 			case 6:
 				for (int i = 0; i < 100; i++) {
@@ -93,7 +92,7 @@ int MainLoop() {
 			case 8:
 				break;
 			case  10:
-				SetEvent(*_globalExitThread);
+				//SetEvent(*_globalExitThread);
 				break;
 			case 0:
 				return 0;

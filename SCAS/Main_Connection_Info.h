@@ -247,7 +247,7 @@ namespace Main_Connection_Basic_Info_Types {
 				}
 			);
 		}
-		Main_Connection_Basic_Info_Types(const Zguard_Basic_Info& zguard_basic_info) 
+		Main_Connection_Basic_Info_Types(const Zguard_Basic_Info& zguard_basic_info) //TODO check this
 			: 
 			Runtime_Info(),
 			_converter_main_info(zguard_basic_info._zguard_conveter_data, zguard_basic_info._zguard_converter_ports_data)
