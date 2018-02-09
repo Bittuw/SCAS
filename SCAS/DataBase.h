@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DataStructs.h"
+#include "Main_Connection_Info.h"
 #include "Serializer.h"
 // Little Interface for MySQL Database
 class DataBase 
@@ -59,9 +60,7 @@ class DataBaseLayer {
 public:
 
 	DataBaseLayer() 
-		: database("localhost", 33060, "sslroot", "elitaass18A", "test_skud") ,
-		_basic_info_list_ref(std::make_shared<Mysql_Basic_Info_Types::Mysql_Basic_Info_List>()),
-		_users_basic_info_list_ref(std::make_shared<Mysql_Basic_Info_Types::Mysql_Users_Basic_Info_List>())
+		: database("localhost", 33060, "sslroot", "elitaass18A", "test_skud")
 	{
 		Log(MessageTypes::TRACE) << std::string("Begin serializing mysql data.");
 		Serialization::Serializer ser(
@@ -74,15 +73,13 @@ public:
 		Log(MessageTypes::TRACE) << std::string("End serializing mysql data.");
 	}
 	
-	Mysql_Basic_Info_Types::Mysql_Basic_Info_List_Ref make_Mysql_Basic_Info_List();
-	Mysql_Basic_Info_Types::Mysql_Users_Basic_Info_List_ref make_Mysql_Users_basic_Info_List();
+
 
 private:
-	Mysql_Basic_Info_Types::Mysql_Basic_Info_List_Ref _basic_info_list_ref;
-	Mysql_Basic_Info_Types::Mysql_Users_Basic_Info_List_ref _users_basic_info_list_ref;
-	//void CreateSerializationThread(Common_DataBaseLayer_Types::Basic_Info_Ref_List_Ref);
 
 	DataBase database;
+
+	Main_Connection_Basic_Info_Types::Main_Connection_Basic_Info_List_uRef make_tree();
 
 	Mysql_Types::Mysql_Converters_Data_List _copy_converters_list;
 	Mysql_Types::Mysql_Controllers_Data_List _copy_controllers_list;
@@ -90,11 +87,3 @@ private:
 	Mysql_Types::Mysql_Employees_Data_List _copy_employees_list;
 	Mysql_Types::Mysql_Groups_In_Controllers_Data_List _copy_groups_In_Controllers_list;
 };
-
-//class DataBasePresenter {
-//
-//};
-//
-//class DataBaseThreading {
-//
-//};
