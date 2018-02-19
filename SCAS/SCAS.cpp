@@ -5,7 +5,7 @@
 #include "Connection.h"
 #include "Utils.h"
 #include "DataBase.h"
-#include "Main_Connection_Info.h"
+//#include "Main_Connection_Info.h"
 
 #define PRINT(text, ...) _tprintf(TEXT(text), ##__VA_ARGS__)
 

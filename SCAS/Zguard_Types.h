@@ -1,7 +1,7 @@
 #pragma once
 
 ///
-/// Represent zguard's data types
+/// Zguard's data types
 ///
 
 #ifndef ZGUARD_TYPES

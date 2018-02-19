@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Graph_Builder.h"
 #include "DataBase.h"
 
 
@@ -58,8 +59,15 @@ std::shared_ptr<mysqlx::Table> DataBase::get_table(const std::string& table_name
 	return std::make_shared<mysqlx::Table>(_database.getTable(table_name));
 }
 
-Main_Connection_Basic_Info_Types::Main_Connection_Basic_Info_List_uRef DataBaseLayer::make_tree() {
-
+void DataBaseLayer::make_tree() {
+	Graph_Builder builder;
+	builder.make_Graph_From_Mysql(
+		*database._converters_list,
+		*database._controllers_list,
+		*database._groups_list,
+		*database._employees_list,
+		*database._groups_In_Controllers_list
+	);
 }
 
 std::string* Mysql_Types::Mysql_Converter_Data_Type::_table_name = const_cast<std::string*>(Mysql_Types::TablesNames);

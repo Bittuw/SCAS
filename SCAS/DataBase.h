@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DataStructs.h"
-#include "Main_Connection_Info.h"
+//#include "Main_Connection_Info.h"
 #include "Serializer.h"
 // Little Interface for MySQL Database
 class DataBase 
@@ -79,7 +79,7 @@ private:
 
 	DataBase database;
 
-	Main_Connection_Basic_Info_Types::Main_Connection_Basic_Info_List_uRef make_tree();
+	void make_tree();
 
 	Mysql_Types::Mysql_Converters_Data_List _copy_converters_list;
 	Mysql_Types::Mysql_Controllers_Data_List _copy_controllers_list;

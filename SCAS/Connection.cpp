@@ -753,7 +753,7 @@
 //	auto tempAvailableConnection = std::make_unique<Available_Connection>();
 //
 //
-//	//Common_Types::Common_Connection_Data_Type temp = Common_Types::Common_Connection_Data_Type(Common_Types::Controller_Info(), Common_Types::Converter_Ports_Info_List(), Common_Types::Controllers_Info_List());
+//	//Common_Types::Common_Connection_Data_Type temp = Common_Types::Common_Connection_Data_Type(Common_Types::Controller_Info_Fields(), Common_Types::Converter_Ports_Info_List(), Common_Types::Controllers_Info_List());
 //
 //	if (ZG_SearchDevices(_hSearch, &((_ZP_SEARCH_PARAMS &)_searchParams), FALSE, TRUE) != S_OK)
 //		throw SearchError(std::string("Error in search")); // TODO log trace
