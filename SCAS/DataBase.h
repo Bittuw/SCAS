@@ -14,7 +14,7 @@ public:
 		_database(_session.getDefaultSchema()), 
 		_converters_list(std::make_shared<Mysql_Types::Mysql_Converters_Data_List>()),
 		_controllers_list(std::make_shared<Mysql_Types::Mysql_Controllers_Data_List>()),
-		_groups_list(std::make_shared<Mysql_Types::Mysql_Groups_Data_List>()),
+		_groups_pairs_list(std::make_shared<Mysql_Types::Mysql_Groups_Data_List>()),
 		_employees_list(std::make_shared<Mysql_Types::Mysql_Employees_Data_List>()),
 		_groups_In_Controllers_list(std::make_shared<Mysql_Types::Mysql_Groups_In_Controllers_Data_List>())
 	{
@@ -47,7 +47,7 @@ public:
 
 	std::shared_ptr<Mysql_Types::Mysql_Converters_Data_List> _converters_list;
 	std::shared_ptr<Mysql_Types::Mysql_Controllers_Data_List> _controllers_list;
-	std::shared_ptr<Mysql_Types::Mysql_Groups_Data_List> _groups_list;
+	std::shared_ptr<Mysql_Types::Mysql_Groups_Data_List> _groups_pairs_list;
 	std::shared_ptr<Mysql_Types::Mysql_Employees_Data_List> _employees_list;
 	std::shared_ptr<Mysql_Types::Mysql_Groups_In_Controllers_Data_List> _groups_In_Controllers_list;
 
@@ -66,7 +66,7 @@ public:
 		Serialization::Serializer ser(
 			*database._converters_list,
 			*database._controllers_list,
-			*database._groups_list,
+			*database._groups_pairs_list,
 			*database._groups_In_Controllers_list,
 			*database._employees_list
 		);

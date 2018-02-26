@@ -30,7 +30,7 @@ void DataBase::downloadTables() { // TODO just do it like template
 			break;
 		case 2:
 			for (auto row : table.select("*").execute()) {
-				_groups_list->emplace_back(row, 0);
+				_groups_pairs_list->emplace_back(row, 0);
 			}
 			break;
 		case 3:
@@ -62,11 +62,11 @@ std::shared_ptr<mysqlx::Table> DataBase::get_table(const std::string& table_name
 void DataBaseLayer::make_tree() {
 	Graph_Builder builder;
 	builder.make_Graph_From_Mysql(
-		*database._converters_list,
-		*database._controllers_list,
-		*database._groups_list,
-		*database._employees_list,
-		*database._groups_In_Controllers_list
+		Graph_Builder::filter(*database._converters_list),
+		Graph_Builder::filter(*database._controllers_list),
+		Graph_Builder::filter(*database._groups_pairs_list),
+		Graph_Builder::filter(*database._employees_list),
+		Graph_Builder::filter(*database._groups_In_Controllers_list)
 	);
 }
 

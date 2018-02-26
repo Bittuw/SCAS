@@ -14,6 +14,7 @@ int MainLoop() {
 		return 0;
 	
 	DataBaseLayer base;
+	base.make_tree();
 	/*auto conv_list = base.make_Mysql_Basic_Info_List();
 	auto uconv_list = Main_Connection_Basic_Info_Types::Transorms<Mysql_Basic_Info_Types::Mysql_Basic_Info_List_uRef, Main_Connection_Basic_Info_Types::Main_Connection_basic_Info_List_uRef>::FromTo(conv_list);
 	auto users_list = base.make_Mysql_Users_Basic_Info_List();

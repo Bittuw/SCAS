@@ -8,50 +8,72 @@
 #define MAIN_CONNECION_INFO
 
 #include <string>
+#include <set>
 #include "Util.h"
 #include "Mysql_Types.h"
 
 namespace Graph_Types {
-		
+
 	///
 	/// Defines of data fields 
 	///
 
+#define PK(type, name)\
+	struct pk_##name{\
+		type pk;\
+		using pk_type = type;\
+	} _pk;\
+
+#define FK(type, name)\
+	struct fk_##name{\
+		type fk;\
+		using fk_type = type;\
+	} _fk;\
+
+#define FIELD(type, name)\
+	struct name{\
+		type name;\
+		using field_type = type;\
+	} name;\
+	
 #define Converter_Info_Fields\
-	X(unsigned int, _id)\
-	X(unsigned int, _nSn)\
-	X(std::wstring, _type_name)\
-	X(std::wstring, _first_ip_port)\
-	X(std::wstring, _second_ip_port)\
+	PK(unsigned int, _id)\
+	FIELD(unsigned int, _nSn)\
+	FIELD(std::wstring, _type_name)\
+	FIELD(std::wstring, _first_ip_port)\
+	FIELD(std::wstring, _second_ip_port)\
 
 #define Controller_Info_Fields\
-	X(unsigned int, _id)\
-	X(unsigned int, _nSn)\
-	X(std::wstring, _type_name)\
-	X(std::wstring, _name)\
-	X(unsigned int, _max_groups)\
-	X(unsigned int, _max_keys)\
-	X(unsigned int, _max_events)\
-	X(unsigned int, _max_r_event_at_time)\
-	X(unsigned int, _max_w_event_at_time)\
+	PK(unsigned int, _id)\
+	FIELD(unsigned int, _nSn)\
+	FIELD(std::wstring, _type_name)\
+	FIELD(std::wstring, _name)\
+	FIELD(unsigned int, _max_groups)\
+	FIELD(unsigned int, _max_keys)\
+	FIELD(unsigned int, _max_events)\
+	FIELD(unsigned int, _max_r_event_at_time)\
+	FIELD(unsigned int, _max_w_event_at_time)\
+	FK(unsigned int, _id_converter)
 
 #define User_Info_Fields\
-	X(unsigned int, _id)\
-	X(std::wstring, _name)\
-	X(std::wstring, _surname)\
-	X(std::wstring, _patronymic)\
-	X(unsigned int, _card_number)
+	PK(unsigned int, _id)\
+	FIELD(std::wstring, _name)\
+	FIELD(std::wstring, _surname)\
+	FIELD(std::wstring, _patronymic)\
+	FIELD(unsigned int, _card_number)\
+	FK(unsigned int, _id_groups)
 
 #define Group_Info_Fields\
-	X(unsigned int, _id)\
-	X(std::wstring, _name)\
-	X(unsigned int, _time_zone)\
+	PK(unsigned int, _id)\
+	FIELD(std::wstring, _name)\
+	FIELD(unsigned int, _time_zone)\
 
 #define Group_In_Controller_Fields\
-	X(unsigned int, _id_groups) \
-	X(unsigned int, _id_controllers) \
-	X(unsigned int, _id_converter) \
-	X(unsigned int, _position_in_controller)
+	PK(unsigned int, _id)\
+	FK(unsigned int, _id_groups) \
+	FK(unsigned int, _id_controllers) \
+	FK(unsigned int, _id_converter) \
+	FIELD(unsigned int, _position_in_controller)
 
 	static std::wstring unnamed = L"Unnamed";
 	static unsigned int base_rw_events_at_time = 0x07;
@@ -61,80 +83,83 @@ namespace Graph_Types {
 	///
 
 	struct Converter_Info {
-#define X(type, name) type name;
+
 		Converter_Info_Fields
-#undef X
+
 		Converter_Info() = default;
 		Converter_Info(const Mysql_Types::Mysql_Converter_Data_Type& mysql_converter)
 			:
-			_id(mysql_converter._id),
-			_nSn(mysql_converter._nSn),
-			_type_name(Utils::MultiToWide(mysql_converter._type_name.c_str(), mysql_converter._type_name.size())),
-			_first_ip_port(Utils::MultiToWide(mysql_converter._first_ip_port.c_str(), mysql_converter._first_ip_port.size())),
-			_second_ip_port(Utils::MultiToWide(mysql_converter._second_ip_port.c_str(), mysql_converter._second_ip_port.size()))
+			_pk({ mysql_converter._id }),
+			_nSn({ mysql_converter._nSn }),
+			_type_name({ Utils::MultiToWide(mysql_converter._type_name.c_str(), mysql_converter._type_name.size()) }),
+			_first_ip_port({ Utils::MultiToWide(mysql_converter._first_ip_port.c_str(), mysql_converter._first_ip_port.size()) }),
+			_second_ip_port({ Utils::MultiToWide(mysql_converter._second_ip_port.c_str(), mysql_converter._second_ip_port.size()) })
 		{}
 	};
 
 	struct Controller_Info {
-#define X(type, name) type name;
+
 		Controller_Info_Fields
-#undef X
+
 		Controller_Info() = default;
 		Controller_Info(const Mysql_Types::Mysql_Controller_Data_Type& mysql_controller) 
 			:
-			_id(mysql_controller._id),
-			_nSn(mysql_controller._nSn),
-			_type_name(Utils::MultiToWide(mysql_controller._type_name.c_str(), mysql_controller._type_name.size())),
-			_name(Utils::MultiToWide(mysql_controller._name.c_str(), mysql_controller._name.size())),
-			_max_groups(mysql_controller._max_groups),
-			_max_keys(mysql_controller._max_keys),
-			_max_events(mysql_controller._max_events),
-			_max_r_event_at_time(mysql_controller._max_r_event_at_time),
-			_max_w_event_at_time(mysql_controller._max_w_event_at_time)
+			_pk({ mysql_controller._id }),
+			_nSn({ mysql_controller._nSn }),
+			_type_name({ Utils::MultiToWide(mysql_controller._type_name.c_str(), mysql_controller._type_name.size()) }),
+			_name({ Utils::MultiToWide(mysql_controller._name.c_str(), mysql_controller._name.size()) }),
+			_max_groups({ mysql_controller._max_groups }),
+			_max_keys({ mysql_controller._max_keys }),
+			_max_events({ mysql_controller._max_events }),
+			_max_r_event_at_time({ mysql_controller._max_r_event_at_time }),
+			_max_w_event_at_time({ mysql_controller._max_w_event_at_time }),
+			_fk({ mysql_controller._id_converter })
 		{}
 	};
 
 	struct User_Info {
-#define X(type, name) type name;
+
 		User_Info_Fields
-#undef X
+
 		User_Info() = default;
 		User_Info(const Mysql_Types::Mysql_Employee_Data_Type& mysql_employee) 
 			:
-			_id(mysql_employee._id),
-			_name(Utils::MultiToWide(mysql_employee._name.c_str(), mysql_employee._name.size())),
-			_surname(Utils::MultiToWide(mysql_employee._surname.c_str(), mysql_employee._surname.size())),
-			_patronymic(Utils::MultiToWide(mysql_employee._patronymic.c_str(), mysql_employee._patronymic.size())),
-			_card_number(mysql_employee._card_number)
+			_pk({ mysql_employee._id }),
+			_name({ Utils::MultiToWide(mysql_employee._name.c_str(), mysql_employee._name.size()) }),
+			_surname({ Utils::MultiToWide(mysql_employee._surname.c_str(), mysql_employee._surname.size()) }),
+			_patronymic({ Utils::MultiToWide(mysql_employee._patronymic.c_str(), mysql_employee._patronymic.size()) }),
+			_card_number({ mysql_employee._card_number }),
+			_fk({ mysql_employee._id_groups })
 		{}
 	};
 
 	struct Group_Info {
-#define X(type, name) type name;
+
 		Group_Info_Fields
-#undef X
+
 		Group_Info() = default;
 		Group_Info(const Mysql_Types::Mysql_Group_Data_Type& mysql_group)
 			:
-			_id(mysql_group._id),
-			_name(Utils::MultiToWide(mysql_group._name.c_str(), mysql_group._name.size())),
-			_time_zone(mysql_group._time_zone)
+			_pk({ mysql_group._id }),
+			_name({ Utils::MultiToWide(mysql_group._name.c_str(), mysql_group._name.size()) }),
+			_time_zone({ mysql_group._time_zone })
 		{}
 	};
 
-	struct Group_In_Controller_Info {
-#define X(type, name) type name;
+	/*struct Group_In_Controller_Info {
+
 		Group_In_Controller_Fields
-#undef X
+
 		Group_In_Controller_Info() = default;
 		Group_In_Controller_Info(const Mysql_Types::Mysql_Group_In_Controller_Data_Type& mysql_group_in_controller) 
 			:
-			_id_groups(mysql_group_in_controller._id_groups),
-			_id_controllers(mysql_group_in_controller._id_controllers),
-			_id_converter(mysql_group_in_controller._id_converter),
+			_pk({ { mysql_group_in_controller._id } }),
+			_fk({ mysql_group_in_controller._id_groups }),
+			_fk({ mysql_group_in_controller._id_controllers }),
+			_fk(mysql_group_in_controller._id_converter),
 			_position_in_controller(mysql_group_in_controller._position_in_controller)
 		{}
-	};
+	};*/
 
 	///
 	/// References of main types
@@ -144,13 +169,13 @@ namespace Graph_Types {
 	using Controller_sRef = std::shared_ptr<Controller_Info>;
 	using User_sRef = std::shared_ptr<User_Info>;
 	using Group_sRef = std::shared_ptr<Group_Info>;
-	using Group_In_Controller_sRef = std::shared_ptr<Group_In_Controller_Info>;
+	//using Group_In_Controller_sRef = std::shared_ptr<Group_In_Controller_Info>;
 
 	using Converters_sRefs = std::vector<Converter_sRef>;
 	using Controllers_sRefs = std::vector<Controller_sRef>;
 	using Users_sRefs = std::vector<User_sRef>;
 	using Groups_sRefs = std::vector<Group_sRef>;
-	using Groups_In_Controllers_sRefs = std::vector<Group_In_Controller_sRef>;
+	//using Groups_In_Controllers_sRefs = std::vector<Group_In_Controller_sRef>;
 
 	///
 	/// Main types
@@ -165,356 +190,301 @@ namespace Graph_Types {
 	/// Declarations of main types's fields
 	///
 
-	using Graph_Converter_sRef = std::shared_ptr<Graph_Converter>;
-	using Graph_Controller_sRef = std::shared_ptr<Graph_Controller>;
-	using Graph_User_sRef = std::shared_ptr<Graph_User>;
-	using Graph_Group_sRef = std::shared_ptr<Graph_Group>;
+	using Graph_Converter_sRef = std::shared_ptr<Graph_Converter>; // Указатель на конвертер
+	using Graph_Controller_sRef = std::shared_ptr<Graph_Controller>; // Указатель на контроллер
+	using Graph_User_sRef = std::shared_ptr<Graph_User>; // Указатель на пользователя
+	using Graph_Group_sRef = std::shared_ptr<Graph_Group>; // Указатель на группу
 
-	using Graph_Converters_sRefs = std::vector<Graph_Converter_sRef>;
-	using Graph_Controlles_sRefs = std::vector<Graph_Controller_sRef>;
-	using Graph_Users_sRefs = std::vector<Graph_User_sRef>;
-	using Graph_Groups_sRefs = std::vector<Graph_Group_sRef>;
+	using Graph_Converters_sRefs = std::vector<Graph_Converter_sRef>; // Список указателей на конверторы
+	using Graph_Controlles_sRefs = std::vector<Graph_Controller_sRef>; // Список указателей на контроллеры
+	using Graph_Users_sRefs = std::vector<Graph_User_sRef>; // Список указателей на пользователей
+	using Graph_Groups_sRefs = std::vector<Graph_Group_sRef>; // Список указателй на группы
 
-	class Graph_Converter {
+	using Grapg_Group_Pair = std::pair<unsigned int, Graph_Group_sRef>; // Пара "позиция:группа"
+	using Graph_Groups_Pairs_sRefs = std::vector<std::pair<unsigned int, Graph_Group_sRef>>; // Список пар "позиция:группа"
+	//using Graph_Converters_sRefs_Set = std::set<Graph_Converter_sRef>;
+
+	//class Graph_Converter {
+	//public:
+	//	Converter_sRef _converter_info_ref;
+	//	Graph_Controlles_sRefs _controllers_list;
+	//	Graph_Converter(const Converter_sRef& converter_info) 
+	//		: // Построение
+	//		_converter_info_ref(converter_info)
+	//	{};
+	//	bool operator<(const Graph_Converter& right) {
+	//		return this->_converter_info_ref->_nSn < right._converter_info_ref->_nSn;
+	//	}
+	//};
+
+	//class Graph_Controller {
+	//public:
+	//	Controller_sRef _controller_info_ref;
+	//	Graph_Converter_sRef _converter_ref;
+	//	Graph_Groups_Pairs_sRefs _groups_pairs_list;
+	//	Graph_Controller() = delete;
+	//	Graph_Controller(const Controller_sRef& controller_info)
+	//		: // Построение без связывания
+	//		_controller_info_ref(controller_info)
+	//	{}
+	//	Graph_Controller(const Controller_sRef& controller_info, const Graph_Converter_sRef& converter) 
+	//		: // Построение с связыванием
+	//		_controller_info_ref(controller_info),
+	//		_converter_ref(converter)
+	//	{}
+	//};
+
+	//class Graph_User {
+	//public:
+	//	User_sRef _user_ref;
+	//	Graph_Group_sRef _group_ref;
+	//	Graph_User() = delete;
+	//	Graph_User(const User_sRef& user_info)
+	//		: // Потсроение без связывание
+	//		_user_ref(user_info)
+	//	{}
+	//	Graph_User(const User_sRef& user_info, const Graph_Group_sRef& group) 
+	//		: // Построение с связывание
+	//		_user_ref(user_info),
+	//		_group_ref(group)
+	//	{}
+	//};
+	
+	//class Graph_Group {
+	//public:
+	//	Group_sRef _group_ref;
+	//	Graph_Controlles_sRefs _controllers_list;
+	//	Graph_Users_sRefs _users_list;
+	//	Graph_Group(const Group_sRef& group_info) 
+	//		: // Построение
+	//		_group_ref(group_info)
+	//	{}
+	//};
+
+	template<typename... Ts> struct typelist {
+		template<typename T> using prepend = typelist<T, Ts...>;
+	};
+
+	template<typename T, typename... Ts> struct index;
+	template<typename T, typename... Ts> struct index<T, T, Ts...> : std::integral_constant<int, 0> {};
+	template<typename T, typename U, typename... Ts> struct index<T, U, Ts...> : std::integral_constant<int, index<T, Ts...>::value + 1> {};
+
+	template<int n, typename... Ts> struct nth_impl;
+	template<typename T, typename... Ts> struct nth_impl<0, T, Ts...> {
+		using type = T;
+	};
+	template<int n, typename T, typename... Ts> struct nth_impl<n, T, Ts...> {
+		using type = typename nth_impl<n - 1, Ts...>::type;
+	};
+	template<int n, typename... Ts> using nth = typename nth_impl<n, Ts...>::type;
+
+	template<int n, int m, typename... Ts> struct extract_impl;
+	template<int n, int m, typename T, typename... Ts>
+	struct extract_impl<n, m, T, Ts...> : extract_impl<n, m - 1, Ts...> {};
+	template<int n, typename T, typename... Ts>
+	struct extract_impl<n, 0, T, Ts...> {
+		using types = typename extract_impl<n, n - 1, Ts...>::types::template prepend<T>;
+	};
+	template<int n, int m> struct extract_impl<n, m> {
+		using types = typelist<>;
+	};
+	template<int n, int m, typename... Ts> using extract = typename extract_impl<n, m, Ts...>::types;
+
+	template<typename S, typename T> struct tt_impl;
+	template<typename... Ss, typename... Ts>
+	struct tt_impl<typelist<Ss...>, typelist<Ts...>> :
+		public std::tuple<Ts...> {
+
+		template<typename... Args> tt_impl(Args &&...args) :
+			std::tuple<Ts...>(std::forward<Args>(args)...) {}
+
+		template<typename S> nth<index<S, Ss...>::value, Ts...> get() {
+			return std::get<index<S, Ss...>::value>(*this);
+		}
+	};
+	template<typename... Ts> struct tagged_tuple : tt_impl<extract<2, 0, Ts...>, extract<2, 1, Ts...>> {
+		template<typename... Args> tagged_tuple(Args &&...args) :
+			tt_impl<extract<2, 0, Ts...>, extract<2, 1, Ts...>>(std::forward<Args>(args)...) {}
+	};
+
+	template <typename...Ts>
+	struct FKeys {
+		tagged_tuple<Ts...> fkeys;
+	};
+
+	template <typename P, typename D, typename C>
+	class Graph_Point {
 	public:
-		Converter_sRef _converter_info_ref;
-		Graph_Controlles_sRefs _controllers_list;
+		P _parent;
+		D _data;
+		C _child;
+
+		Graph_Point(const D& data) : _data(data){}
+		virtual ~Graph_Point() = default;
+	};
+
+	template <typename D, typename C>
+	class Graph_Zero_Parent : public Graph_Point<nullptr_t, D, C> {
+	public:
+		Graph_Zero_Parent(const D& data) : Graph_Point(data) {}
+	};
+
+	template <typename P, typename D>
+	class Graph_Zero_Child : public Graph_Point<P, D, nullptr_t> {
+	public:
+		Graph_Zero_Child(const D& data) : Graph_Point(data) {}
+	};
+
+	class Graph_Converter : public Graph_Zero_Parent<
+		Converter_sRef, Graph_Controlles_sRefs> {
+	public:
 		Graph_Converter(const Converter_sRef& converter_info) 
 			: // Построение
-			_converter_info_ref(converter_info)
+			Graph_Zero_Parent(converter_info)
 		{};
 	};
 
-	class Graph_Controller {
+	class Graph_Controller : public Graph_Point
+		<Graph_Converter_sRef, Controller_sRef, Graph_Groups_Pairs_sRefs> {
 	public:
-		Controller_sRef _controller_info_ref;
-		Graph_Converter_sRef _converter_ref;
-		Graph_Groups_sRefs _groups_list;
-		Graph_Controller() = delete;
 		Graph_Controller(const Controller_sRef& controller_info)
-			: // Построение без связывания
-			_controller_info_ref(controller_info)
-		{}
-		Graph_Controller(const Controller_sRef& controller_info, const Graph_Converter_sRef& converter) 
-			: // Построение с связыванием
-			_controller_info_ref(controller_info),
-			_converter_ref(converter)
+			:
+			Graph_Point(controller_info)
 		{}
 	};
 
-	class Graph_User {
+	class Graph_Group : public Graph_Point
+		<Graph_Controlles_sRefs, Group_sRef, Graph_Users_sRefs> {
 	public:
-		User_sRef _user_ref;
-		Graph_Group_sRef _group_ref;
-		Graph_User() = delete;
+		Graph_Group(const Group_sRef& group_info)
+			:
+			Graph_Point(group_info)
+		{}
+	};
+
+	class Graph_User : public Graph_Zero_Child
+		<Graph_Group_sRef, User_sRef> {
+	public:
 		Graph_User(const User_sRef& user_info)
-			: // Потсроение без связывание
-			_user_ref(user_info)
-		{}
-		Graph_User(const User_sRef& user_info, const Graph_Group_sRef& group) 
-			: // Построение с связывание
-			_user_ref(user_info),
-			_group_ref(group)
-		{}
-	};
-
-	class Graph_Group {
-	public:
-		Group_sRef _group_ref;
-		Graph_Controlles_sRefs _controllers_list;
-		Graph_Users_sRefs _users_list;
-		Graph_Group(const Group_sRef& group_info) 
 			: // Построение
-			_group_ref(group_info)
+			Graph_Zero_Child(user_info)
 		{}
 	};
 
-	//using = std::vector<>;
-	//using Converter_Handle = HANDLE;
-	//using Converter_Detail_Info = _ZG_CVT_INFO;
-	//using Converter_Detail_Info_Ref = std::shared_ptr<Converter_Detail_Info>;
-	//using Converter_Port_Info = _ZP_PORT_INFO;
-	//using Converter_Ports_Info_List = std::vector<Converter_Port_Info>;
-	//using Converter_Ports_Info_List_Ref = std::shared_ptr<Converter_Ports_Info_List>;
-	//using Converter_Connection_Status = bool;
+	template <typename DList, typename GList, typename F>
+	inline static void transform_one(DList& dlist, GList& glist, const F& tr) {
+		dlist.emplace_back(new DList::value_type::element_type(tr));
+		glist.emplace_back(new DList::value_type::element_type(dlist.back()));
+	}
 
-	//// Common controller's information types Под вопросом
-	//using Controller_Handle = HANDLE;
-	//using Controller_Info = _ZG_FIND_CTR_INFO;
-	//using Controllers_Info_List = std::vector<Controller_Info>;
-	//using Controllers_Info_List_Ref = std::shared_ptr<Controllers_Info_List>;
-	//using Controllers_Handles_List = std::vector<Controller_Handle>;
-	//using Controller_Detail_Info = _ZG_CTR_INFO;
-	//using Controllers_Detail_Info_List = std::vector<Controller_Detail_Info>;
-	//using Controllers_Detail_Info_List_Ref = std::shared_ptr<Controllers_Detail_Info_List>;
-	//using Controller_Connection_Status = bool;
-	//using Controllers_Connection_Status_List = std::vector<Controller_Connection_Status>;
-	//using Controllers_Connection_Status_List_ref = std::shared_ptr<Controllers_Connection_Status_List>;
-	//using Controller_Index_Read_Write = std::pair<int, int>;;
-	//using Controllers_Index_Read_Write_List = std::vector<Controller_Index_Read_Write>;
-	//using Controllers_Index_Read_Write_List_Ref = std::shared_ptr<Controllers_Index_Read_Write_List>;
+	// Трансформируем иходные списки
+	template <typename From, typename To, typename F = From::value_type, typename T = To::value_type::element_type>
+	inline static void transform(const From& flist, To& tlist) {
+		std::transform(
+			flist.cbegin(), 
+			flist.cend(), 
+			std::back_inserter(tlist), 
+			[](const F& felement) 
+			{ return std::make_shared<T>(new T(felement))}
+		);
+	}
 
-	//using Connection_Mutex_Ref = std::shared_ptr<std::mutex>;
-	//using Connection_Type = ZP_PORT_TYPE;
+	template <
+		typename PDataList, typename CDataList,
+		typename PList, typename CList
+	>
+	class building {
+		using PD_element = PDataList::value_type::element_type;
+		using P_element = PList::value_type::element_type;
+		using P_element_ref = PList::value_type;
+
+		using CD_element = CDataList::value_type::element_type;
+		using C_element = CList::value_type::element_type;
+		using C_element_ref = CList::value_type;
+
+		template <typename List, typename Parametr>
+		inline static decltype(auto) build_one(List& list, const Parametr& parametr) {
+			list.emplace_back(new List::value_type::element_type(parametr));
+			return list.back();
+		}
+
+		inline static void bind_many_one(const P_element& parent, const C_element& child) /*Один родитель - много детей*/ {
+			if (child->_parent != nullptr)
+				throw Programm_Exceptions(
+					LoggerFormat::format(
+						"Chile element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
+						typeid(parent).name(),
+						parent->_data->_id,
+						typeid(child).name(),
+						child->_data->_id
+					)
+				);
+			parent->_child.push_back(child);
+			child->_parent = parent;
+		}
+
+	public:
+		inline static void build(
+			PDataList& pdatalist, CDataList& cdatalist,
+			Plist& plist, CList& clist
+		)
+		{
+			for (auto& parent_data : pdatalist)
+			{
+				auto parent = build_one(plist, parent_data);
+
+				CDataList::const_iterator = result;
+				auto start_from = cdatalist.cbegin();
+				C_element_ref& child;
+
+				while ((result = std::find_if(start_from, cdatalist.cend(), [parent_data](const CD_element& element) { return parent_data->_pk.pk == element->_fk.fk })) != cdatalist.cend())
+				{
+					start_from = result + 1;
+					child = build_one(clist, *result);
+					bind_many_one(plist.back(), clist.back());
+				}
+			}
+		};
+	};
+	
+
+	//template <typename PElement, typename CElement>
+	//inline static void bind_many_one(const PElement& parent, const CElement& child) /*Один родитель - много детей*/ { 
+	//	if (child->_parent != nullptr)
+	//		throw Programm_Exceptions(
+	//			LoggerFormat::format(
+	//					"Chile element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
+	//					typeid(parent).name(),
+	//					parent->_data->_id,
+	//					typeid(child).name(),
+	//					child->_data->_id
+	//				)
+	//		);
+	//	parent->_child.push_back(child);
+	//	child->_parent = parent;
+	//}
 
 	
-//	//Срутура хранения данных пользователя
-//	struct User_Data_Type {
-//#define X(type, name) type name;
-//		User_Info_Fields
-//#undef X
-//			User_Data_Type() = delete;
-//		User_Data_Type(const Mysql_Employee_Data_Type& mysql_employee_data_type)
-//			:
-//			_name(mysql_employee_data_type._name.cbegin(), mysql_employee_data_type._name.cend()),
-//			_surname(mysql_employee_data_type._surname.cbegin(), mysql_employee_data_type._surname.cend()),
-//			_patronymic(mysql_employee_data_type._patronymic.cbegin(), mysql_employee_data_type._patronymic.cend()),
-//			_card_number(mysql_employee_data_type._card_number)
-//		{}
-//
-//		User_Data_Type(User_Data_Type&& other) noexcept
-//			:
-//			_name(std::move(other._name)),
-//			_surname(std::move(other._surname)),
-//			_patronymic(std::move(other._patronymic)),
-//			_card_number(std::move(other._card_number))
-//		{}
-//		User_Data_Type(const User_Data_Type& other) = default;
-//		User_Data_Type& operator=(User_Data_Type&& other) = default;
-//		User_Data_Type& operator=(const User_Data_Type& other) = default;
-//
-//		~User_Data_Type() = default;
-//	};
-//	using User_Data_Ref = std::shared_ptr<User_Data_Type>;
-//	struct Basic_User_Data_Type {
-//		User_Data_Ref _user_data_type;
-//
-//		Basic_User_Data_Type() = delete;
-//		Basic_User_Data_Type(const Mysql_Employee_Data_Type& mysql_employee_data_type) 
-//			:
-//			_user_data_type(std::make_shared<User_Data_Type>(mysql_employee_data_type))
-//		{}
-//		
-//		Basic_User_Data_Type(Basic_User_Data_Type&& other) noexcept 
-//			:
-//			_user_data_type(std::move(other._user_data_type))
-//		{}
-//		Basic_User_Data_Type(const Basic_User_Data_Type& other) = default;
-//		Basic_User_Data_Type& operator=(Basic_User_Data_Type&& other) = default;
-//		Basic_User_Data_Type& operator=(const Basic_User_Data_Type& other) = default;
-//
-//		~Basic_User_Data_Type() = default;
-//	};
-//	using Basic_User_Data_Ref = std::shared_ptr<Basic_User_Data_Type>;
-//	using Basic_Users_Data_Ref_List = std::vector<Basic_User_Data_Ref>;
-//	//Структура хранения данных группы
-//	struct Group_Data_Type {
-//#define X(type, name) type name;
-//		Group_Info_Fields
-//#undef X
-//		Group_Data_Type() = delete;
-//		Group_Data_Type(const Mysql_Group_Data_Type& mysql_group_data_type) 
-//			:
-//			_name(mysql_group_data_type._name.cbegin(), mysql_group_data_type._name.cend()),
-//			_time_zone(mysql_group_data_type._time_zone)
-//		{}
-//
-//		Group_Data_Type(Group_Data_Type&& other) noexcept 
-//			:
-//			_name(std::move(other._name)),
-//			_time_zone(std::move(other._time_zone))
-//		{}
-//
-//		Group_Data_Type(const Group_Data_Type& other) = default;
-//		Group_Data_Type& operator=(Group_Data_Type&&) = default;
-//		Group_Data_Type& operator=(const Group_Data_Type&) = default;
-//
-//		~Group_Data_Type() = default;
-//	};
-//	using Group_Data_Ref = std::shared_ptr<Group_Data_Type>;
-//	struct Basic_Group_Data_Type {
-//		Group_Data_Ref group_data_type;
-//		Basic_Users_Data_Ref_List _basic_users_data_ref_list;
-//
-//		Basic_Group_Data_Type() = delete;
-//		Basic_Group_Data_Type(const Mysql_Group_Data_Type& mysql_group_data_type, const Mysql_Employees_Data_List& mysql_employees_data_list)
-//			:
-//			group_data_type(std::make_shared<Group_Data_Type>(mysql_group_data_type))
-//		{
-//			Mysql_Employees_Data_List::const_iterator result;
-//			Mysql_Employees_Data_List::const_iterator start_from = mysql_employees_data_list.cbegin();
-//			while (
-//				(result = std::find_if(
-//					start_from, 
-//					mysql_employees_data_list.cend(), 
-//					[this, &mysql_group_data_type](const Mysql_Employee_Data_Type& mysql_employee_data_type) 
-//					{ return mysql_group_data_type._id == mysql_employee_data_type._id_groups; }
-//				)) != mysql_employees_data_list.cend()) 
-//			{
-//				_basic_users_data_ref_list.emplace_back(new Basic_User_Data_Type(*result));
-//				start_from = result++;
-//			}
-//		}
-//
-//		Basic_Group_Data_Type(Basic_Group_Data_Type&& other) noexcept
-//			:
-//			group_data_type(std::move(other.group_data_type)),
-//			_basic_users_data_ref_list(std::move(other._basic_users_data_ref_list))
-//		{}
-//		Basic_Group_Data_Type(const Basic_Group_Data_Type& other) = default;
-//		Basic_Group_Data_Type& operator=(Basic_Group_Data_Type&&) = default;
-//		Basic_Group_Data_Type& operator=(const Basic_Group_Data_Type&) = default;
-//
-//		~Basic_Group_Data_Type() = default;
-//	};
-//	using Basic_Group_Data_Ref = std::shared_ptr<Basic_Group_Data_Type>;
-//	using Basic_Groups_Data_Ref_list = std::vector<Basic_Group_Data_Ref>;
-//	// Структура, которая получает из базовых типов Mysql или Zguard нужные данные про контроллер
-//	struct Basic_Controller_Data_Type {
-//#define X(type, name) type name;
-//		Controller_Info_Fields
-//#undef X
-//		Basic_Controller_Data_Type() = delete;
-//		Basic_Controller_Data_Type(
-//			const Mysql_Controller_Data_Type& mysql_controller_data, 
-//			const Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers, 
-//			const Mysql_Groups_Data_List& mysql_groups_data_list,
-//			const Mysql_Employees_Data_List& mysql_employees_data_list
-//		)
-//			:
-//			_nSn(mysql_controller_data._nSn),
-//			_type_name(mysql_controller_data._type_name.cbegin(), mysql_controller_data._type_name.cend()),
-//			_name(mysql_controller_data._name.cbegin(), mysql_controller_data._name.cend()),
-//			_max_groups(mysql_controller_data._max_groups),
-//			_max_keys(mysql_controller_data._max_keys),
-//			_max_events(mysql_controller_data._max_events),
-//			_max_r_event_at_time(mysql_controller_data._max_r_event_at_time),
-//			_max_w_event_at_time(mysql_controller_data._max_w_event_at_time),
-//			_basic_groups_data_ref_list()
-//		{
-//			Mysql_Groups_In_Controllers_Data_List temp;
-//			Mysql_Groups_In_Controllers_Data_List::const_iterator result_a;
-//			Mysql_Groups_In_Controllers_Data_List::const_iterator start_from_a = mysql_groups_in_controllers.cbegin();
-//
-//			while (
-//				(result_a = std::find_if(
-//					start_from_a, 
-//					mysql_groups_in_controllers.cend(), 
-//					[&mysql_controller_data, &mysql_groups_in_controllers](const Mysql_Group_In_Controller_Data_Type& mysql_group_in_controller_data_type) -> decltype(auto) 
-//					{ return mysql_group_in_controller_data_type._id_controllers == mysql_controller_data._id; }
-//					)
-//				) != mysql_groups_in_controllers.cend()) 
-//			{
-//				temp.push_back(*result_a);
-//				start_from_a = result_a++;
-//			}
-//
-//			for (auto& group_in_controller : temp) 
-//			{
-//				Mysql_Groups_Data_List::const_iterator result_b;
-//				Mysql_Groups_Data_List::const_iterator start_from_b = mysql_groups_data_list.cbegin();
-//
-//				while ((result_b = std::find_if(start_from_b, mysql_groups_data_list.cend(), [&group_in_controller](const Mysql_Group_Data_Type& mysql_group_data_type) -> decltype(auto) { return mysql_group_data_type._id == group_in_controller._id_groups; })) != mysql_groups_data_list.cend()) {
-//					_basic_groups_data_ref_list.emplace_back(new Basic_Group_Data_Type(*result_b, mysql_employees_data_list));
-//					start_from_b = result_b++;
-//				}
-//			}
-//
-//		}
-//		Basic_Controller_Data_Type(const Zguard_Controller_Data_Type& zguard_controller_data)
-//			:
-//			_nSn(zguard_controller_data.nSn),
-//			_type_name(CtrTypeStrs[zguard_controller_data.nType]),
-//			_name(unnamed),
-//			_max_groups(ZG_MAX_TIMEZONES),
-//			_max_keys(zguard_controller_data.nMaxKeys),
-//			_max_events(zguard_controller_data.nMaxEvents),
-//			_max_r_event_at_time(rw_events_at_time),
-//			_max_w_event_at_time(rw_events_at_time)
-//		{}
-//
-//		Basic_Controller_Data_Type(Basic_Controller_Data_Type&& other) noexcept
-//			:
-//			_nSn(std::move(other._nSn)),
-//			_type_name(std::move(other._type_name)),
-//			_name(std::move(other._name)),
-//			_max_groups(other._max_groups),
-//			_max_keys(other._max_keys),
-//			_max_events(other._max_events),
-//			_max_r_event_at_time(other._max_r_event_at_time),
-//			_max_w_event_at_time(std::move(other._max_w_event_at_time)),
-//			_basic_groups_data_ref_list(std::move(other._basic_groups_data_ref_list))
-//		{
-//			other._nSn = 0;
-//			/*other._type_name.clear();
-//			other._name.clear();*/
-//			other._max_groups = 0;
-//			other._max_keys = 0;
-//			other._max_events = 0;
-//			other._max_r_event_at_time = 0;
-//			other._max_w_event_at_time = 0;
-//		}
-//		Basic_Controller_Data_Type(const Basic_Controller_Data_Type& other) = default;
-//		Basic_Controller_Data_Type& operator=(Basic_Controller_Data_Type&& other) = default;
-//		Basic_Controller_Data_Type& operator=(const Basic_Controller_Data_Type& other) = default;
-//
-//		~Basic_Controller_Data_Type() = default;
-//	};
-//	using Basic_Controller_Data_Ref = std::shared_ptr<Basic_Controller_Data_Type>;
-//	using Basic_Controllers_Data_Ref_List = std::vector<Basic_Controller_Data_Ref>;
-//	// Структура, которая получает из базовых типов Mysql или Zguard нужные данные про конвертер
-//	struct Basic_Converter_Data_Type {
-//#define X(type, name) type name;
-//		Converter_Info_Fields
-//#undef X
-//			Basic_Converter_Data_Type() = delete;
-//		Basic_Converter_Data_Type(
-//			const Mysql_Converter_Data_Type& mysql_converter_data,
-//			const Mysql_Controllers_Data_List& mysql_controllers_data_list,
-//			const Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers,
-//			const Mysql_Groups_Data_List& mysql_groups_data_list,
-//			const Mysql_Employees_Data_List& mysql_employees_data_list)
-//			:
-//			_nSn(mysql_converter_data._nSn),
-//			_type_name(mysql_converter_data._type_name.cbegin(), mysql_converter_data._type_name.cend()),
-//			_first_ip_port(mysql_converter_data._first_ip_port.cbegin(), mysql_converter_data._first_ip_port.cend()),
-//			_second_ip_port(mysql_converter_data._second_ip_port.cbegin(), mysql_converter_data._second_ip_port.cend()),
-//			_basic_controllers_data_ref_list()
-//		{
-//			Mysql_Controllers_Data_List::const_iterator result;
-//			Mysql_Controllers_Data_List::const_iterator start_from = mysql_controllers_data_list.cbegin();
-//
-//			while ((result = std::find_if(start_from, mysql_controllers_data_list.cend(), [&mysql_converter_data](const Mysql_Controller_Data_Type& mysql_controller_data_type) -> decltype(auto) { return mysql_controller_data_type._id_converter == mysql_converter_data._id; })) != mysql_controllers_data_list.cend()) {
-//				_basic_controllers_data_ref_list.emplace_back(new Basic_Controller_Data_Type(*result, mysql_groups_in_controllers, mysql_groups_data_list, mysql_employees_data_list));
-//				start_from = result++;
-//			}
-//		}
-//		Basic_Converter_Data_Type(const Zguard_Converter_Data_Type& zguard_converter_data, const Zguard_Converter_Ports_Data_List& zguard_ports_data_list)
-//			:
-//			_nSn(zguard_converter_data.nSn),
-//			_type_name(CvtTypeStrs[zguard_converter_data.nType]),
-//			_first_ip_port(zguard_ports_data_list.at(0).szName),
-//			_second_ip_port(zguard_ports_data_list.at(1).szName)
-//		{}
-//
-//		Basic_Converter_Data_Type(Basic_Converter_Data_Type&& other)
-//			:
-//			_nSn(other._nSn),
-//			_type_name(std::move(other._type_name)),
-//			_first_ip_port(std::move(other._first_ip_port)),
-//			_second_ip_port(std::move(other._second_ip_port))
-//		{
-//			other._nSn = 0;
-//		}
-//		Basic_Converter_Data_Type(const Basic_Converter_Data_Type& other) = default;
-//		Basic_Converter_Data_Type& operator=(Basic_Converter_Data_Type&& other) = default;
-//		Basic_Converter_Data_Type& operator=(const Basic_Converter_Data_Type& other) = default;
-//
-//		~Basic_Converter_Data_Type() = default;
-//	};
-//	using Basic_Converter_Data_Ref = std::shared_ptr<Basic_Converter_Data_Type>;
-//	using Basic_Converters_Data_Ref_List = std::vector<Basic_Converter_Data_Ref>;
-//
+	/*template <typename P, typename CList>
+	static void bind_one_many(const P& pElement, const CList& clist) {
+	
+		static_assert(std::is_function<F>::value, "Last parametr is not a boolean functor!");
+	
+		CList::const_iterator result;
+		auto start_from = clist.cbegin();
+
+		while ((result = std::find_if(start_from, clist.cend(), [&](const CList::value_type& cElement) { pElement; }) != clist.cend()))
+		{
+			start_from = result + 1;
+			bind_one_one(element, *result);
+		}
+	}*/
+
+	/*template <typename PList, typename CList>
+	static void bind_many_many(const PList& list, const CList& list) {
+
+	}*/
+
 //	// Структура, которая используется/заполняется в runtime
 //	struct Runtime_Info {
 //
