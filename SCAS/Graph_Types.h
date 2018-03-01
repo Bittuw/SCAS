@@ -424,27 +424,33 @@ namespace Graph_Types {
 			child->_parent.push_back(parent);
 		}
 
-		template <typename Parent, typename Child>
-		inline static void bind_many_one(const Parent& parent, const Child& child) /*Один родитель - много детей*/ {
-			if (child->_parent != nullptr)
-				throw Programm_Exceptions(
-					LoggerFormat::format(
-						"Child element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
-						typeid(parent).name(),
-						parent->_data->_pk.pk,
-						typeid(child).name(),
-						child->_data->_fk.fk
-					)
-				);
-			parent->_child.push_back(child);
-			child->_parent = parent;
-		}
-
 	public:
 		template <
 			typename PList, typename CList
 		>
-		static void build(
+			static void rebuild( // with rebuild (clear links)
+				PList& plist, CList& clist
+			)
+		{
+			for (auto& parent : plist)
+			{
+				parent->_child.clear();
+				CList::const_iterator result;
+				auto start_from = clist.cbegin();
+
+				while ((result = std::find_if(start_from, clist.cend(), [parent](const CList::value_type& element) { return parent->_data->_pk.pk == element->_data->_fk.fk; })) != clist.cend())
+				{
+					*result->_parent.clear();
+					start_from = result + 1;
+					bind_many_one(parent, *result);
+				}
+			}
+		}
+
+		template <
+			typename PList, typename CList
+		>
+		static void build( // without rebuild
 			PList& plist, CList& clist
 		)
 		{
