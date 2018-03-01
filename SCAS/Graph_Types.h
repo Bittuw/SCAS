@@ -382,15 +382,21 @@ namespace Graph_Types {
 	}*/
 
 	// Трансформируем иходные списки
-	template <typename From, typename To, typename F = From::value_type, typename T = To::value_type::element_type>
-	inline static void transform(const From& flist, To& tlist) {
+	template <
+		typename From, typename To, 
+		typename F = From::value_type, 
+		typename T = To::value_type::element_type,
+		typename Arg = T::_data_type::element_type>
+	inline static decltype(auto) transform(const From& flist, To& tlist) {
+		auto start_new = tlist.cend();
 		std::transform(
 			flist.cbegin(), 
 			flist.cend(), 
 			std::back_inserter(tlist), 
 			[](const F& felement) 
-		{ return std::make_shared<T>(felement); }
+		{ return std::make_shared<T>(std::make_shared<Arg>(felement)); }
 		);
+		return start_new;
 	}
 
 	class Building {
@@ -436,26 +442,21 @@ namespace Graph_Types {
 
 	public:
 		template <
-			typename PDataList, typename CDataList,
 			typename PList, typename CList
 		>
 		static void build(
-			PDataList& pdatalist, CDataList& cdatalist,
 			PList& plist, CList& clist
 		)
 		{
-			for (auto& parent_data : pdatalist)
+			for (auto& parent : plist)
 			{
-				auto parent = build_one(plist, parent_data);
+				CList::const_iterator result;
+				auto start_from = clist.cbegin();
 
-				CDataList::const_iterator result;
-				auto start_from = cdatalist.cbegin();
-
-				while ((result = std::find_if(start_from, cdatalist.cend(), [parent_data](const CDataList::value_type& element) { return parent_data->_pk.pk == element->_fk.fk; })) != cdatalist.cend())
+				while ((result = std::find_if(start_from, clist.cend(), [parent](const CList::value_type& element) { return parent->_data->_pk.pk == element->_data->_fk.fk; })) != clist.cend())
 				{
 					start_from = result + 1;
-					auto child = build_one(clist, *result);
-					bind_many_one(parent, child);
+					bind_many_one(parent, *result);
 				}
 			}
 		}
@@ -486,12 +487,12 @@ namespace Graph_Types {
 					);
 
 				if (controller != controllers_srefs.cend() && group != groups_srefs.cend())
-						{
-							bind_one_one(*controller, *group, group_in_controller._position_in_controller);
-						}
-						else {
-							throw Programm_Exceptions("Not valid bond!");
-						}
+					{
+						bind_one_one(*controller, *group, group_in_controller._position_in_controller);
+					}
+					else {
+						throw Programm_Exceptions("Not valid bond!");
+					}
 			}
 		}
 	};

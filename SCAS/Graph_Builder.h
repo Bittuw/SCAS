@@ -36,23 +36,25 @@ public:
 		return list;
 	}
 
-	/*void add_User(
+	void add_Users(
 		const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list
 	);
-	void add_Group(
-		const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list
+	void delete_Users(
+		const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list
 	);
-	void add_Group_In_Controller(
+	void update_Users(
+		const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list
+	);
+	/*void add_Group(
+		const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list
+	);*/
+	/*void add_Group_In_Controller(
 		const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list
-	);
-
-	Graph_Types::Graph_Users_sRefs delete_User(
-		const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list
-	);
-	Graph_Types::Graph_Groups_sRefs delete_Group(
+	);*/
+	/*Graph_Types::Graph_Groups_sRefs delete_Group(
 		const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list
-	);
-*/
+	);*/
+
 	//void commit_change();
 
 private:
@@ -72,12 +74,7 @@ private:
 
 	/*void delete_commit();
 	void add_commit();
-	void update_commit();
-
-	template <typename L, typename...Largs>
-	void find_affected_converters(const L& list, Largs...lists) {
-
-	}*/
+	void update_commit();*/
 
 	Graph_Types::Converters_sRefs _converters_info_list; // Информация о конверторе Left
 	Graph_Types::Controllers_sRefs _controllers_info_list; // Информация о контроллере left
@@ -90,8 +87,8 @@ private:
 	Graph_Types::Graph_Users_sRefs _users_list; // Элемент графа (пользователи) right
 	Graph_Types::Graph_Groups_sRefs _groups_list; // Элемент графа (группы) right
 
-	Graph_Types::Graph_Users_sRefs commit_users_list; // Пользователи для добавления
-	Graph_Types::Graph_Groups_sRefs commit_groups_list; // Группы для добавления
+	Graph_Types::Graph_Users_sRefs temp_users_list; // Пользователи для добавления
+	//Graph_Types::Graph_Groups_sRefs commit_groups_list; // Группы для добавления
 	//Graph_Types::Groups_In_Controllers_sRefs commit_groups_in_controllers_list; // Связи группа-контроллер для добавления
 
 };

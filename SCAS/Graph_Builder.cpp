@@ -39,9 +39,9 @@ void Graph_Builder::right
 	const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list
 )
 {
-	Graph_Types::transform(mysql_groups_data_list, _groups_info_list);
-	Graph_Types::transform(mysql_employees_data_list, _users_info_list);
-	Graph_Types::Building::build(_groups_info_list, _users_info_list, _groups_list, _users_list);
+	Graph_Types::transform(mysql_groups_data_list, _groups_list);
+	Graph_Types::transform(mysql_employees_data_list, _users_list);
+	Graph_Types::Building::build(_groups_list, _users_list);
 	/*for (auto& mysql_group_info : mysql_groups_data_list)
 	{
 		_groups_info_list.emplace_back(new Graph_Types::Group_Info(mysql_group_info));
@@ -77,9 +77,9 @@ void Graph_Builder::left
 	const Mysql_Types::Mysql_Controllers_Data_List& mysql_controllers_data_list
 ) 
 {
-	Graph_Types::transform(mysql_converters_data_list, _converters_info_list);
-	Graph_Types::transform(mysql_controllers_data_list, _controllers_info_list);
-	Graph_Types::Building::build(_converters_info_list, _controllers_info_list, _converters_list, _controllers_list);
+	Graph_Types::transform(mysql_converters_data_list, _converters_list);
+	Graph_Types::transform(mysql_controllers_data_list, _controllers_list);
+	Graph_Types::Building::build(_converters_list, _controllers_list);
 	/*for (auto& mysql_converter_info : mysql_converters_data_list)
 	{
 		_converters_info_list.emplace_back(new Graph_Types::Converter_Info(mysql_converter_info));
@@ -115,6 +115,9 @@ void Graph_Builder::binding(const Mysql_Types::Mysql_Groups_In_Controllers_Data_
 	Graph_Types::Building::stiching(_controllers_list,mysql_groups_in_controllers_data_list, _groups_list);
 }
 
+void Graph_Builder::add_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
+	/*Graph_Types::transform(mysql_employees_data_list,);*/
+}
 
 //void Graph_Builder::bind_one_pair(const Graph_Types::Group_In_Controller_sRef& group_in_controller) {
 //
