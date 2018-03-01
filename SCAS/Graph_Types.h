@@ -28,10 +28,10 @@ namespace Graph_Types {
 	struct fk_##name{\
 		type fk;\
 		using fk_type = type;\
-	} _fk;\
+	}_fk;\
 
 #define FIELD(type, name)\
-	struct name{\
+	struct field_##name{\
 		type name;\
 		using field_type = type;\
 	} name;\
@@ -68,12 +68,12 @@ namespace Graph_Types {
 	FIELD(std::wstring, _name)\
 	FIELD(unsigned int, _time_zone)\
 
-#define Group_In_Controller_Fields\
-	PK(unsigned int, _id)\
-	FK(unsigned int, _id_groups) \
-	FK(unsigned int, _id_controllers) \
-	FK(unsigned int, _id_converter) \
-	FIELD(unsigned int, _position_in_controller)
+//#define Group_In_Controller_Fields\
+//	PK(unsigned int, _id)\
+//	FK(unsigned int, _id_groups) \
+//	FK(unsigned int, _id_controllers) \
+//	FK(unsigned int, _id_converter)\
+//	FIELD(unsigned int, _position_in_controller)
 
 	static std::wstring unnamed = L"Unnamed";
 	static unsigned int base_rw_events_at_time = 0x07;
@@ -319,6 +319,10 @@ namespace Graph_Types {
 		D _data;
 		C _child;
 
+		using _parent_type = P;
+		using _data_type = D;
+		using _child_type = C;
+
 		Graph_Point(const D& data) : _data(data){}
 		virtual ~Graph_Point() = default;
 	};
@@ -371,11 +375,11 @@ namespace Graph_Types {
 		{}
 	};
 
-	template <typename DList, typename GList, typename F>
+	/*template <typename DList, typename GList, typename F>
 	inline static void transform_one(DList& dlist, GList& glist, const F& tr) {
 		dlist.emplace_back(new DList::value_type::element_type(tr));
 		glist.emplace_back(new DList::value_type::element_type(dlist.back()));
-	}
+	}*/
 
 	// Трансформируем иходные списки
 	template <typename From, typename To, typename F = From::value_type, typename T = To::value_type::element_type>
@@ -385,38 +389,45 @@ namespace Graph_Types {
 			flist.cend(), 
 			std::back_inserter(tlist), 
 			[](const F& felement) 
-			{ return std::make_shared<T>(new T(felement))}
+		{ return std::make_shared<T>(felement); }
 		);
 	}
 
-	template <
-		typename PDataList, typename CDataList,
-		typename PList, typename CList
-	>
-	class building {
-		using PD_element = PDataList::value_type::element_type;
-		using P_element = PList::value_type::element_type;
-		using P_element_ref = PList::value_type;
-
-		using CD_element = CDataList::value_type::element_type;
-		using C_element = CList::value_type::element_type;
-		using C_element_ref = CList::value_type;
-
+	class Building {
+		
 		template <typename List, typename Parametr>
 		inline static decltype(auto) build_one(List& list, const Parametr& parametr) {
 			list.emplace_back(new List::value_type::element_type(parametr));
 			return list.back();
 		}
 
-		inline static void bind_many_one(const P_element& parent, const C_element& child) /*Один родитель - много детей*/ {
+		template <typename Parent, typename Child>
+		inline static void bind_one_one(const Parent& parent, const Child& child, const unsigned int position) { // Специально для controller <-> group
+			Child::element_type::_parent_type::const_iterator result;
+			if ((result = std::find_if(child->_parent.cbegin(), child->_parent.cend(), [parent](const Parent& element) { return parent->_data->_pk.pk == element->_data->_pk.pk; })) != child->_parent.cend())
+				throw Programm_Exceptions(
+					LoggerFormat::format(
+						"Child element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
+						typeid(parent).name(),
+						parent->_data->_pk.pk,
+						typeid(child).name(),
+						child->_data->_pk.pk
+					)
+				);
+			parent->_child.emplace_back(position, child);
+			child->_parent.push_back(parent);
+		}
+
+		template <typename Parent, typename Child>
+		inline static void bind_many_one(const Parent& parent, const Child& child) /*Один родитель - много детей*/ {
 			if (child->_parent != nullptr)
 				throw Programm_Exceptions(
 					LoggerFormat::format(
-						"Chile element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
+						"Child element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
 						typeid(parent).name(),
-						parent->_data->_id,
+						parent->_data->_pk.pk,
 						typeid(child).name(),
-						child->_data->_id
+						child->_data->_fk.fk
 					)
 				);
 			parent->_child.push_back(child);
@@ -424,27 +435,65 @@ namespace Graph_Types {
 		}
 
 	public:
-		inline static void build(
+		template <
+			typename PDataList, typename CDataList,
+			typename PList, typename CList
+		>
+		static void build(
 			PDataList& pdatalist, CDataList& cdatalist,
-			Plist& plist, CList& clist
+			PList& plist, CList& clist
 		)
 		{
 			for (auto& parent_data : pdatalist)
 			{
 				auto parent = build_one(plist, parent_data);
 
-				CDataList::const_iterator = result;
+				CDataList::const_iterator result;
 				auto start_from = cdatalist.cbegin();
-				C_element_ref& child;
 
-				while ((result = std::find_if(start_from, cdatalist.cend(), [parent_data](const CD_element& element) { return parent_data->_pk.pk == element->_fk.fk })) != cdatalist.cend())
+				while ((result = std::find_if(start_from, cdatalist.cend(), [parent_data](const CDataList::value_type& element) { return parent_data->_pk.pk == element->_fk.fk; })) != cdatalist.cend())
 				{
 					start_from = result + 1;
-					child = build_one(clist, *result);
-					bind_many_one(plist.back(), clist.back());
+					auto child = build_one(clist, *result);
+					bind_many_one(parent, child);
 				}
 			}
-		};
+		}
+
+		static void stiching(
+			const Graph_Controlles_sRefs& controllers_srefs,
+			const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list,
+			const Graph_Groups_sRefs& groups_srefs
+		) 
+		{
+			for (auto& group_in_controller : mysql_groups_in_controllers_data_list) {
+		
+				auto controller = std::find_if(
+					controllers_srefs.cbegin(),
+					controllers_srefs.cend(),
+						[group_in_controller](const Graph_Types::Graph_Controller_sRef& controller)
+						{
+							return group_in_controller._id_controllers == controller->_data->_pk.pk;
+						}
+					);
+				auto group = std::find_if(
+					groups_srefs.cbegin(),
+					groups_srefs.cend(),
+						[group_in_controller](const Graph_Types::Graph_Group_sRef& group)
+						{
+							return group_in_controller._id_groups == group->_data->_pk.pk;
+						}
+					);
+
+				if (controller != controllers_srefs.cend() && group != groups_srefs.cend())
+						{
+							bind_one_one(*controller, *group, group_in_controller._position_in_controller);
+						}
+						else {
+							throw Programm_Exceptions("Not valid bond!");
+						}
+			}
+		}
 	};
 	
 
@@ -480,10 +529,6 @@ namespace Graph_Types {
 		}
 	}*/
 
-	/*template <typename PList, typename CList>
-	static void bind_many_many(const PList& list, const CList& list) {
-
-	}*/
 
 //	// Структура, которая используется/заполняется в runtime
 //	struct Runtime_Info {

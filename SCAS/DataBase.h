@@ -73,13 +73,13 @@ public:
 		Log(MessageTypes::TRACE) << std::string("End serializing mysql data.");
 	}
 	
-
+	void make_tree();
 
 private:
 
 	DataBase database;
 
-	void make_tree();
+	
 
 	Mysql_Types::Mysql_Converters_Data_List _copy_converters_list;
 	Mysql_Types::Mysql_Controllers_Data_List _copy_controllers_list;

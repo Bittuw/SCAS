@@ -62,11 +62,11 @@ std::shared_ptr<mysqlx::Table> DataBase::get_table(const std::string& table_name
 void DataBaseLayer::make_tree() {
 	Graph_Builder builder;
 	builder.make_Graph_From_Mysql(
-		Graph_Builder::filter(*database._converters_list),
-		Graph_Builder::filter(*database._controllers_list),
-		Graph_Builder::filter(*database._groups_pairs_list),
-		Graph_Builder::filter(*database._employees_list),
-		Graph_Builder::filter(*database._groups_In_Controllers_list)
+		*database._converters_list,
+		*database._controllers_list,
+		*database._groups_pairs_list,
+		*database._employees_list,
+		*database._groups_In_Controllers_list
 	);
 }
 

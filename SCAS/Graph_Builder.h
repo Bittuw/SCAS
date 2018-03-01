@@ -24,21 +24,21 @@ public:
 	template <typename T>
 	static T& filter(T& list) {
 		auto first = std::unique(
-			list.cbegin(),
-			list.cend(),
+			list.begin(),
+			list.end(),
 			[](const T::value_type& a, const T::value_type& b) 
 			{
-				return a._id == b._id;
+				Log(MessageTypes::WARNING) << LoggerFormat::format("Delete dublicate from table: '%'", *a._table_name);
+				return (a._id) == (b._id);
 			}
 		);
-
 		list.erase(first, list.cend());
+		return list;
 	}
 
-	void add_User(
+	/*void add_User(
 		const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list
 	);
-
 	void add_Group(
 		const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list
 	);
@@ -52,7 +52,7 @@ public:
 	Graph_Types::Graph_Groups_sRefs delete_Group(
 		const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list
 	);
-
+*/
 	//void commit_change();
 
 private:
@@ -69,7 +69,6 @@ private:
 		const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list
 	); // Bind right and left part of graph
 
-	//void bind_one_pair(const Graph_Types::Group_In_Controller_sRef& group_in_controller);
 
 	/*void delete_commit();
 	void add_commit();
