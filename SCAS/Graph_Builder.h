@@ -71,7 +71,10 @@ private:
 		const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list
 	); // Bind right and left part of graph
 
-
+	template <typename T>
+	void remove_dublicates(const T& one, const T& two) {
+		T& temp_list = one + two;
+	}
 	/*void delete_commit();
 	void add_commit();
 	void update_commit();*/
@@ -87,7 +90,7 @@ private:
 	Graph_Types::Graph_Users_sRefs _users_list; // Элемент графа (пользователи) right
 	Graph_Types::Graph_Groups_sRefs _groups_list; // Элемент графа (группы) right
 
-	Graph_Types::Graph_Users_sRefs temp_users_list; // Пользователи для добавления
+	//Graph_Types::Graph_Users_sRefs _temp_users_list; // Пользователи для добавления
 	//Graph_Types::Graph_Groups_sRefs commit_groups_list; // Группы для добавления
 	//Graph_Types::Groups_In_Controllers_sRefs commit_groups_in_controllers_list; // Связи группа-контроллер для добавления
 

@@ -82,6 +82,10 @@ namespace Graph_Types {
 	/// Structs 
 	///
 
+	struct Model_Info {
+		virtual ~Model_Info() {};
+	};
+
 	struct Converter_Info {
 
 		Converter_Info_Fields
@@ -146,6 +150,8 @@ namespace Graph_Types {
 		{}
 	};
 
+	template <typename Element>
+	struct less;
 	/*struct Group_In_Controller_Info {
 
 		Group_In_Controller_Fields
@@ -181,6 +187,7 @@ namespace Graph_Types {
 	/// Main types
 	///
 
+	class Graph_Base;
 	class Graph_Converter;
 	class Graph_Controller;
 	class Graph_User;
@@ -189,6 +196,9 @@ namespace Graph_Types {
 	///
 	/// Declarations of main types's fields
 	///
+
+	using Graph_Base_sRef = std::shared_ptr<Graph_Base>;
+	using Graph_Base_sRefs = std::vector<Graph_Base_sRef>;
 
 	using Graph_Converter_sRef = std::shared_ptr<Graph_Converter>; // Указатель на конвертер
 	using Graph_Controller_sRef = std::shared_ptr<Graph_Controller>; // Указатель на контроллер
@@ -202,6 +212,29 @@ namespace Graph_Types {
 
 	using Grapg_Group_Pair = std::pair<unsigned int, Graph_Group_sRef>; // Пара "позиция:группа"
 	using Graph_Groups_Pairs_sRefs = std::vector<std::pair<unsigned int, Graph_Group_sRef>>; // Список пар "позиция:группа"
+
+	using Graph_Converters_sRefsSet = std::set<Graph_Converter_sRef, less<Graph_Converter_sRef>>;
+
+	//////
+
+	//template <typename T>
+	//using Graph_Point_sRef = std::shared_ptr<T>;
+	//using Graph_Converter_sRef = Graph_Point_sRef<Graph_Converter>; // Указатель на конвертер
+	//using Graph_Controller_sRef = Graph_Point_sRef<Graph_Controller>; // Указатель на контроллер
+	//using Graph_User_sRef = Graph_Point_sRef<Graph_User>; // Указатель на пользователя
+	//using Graph_Group_sRef = Graph_Point_sRef<Graph_Group>; // Указатель на группу
+
+	//template <typename T>
+	//using Graph_Points_sRefs = std::vector<T>;
+	//using Graph_Converters_sRefs = Graph_Points_sRefs<Graph_Converter_sRef>; // Список указателей на конверторы
+	//using Graph_Controlles_sRefs = Graph_Points_sRefs<Graph_Controller_sRef>; // Список указателей на контроллеры
+	//using Graph_Users_sRefs = Graph_Points_sRefs<Graph_User_sRef>; // Список указателей на пользователей
+	//using Graph_Groups_sRefs = Graph_Points_sRefs<Graph_Group_sRef>; // Список указателй на группы
+
+	//using Grapg_Group_Pair = std::pair<unsigned int, Graph_Group_sRef>; // Пара "позиция:группа"
+	//using Graph_Groups_Pairs_sRefs = std::vector<std::pair<unsigned int, Graph_Group_sRef>>; // Список пар "позиция:группа"
+
+	//using Graph_Converters_sRefsSet = std::set<Graph_Converter_sRef, less<Graph_Converter_sRef>>;
 	//using Graph_Converters_sRefs_Set = std::set<Graph_Converter_sRef>;
 
 	//class Graph_Converter {
@@ -312,8 +345,13 @@ namespace Graph_Types {
 		tagged_tuple<Ts...> fkeys;
 	};
 
+	class Graph_Base {
+	public:
+		virtual ~Graph_Base() = default;
+	};
+
 	template <typename P, typename D, typename C>
-	class Graph_Point {
+	class Graph_Point : Graph_Base {
 	public:
 		P _parent;
 		D _data;
@@ -375,18 +413,29 @@ namespace Graph_Types {
 		{}
 	};
 
-	/*template <typename DList, typename GList, typename F>
-	inline static void transform_one(DList& dlist, GList& glist, const F& tr) {
-		dlist.emplace_back(new DList::value_type::element_type(tr));
-		glist.emplace_back(new DList::value_type::element_type(dlist.back()));
-	}*/
+
+	template <typename Element>
+	struct less{
+		constexpr bool operator()(const Element& right, const Element& left) {
+			return right->_data->_pk.pk < left->_data->_pk.pk;
+		}
+	};
+
+	template <>
+	struct less<Graph_Converter_sRef> {
+		constexpr bool operator()(const Graph_Converter_sRef& right, const Graph_Converter_sRef& left) {
+			return right->_data->_nSn._nSn < left->_data->_nSn._nSn;
+		}
+	};
 
 	// Трансформируем иходные списки
-	template <
+	template 
+		<
 		typename From, typename To, 
 		typename F = From::value_type, 
 		typename T = To::value_type::element_type,
-		typename Arg = T::_data_type::element_type>
+		typename Arg = T::_data_type::element_type
+		>
 	inline static decltype(auto) transform(const From& flist, To& tlist) {
 		auto start_new = tlist.cend();
 		std::transform(
@@ -408,7 +457,12 @@ namespace Graph_Types {
 		}
 
 		template <typename Parent, typename Child>
-		inline static void bind_one_one(const Parent& parent, const Child& child, const unsigned int position) { // Специально для controller <-> group
+		inline static void bind_one_one(
+			const Parent& parent,
+			const Child& child,
+			const unsigned int position
+		) 
+		{ // Специально для controller <-> group
 			Child::element_type::_parent_type::const_iterator result;
 			if ((result = std::find_if(child->_parent.cbegin(), child->_parent.cend(), [parent](const Parent& element) { return parent->_data->_pk.pk == element->_data->_pk.pk; })) != child->_parent.cend())
 				throw Programm_Exceptions(
@@ -424,28 +478,64 @@ namespace Graph_Types {
 			child->_parent.push_back(parent);
 		}
 
+		template <typename Parent, typename Child>
+		inline static void bind_many_one(const Parent& parent, const Child& child) 
+		{
+			if (child->_parent != nullptr)
+				throw Programm_Exceptions(
+					LoggerFormat::format(
+						"Child element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
+						typeid(parent).name(),
+						parent->_data->_pk.pk,
+						typeid(child).name(),
+						child->_data->_fk.fk
+					)
+				);
+			parent->_child.push_back(child);
+			child->_parent = parent;
+		}
+
+		/*template <typename Parent, typename Child_Iterator>
+		inline static void for_bind_many_one(const Parent& parent, Child_Iterator& from, Child_Iterator& to) 
+		{
+			for (;from < to; from++) {
+				if (child->_parent != nullptr)
+					throw Programm_Exceptions(
+						LoggerFormat::format(
+							"Child element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
+							typeid(parent).name(),
+							parent->_data->_pk.pk,
+							typeid(child).name(),
+							*from->_data->_fk.fk
+						)
+					);
+				parent->_child.push(*from);
+				*from->_parent = parent;
+			}
+		}*/
+
 	public:
 		template <
 			typename PList, typename CList
 		>
-			static void rebuild( // with rebuild (clear links)
-				PList& plist, CList& clist
-			)
+		static void rebuild( // with rebuild (clear links)
+			PList& plist, CList& clist
+		)
+	{
+		for (auto& parent : plist)
 		{
-			for (auto& parent : plist)
-			{
-				parent->_child.clear();
-				CList::const_iterator result;
-				auto start_from = clist.cbegin();
+			parent->_child.clear();
+			CList::const_iterator result;
+			auto start_from = clist.cbegin();
 
-				while ((result = std::find_if(start_from, clist.cend(), [parent](const CList::value_type& element) { return parent->_data->_pk.pk == element->_data->_fk.fk; })) != clist.cend())
-				{
-					*result->_parent.clear();
-					start_from = result + 1;
-					bind_many_one(parent, *result);
-				}
+			while ((result = std::find_if(start_from, clist.cend(), [parent](const CList::value_type& element) { return parent->_data->_pk.pk == element->_data->_fk.fk; })) != clist.cend())
+			{
+				*result->_parent.clear();
+				start_from = result + 1;
+				bind_many_one(parent, *result);
 			}
 		}
+	}
 
 		template <
 			typename PList, typename CList
@@ -500,6 +590,63 @@ namespace Graph_Types {
 						throw Programm_Exceptions("Not valid bond!");
 					}
 			}
+		}
+
+		template <typename Child_Iterator, typename T>
+		inline static void bind_elements(const T& parent_list, Child_Iterator& from, Child_Iterator& to) {
+			for (; from < to; from++) {
+				auto result = std::find_if(
+					parent_list.cbegin(),
+					parent_list.cend(),
+					[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
+				(*result)->_child.push_back(*from);
+				(*from)->_parent = *result;
+			}
+		}
+
+		template <typename Child_Iterator, typename T, typename B>
+		inline static void bind_elements(const T& parent_list, const B& bind_by_list, Child_Iterator& from, Child_Iterator& to) {
+			for (auto& bind_element : bind_by_list) {
+				std::find_if(parent_list.cbegin(), parent_list.cend(), []() {});
+				std::find_if(from, to, [bind_element]() {});
+			}
+			for (; from < to; from++) {
+				auto result = std::find_if(
+					parent_list.cbegin(),
+					parent_list.cend(),
+					[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
+				(*result)->_child.push_back(*from);
+				(*from)->_parent = *result;
+			}
+		}
+
+		////
+		template <typename T>
+		static void find_converters(Graph_Converters_sRefsSet& converters_set, const T& element) {
+			find_converters(converters_set, element->_parent);
+		}
+
+		template <template <typename, typename> class Container, typename Object>
+		static void find_converters(Graph_Converters_sRefsSet& converters_set, const Container<Object, std::allocator<Object>> container) {
+			if (container.empty())
+				throw Programm_Exceptions(LoggerFormat::format("%'s parent list is empty!", typeid(Object::element_type).name()));
+			for (auto& element : container)
+				find_converters(converters_set, element->_parent);
+		}
+
+		template <>
+		inline static void find_converters<Graph_Converter_sRef>(Graph_Converters_sRefsSet& converters_set, const Graph_Converter_sRef& element) {
+			converters_set.insert(element);
+		}
+
+		// Для списка
+		template <typename Iterator>
+		static decltype(auto) find_converters_iterator(Iterator& from, Iterator& to) {
+			Graph_Converters_sRefsSet converters_set;
+			for (;from < to; to++) {
+				find_converters(converters_set, (*from)->_parent);
+			}
+			return converters_set;
 		}
 	};
 	

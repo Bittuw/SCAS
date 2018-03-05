@@ -115,10 +115,30 @@ void Graph_Builder::binding(const Mysql_Types::Mysql_Groups_In_Controllers_Data_
 	Graph_Types::Building::stiching(_controllers_list,mysql_groups_in_controllers_data_list, _groups_list);
 }
 
+
 void Graph_Builder::add_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
-	/*Graph_Types::transform(mysql_employees_data_list,);*/
+	auto copy_users = mysql_employees_data_list;
+	auto new_element = Graph_Types::transform(filter(copy_users), _users_list);	// Добавили
+	Graph_Types::Building::bind_elements(_groups_list, new_element, _users_list.cend());// bind
+	Graph_Types::Building::find_converters_iterator(new_element, _users_list.cend());// Найти converter TODO уведомить в commit
 }
 
+
+void Graph_Builder::delete_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
+
+}
+
+
+void Graph_Builder::update_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
+
+}
+
+void Graph_Builder::add_Group(const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list) {
+	auto copy_groups = mysql_groups_data_list;
+	auto new_element = Graph_Types::transform(filter(copy_groups), _groups_list);// Добавили
+	Graph_Types::Building::bind_elements(_controllers_list, mysql_groups_in_controllers_data_list, new_element, _groups_list.cend());// bind
+	Graph_Types::Building::find_converters_iterator(new_element, _groups_list.cend());// Найти converter TODO уведомить в commit
+}
 //void Graph_Builder::bind_one_pair(const Graph_Types::Group_In_Controller_sRef& group_in_controller) {
 //
 //	auto controller = std::find_if(
