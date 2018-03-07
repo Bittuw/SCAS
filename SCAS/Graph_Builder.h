@@ -89,13 +89,8 @@ private:
 		const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list
 	); // Bind right and left part of graph
 
-	template <typename T>
-	void remove_dublicates(const T& one, const T& two) {
-		T& temp_list = one + two;
-	}
-	/*void delete_commit();
-	void add_commit();
-	void update_commit();*/
+	inline void add_to_notify_set(Graph_Types::Graph_Converters_sRefsSet&);
+	//void commit()
 
 	Graph_Types::Converters_sRefs _converters_info_list; // »нформаци€ о конверторе Left
 	Graph_Types::Controllers_sRefs _controllers_info_list; // »нформаци€ о контроллере left
@@ -107,6 +102,8 @@ private:
 	Graph_Types::Graph_Controlles_sRefs _controllers_list; // Ёлемент графа (контроллеры) left 
 	Graph_Types::Graph_Users_sRefs _users_list; // Ёлемент графа (пользователи) right
 	Graph_Types::Graph_Groups_sRefs _groups_list; // Ёлемент графа (группы) right
+
+	Graph_Types::Graph_Converters_sRefsSet _converters_set; // ”ведомл€емые конверторы
 
 	//Graph_Types::Graph_Users_sRefs _temp_users_list; // ѕользователи дл€ добавлени€
 	//Graph_Types::Graph_Groups_sRefs commit_groups_list; // √руппы дл€ добавлени€

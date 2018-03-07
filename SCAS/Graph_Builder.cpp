@@ -115,13 +115,16 @@ void Graph_Builder::binding(const Mysql_Types::Mysql_Groups_In_Controllers_Data_
 	Graph_Types::Building::stiching(_controllers_list,mysql_groups_in_controllers_data_list, _groups_list);
 }
 
+void Graph_Builder::add_to_notify_set(Graph_Types::Graph_Converters_sRefsSet& converters_set) {
+	_converters_set.insert(converters_set.begin(), converters_set.end());
+}
 
 void Graph_Builder::add_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
 	auto copy_users = mysql_employees_data_list;
-	auto new_element = Graph_Types::transform(filter_by(copy_users, _users_list), _users_list);	// Добавили
 	try {
+		auto new_element = Graph_Types::transform(filter_by(copy_users, _users_list), _users_list);	// Добавили
 		Graph_Types::Building::bind_elements(_groups_list, new_element, _users_list.cend());// bind
-		Graph_Types::Building::find_converters_iterator(new_element, _users_list.cend());// Найти converter TODO уведомить в commit
+		add_to_notify_set(Graph_Types::Building::find_converters_iterator(new_element, _users_list.cend()));// Найти converter TODO уведомить в commit
 	}
 	catch (const std::exception& error) {
 		Log(MessageTypes::ERR) << "Add users prevented!";

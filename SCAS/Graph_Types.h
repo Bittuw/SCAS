@@ -649,46 +649,15 @@ namespace Graph_Types {
 		template <typename Iterator>
 		static decltype(auto) find_converters_iterator(Iterator& from, Iterator& to) {
 			Graph_Converters_sRefsSet converters_set;
-			for (;from < to; to++) {
-				find_converters(converters_set, (*from)->_parent);
-			}
+			std::for_each(from, to, 
+				[&converters_set,&from](const std::iterator_traits<Iterator>::value_type& element)
+				{
+					find_converters(converters_set, (*from)->_parent);
+				}
+			);
 			return converters_set;
 		}
 	};
-	
-
-	//template <typename PElement, typename CElement>
-	//inline static void bind_many_one(const PElement& parent, const CElement& child) /*Один родитель - много детей*/ { 
-	//	if (child->_parent != nullptr)
-	//		throw Programm_Exceptions(
-	//			LoggerFormat::format(
-	//					"Chile element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
-	//					typeid(parent).name(),
-	//					parent->_data->_id,
-	//					typeid(child).name(),
-	//					child->_data->_id
-	//				)
-	//		);
-	//	parent->_child.push_back(child);
-	//	child->_parent = parent;
-	//}
-
-	
-	/*template <typename P, typename CList>
-	static void bind_one_many(const P& pElement, const CList& clist) {
-	
-		static_assert(std::is_function<F>::value, "Last parametr is not a boolean functor!");
-	
-		CList::const_iterator result;
-		auto start_from = clist.cbegin();
-
-		while ((result = std::find_if(start_from, clist.cend(), [&](const CList::value_type& cElement) { pElement; }) != clist.cend()))
-		{
-			start_from = result + 1;
-			bind_one_one(element, *result);
-		}
-	}*/
-
 
 //	// Структура, которая используется/заполняется в runtime
 //	struct Runtime_Info {
