@@ -604,20 +604,24 @@ namespace Graph_Types {
 			}
 		}
 
-		template <typename Child_Iterator, typename T, typename B>
-		inline static void bind_elements(const T& parent_list, const B& bind_by_list, Child_Iterator& from, Child_Iterator& to) {
+		template <typename Child_Iterator, typename T> // Only for controllers <-> groups
+		inline static void bind_elements(const T& parent_list, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& bind_by_list, Child_Iterator& from, Child_Iterator& to) {
 			for (auto& bind_element : bind_by_list) {
-				std::find_if(parent_list.cbegin(), parent_list.cend(), []() {});
-				std::find_if(from, to, [bind_element]() {});
+				auto result_c = std::find_if(parent_list.cbegin(), parent_list.cend(), [bind_element](const T::value_type& element) { return element->_data->_pk.pk == bind_element._id_controllers; });
+				auto result_g = std::find_if(from, to, [bind_element](const std::iterator_traits<Child_Iterator>::value_type& element) { return element->_data->_pk.pk == bind_element._id_groups; });
+
+				if ((result_c == parent_list.cend()) || (result_g == to)) {
+
+				}
 			}
-			for (; from < to; from++) {
+			/*for (; from < to; from++) {
 				auto result = std::find_if(
 					parent_list.cbegin(),
 					parent_list.cend(),
 					[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
 				(*result)->_child.push_back(*from);
 				(*from)->_parent = *result;
-			}
+			}*/
 		}
 
 		////

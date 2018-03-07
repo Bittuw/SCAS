@@ -45,9 +45,10 @@ public:
 	void update_Users(
 		const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list
 	);
-	/*void add_Group(
-		const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list
-	);*/
+	void add_Group(
+		const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list,
+		const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_cintrollers_data_list
+	);
 	/*void add_Group_In_Controller(
 		const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list
 	);*/
