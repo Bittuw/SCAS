@@ -151,7 +151,7 @@ namespace Graph_Types {
 	};
 
 	template <typename Element>
-	struct less;
+	struct Less;
 	/*struct Group_In_Controller_Info {
 
 		Group_In_Controller_Fields
@@ -213,7 +213,7 @@ namespace Graph_Types {
 	using Grapg_Group_Pair = std::pair<unsigned int, Graph_Group_sRef>; // Пара "позиция:группа"
 	using Graph_Groups_Pairs_sRefs = std::vector<std::pair<unsigned int, Graph_Group_sRef>>; // Список пар "позиция:группа"
 
-	using Graph_Converters_sRefsSet = std::set<Graph_Converter_sRef, less<Graph_Converter_sRef>>;
+	using Graph_Converters_sRefsSet = std::set<Graph_Converter_sRef, Less<Graph_Converter_sRef>>;
 
 	//////
 
@@ -234,7 +234,7 @@ namespace Graph_Types {
 	//using Grapg_Group_Pair = std::pair<unsigned int, Graph_Group_sRef>; // Пара "позиция:группа"
 	//using Graph_Groups_Pairs_sRefs = std::vector<std::pair<unsigned int, Graph_Group_sRef>>; // Список пар "позиция:группа"
 
-	//using Graph_Converters_sRefsSet = std::set<Graph_Converter_sRef, less<Graph_Converter_sRef>>;
+	//using Graph_Converters_sRefsSet = std::set<Graph_Converter_sRef, Less<Graph_Converter_sRef>>;
 	//using Graph_Converters_sRefs_Set = std::set<Graph_Converter_sRef>;
 
 	//class Graph_Converter {
@@ -415,14 +415,14 @@ namespace Graph_Types {
 
 
 	template <typename Element>
-	struct less{
+	struct Less{
 		constexpr bool operator()(const Element& right, const Element& left) {
 			return right->_data->_pk.pk < left->_data->_pk.pk;
 		}
 	};
 
 	template <>
-	struct less<Graph_Converter_sRef> {
+	struct Less<Graph_Converter_sRef> {
 		constexpr bool operator()(const Graph_Converter_sRef& right, const Graph_Converter_sRef& left) {
 			return right->_data->_nSn._nSn < left->_data->_nSn._nSn;
 		}
@@ -494,25 +494,6 @@ namespace Graph_Types {
 			parent->_child.push_back(child);
 			child->_parent = parent;
 		}
-
-		/*template <typename Parent, typename Child_Iterator>
-		inline static void for_bind_many_one(const Parent& parent, Child_Iterator& from, Child_Iterator& to) 
-		{
-			for (;from < to; from++) {
-				if (child->_parent != nullptr)
-					throw Programm_Exceptions(
-						LoggerFormat::format(
-							"Child element already has parent: class parent: '%' with id '%', class child: '%' with id '%'",
-							typeid(parent).name(),
-							parent->_data->_pk.pk,
-							typeid(child).name(),
-							*from->_data->_fk.fk
-						)
-					);
-				parent->_child.push(*from);
-				*from->_parent = parent;
-			}
-		}*/
 
 	public:
 		template <
@@ -593,7 +574,8 @@ namespace Graph_Types {
 		}
 
 		template <typename Child_Iterator, typename T>
-		inline static void bind_elements(const T& parent_list, Child_Iterator& from, Child_Iterator& to) {
+		inline static void bind_elements(const T& parent_list, Child_Iterator& from, Child_Iterator& to)
+		{
 			std::for_each(from, to, 
 				[&](const std::iterator_traits<Child_Iterator>::value_type& element) 
 				{
@@ -601,8 +583,9 @@ namespace Graph_Types {
 						parent_list.cbegin(),
 						parent_list.cend(),
 						[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
-					(*result)->_child.push_back(*from);
-					(*from)->_parent = *result;
+					/*(*result)->_child.push_back(*from);
+					(*from)->_parent = *result;*/
+					bind_many_one(*result, *from);
 			});
 		}
 
@@ -613,7 +596,7 @@ namespace Graph_Types {
 				auto result_g = std::find_if(from, to, [bind_element](const std::iterator_traits<Child_Iterator>::value_type& element) { return element->_data->_pk.pk == bind_element._id_groups; });
 
 				if ((result_c == parent_list.cend()) || (result_g == to)) {
-
+					bind_one_one(*result_c, *result_g, bind_element._position_in_controller);
 				}
 			}
 			/*for (; from < to; from++) {
@@ -626,12 +609,13 @@ namespace Graph_Types {
 			}*/
 		}
 
-		////
+		// Для одного родителя
 		template <typename T>
 		static void find_converters(Graph_Converters_sRefsSet& converters_set, const T& element) {
 			find_converters(converters_set, element->_parent);
 		}
 
+		// Для множества родителей
 		template <template <typename, typename> class Container, typename Object>
 		static void find_converters(Graph_Converters_sRefsSet& converters_set, const Container<Object, std::allocator<Object>> container) {
 			if (container.empty())
@@ -640,12 +624,13 @@ namespace Graph_Types {
 				find_converters(converters_set, element->_parent);
 		}
 
+		// Остановка ветки поиска (Конвертер найден)
 		template <>
 		inline static void find_converters<Graph_Converter_sRef>(Graph_Converters_sRefsSet& converters_set, const Graph_Converter_sRef& element) {
 			converters_set.insert(element);
 		}
 
-		// Для списка
+		// Для интервала новых элементов
 		template <typename Iterator>
 		static decltype(auto) find_converters_iterator(Iterator& from, Iterator& to) {
 			Graph_Converters_sRefsSet converters_set;
@@ -659,6 +644,46 @@ namespace Graph_Types {
 		}
 	};
 
+
+	template <typename Target, typename Less>
+	struct Seach {
+
+		using Target_Set_Ref = std::shared_ptr<std::set<Target, Less>>;
+
+		template <typename Iterator>
+		static decltype(auto) find_iterator(Iterator& from, Iterator& to) {
+			Target_Set_Ref targer_set_ref;
+			std::for_each(from, to,
+				[&targer_set, &from](const std::iterator_traits<Iterator>::value_type& element)
+			{
+				find(targer_set_ref, (*from)->_parent);
+			}
+			);
+			return targer_set_ref;
+		}
+
+		// Для одного родителя
+		template <typename Object>
+		static void find(Target_Set_Ref& targer_set_ref, const Object& element) {
+			find(targer_set_ref, element->_parent);
+		}
+
+		// Для множества родителей
+		template <template <typename, typename> class Container, typename Object>
+		static void find(Target_Set_Ref& targer_set_ref, const Container<Object, std::allocator<Object>> container) {
+			if (container.empty())
+				throw Programm_Exceptions(LoggerFormat::format("%'s parent list is empty!", typeid(Object::element_type).name()));
+			for (auto& element : container)
+				find(targer_set_ref, element->_parent);
+		}
+
+		private:
+		// Остановка ветки поиска (Конвертер найден)
+		template <>
+		inline static void find<Graph_Converter_sRef>(Target_Set_Ref& targer_set_ref, const Target& element) {
+			targer_set_ref.insert(element);
+		}
+	};
 //	// Структура, которая используется/заполняется в runtime
 //	struct Runtime_Info {
 //

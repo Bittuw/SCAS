@@ -157,9 +157,15 @@ void Graph_Builder::update_Users(const Mysql_Types::Mysql_Employees_Data_List& m
 
 void Graph_Builder::add_Group(const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list) {
 	auto copy_groups = mysql_groups_data_list;
-	auto new_element = Graph_Types::transform(filter(copy_groups), _groups_list);// Добавили
-	Graph_Types::Building::bind_elements(_controllers_list, mysql_groups_in_controllers_data_list, new_element, _groups_list.cend());// bind
-	Graph_Types::Building::find_converters_iterator(new_element, _groups_list.cend());// Найти converter TODO уведомить в commit
+	try {
+		auto new_element = Graph_Types::transform(filter_by(copy_groups, _groups_list), _groups_list);// Добавили
+		Graph_Types::Building::bind_elements(_controllers_list, mysql_groups_in_controllers_data_list, new_element, _groups_list.cend());// bind
+		Graph_Types::Building::find_converters_iterator(new_element, _groups_list.cend());// Найти converter TODO уведомить в commit
+		Graph_Types::Seach<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_iterator(new_element, _groups_list.cend());
+	}
+	catch (const std::exception& error) {
+		Log(MessageTypes::ERR) << "Update groups prevented!";
+	}
 }
 
 
