@@ -36,6 +36,23 @@ public:
 		return list;
 	}
 
+	template <typename T, typename R> 
+	static T& filter_by(T& list, const R& list_by) {
+		std::for_each(list_by.cbegin(), list_by.cend(),
+			[&list](const R::value_type& element) 
+			{
+				list.erase(std::find_if(list.cbegin(), list.cend(),
+						[element](const T::value_type& new_element)
+						{
+							return (new_element._id == element->_data->_pk.pk);
+						}
+					)
+				);
+			}
+		);
+		return list;
+	}
+
 	void add_Users(
 		const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list
 	);

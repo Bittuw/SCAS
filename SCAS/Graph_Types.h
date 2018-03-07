@@ -437,7 +437,6 @@ namespace Graph_Types {
 		typename Arg = T::_data_type::element_type
 		>
 	inline static decltype(auto) transform(const From& flist, To& tlist) {
-		auto start_new = tlist.cend();
 		std::transform(
 			flist.cbegin(), 
 			flist.cend(), 
@@ -445,7 +444,8 @@ namespace Graph_Types {
 			[](const F& felement) 
 		{ return std::make_shared<T>(std::make_shared<Arg>(felement)); }
 		);
-		return start_new;
+		auto new_element = (tlist.cend() - flist.size());
+		return new_element;
 	}
 
 	class Building {
@@ -594,14 +594,16 @@ namespace Graph_Types {
 
 		template <typename Child_Iterator, typename T>
 		inline static void bind_elements(const T& parent_list, Child_Iterator& from, Child_Iterator& to) {
-			for (; from < to; from++) {
-				auto result = std::find_if(
-					parent_list.cbegin(),
-					parent_list.cend(),
-					[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
-				(*result)->_child.push_back(*from);
-				(*from)->_parent = *result;
-			}
+			std::for_each(from, to, 
+				[&](const std::iterator_traits<Child_Iterator>::value_type& element) 
+				{
+					auto result = std::find_if(
+						parent_list.cbegin(),
+						parent_list.cend(),
+						[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
+					(*result)->_child.push_back(*from);
+					(*from)->_parent = *result;
+			});
 		}
 
 		template <typename Child_Iterator, typename T> // Only for controllers <-> groups
