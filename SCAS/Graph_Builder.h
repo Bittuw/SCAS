@@ -41,13 +41,13 @@ public:
 		std::for_each(list_by.cbegin(), list_by.cend(),
 			[&list](const R::value_type& element) 
 			{
-				list.erase(std::find_if(list.cbegin(), list.cend(),
-						[element](const T::value_type& new_element)
-						{
-							return (new_element._id == element->_data->_pk.pk);
-						}
-					)
+				auto result = std::find_if(list.cbegin(), list.cend(),
+					[&element](const T::value_type& new_element)
+					{
+						return (new_element._id == element->_data->_pk.pk);
+					}
 				);
+				if(result != list.cend()) list.erase(result);
 			}
 		);
 		return list;
@@ -89,7 +89,7 @@ private:
 		const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list
 	); // Bind right and left part of graph
 
-	inline void add_to_notify_set(Graph_Types::Graph_Converters_sRefsSet&);
+	inline void add_to_notify_set(Graph_Types::Graph_Converters_Set_Ref&);
 	//void commit()
 
 	Graph_Types::Converters_sRefs _converters_info_list; // Информация о конверторе Left
@@ -103,7 +103,7 @@ private:
 	Graph_Types::Graph_Users_sRefs _users_list; // Элемент графа (пользователи) right
 	Graph_Types::Graph_Groups_sRefs _groups_list; // Элемент графа (группы) right
 
-	Graph_Types::Graph_Converters_sRefsSet _converters_set; // Уведомляемые конверторы
+	Graph_Types::Graph_Converters_Set_Ref _converters_set; // Уведомляемые конверторы
 
 	//Graph_Types::Graph_Users_sRefs _temp_users_list; // Пользователи для добавления
 	//Graph_Types::Graph_Groups_sRefs commit_groups_list; // Группы для добавления

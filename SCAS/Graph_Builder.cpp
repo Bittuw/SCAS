@@ -115,34 +115,38 @@ void Graph_Builder::binding(const Mysql_Types::Mysql_Groups_In_Controllers_Data_
 	Graph_Types::Building::stiching(_controllers_list,mysql_groups_in_controllers_data_list, _groups_list);
 }
 
-void Graph_Builder::add_to_notify_set(Graph_Types::Graph_Converters_sRefsSet& converters_set) {
-	_converters_set.insert(converters_set.begin(), converters_set.end());
+void Graph_Builder::add_to_notify_set(Graph_Types::Graph_Converters_Set_Ref& converters_set) {
+	_converters_set->insert(converters_set->begin(), converters_set->end());
+	converters_set.reset(nullptr);
 }
 
 void Graph_Builder::add_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
 	auto copy_users = mysql_employees_data_list;
+	copy_users = filter_by(filter(copy_users), _users_list);
+
 	try {
-		auto new_element = Graph_Types::transform(filter_by(copy_users, _users_list), _users_list);	// Добавили
+		auto new_element = Graph_Types::transform(copy_users, _users_list);	// Добавили
 		Graph_Types::Building::bind_elements(_groups_list, new_element, _users_list.cend());// bind
-		add_to_notify_set(Graph_Types::Building::find_converters_iterator(new_element, _users_list.cend()));// Найти converter TODO уведомить в commit
+		add_to_notify_set(Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_iterator(new_element, _users_list.cend())); // Найти converter TODO уведомить в commit
 	}
 	catch (const std::exception& error) {
-		Log(MessageTypes::ERR) << "Add users prevented!";
-		// Cancel
+		Log(MessageTypes::WARNING) << "Add users prevented!";
 	}
 }
 
 
 void Graph_Builder::delete_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
 	auto copy_users = mysql_employees_data_list;
-	try {
+	copy_users = filter_by(filter(copy_users), _users_list);
 
+	try {
+		auto old_elements = Graph_Types::Building::unbind_elements(copy_users, _users_list); // Список удаленных элементов
+		Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_container(old_elements);															// Удалить
+																							// Найти затронутые конверторы
 	}
 	catch (std::exception& error) {
-		Log(MessageTypes::ERR) << "Delete users prevented!";
+		Log(MessageTypes::WARNING) << "Delete users prevented!";
 	}
-	// Удаляем
-	// Ищем затронутые конверторы
 }
 
 
@@ -151,17 +155,18 @@ void Graph_Builder::update_Users(const Mysql_Types::Mysql_Employees_Data_List& m
 
 	}
 	catch (std::exception& error) {
-		Log(MessageTypes::ERR) << "Update users prevented!";
+		Log(MessageTypes::WARNING) << "Update users prevented!";
 	}
 }
 
 void Graph_Builder::add_Group(const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list) {
 	auto copy_groups = mysql_groups_data_list;
+	copy_groups = filter_by(filter(copy_groups), _groups_list);
+
 	try {
-		auto new_element = Graph_Types::transform(filter_by(copy_groups, _groups_list), _groups_list);// Добавили
+		auto new_element = Graph_Types::transform(copy_groups, _groups_list);// Добавили
 		Graph_Types::Building::bind_elements(_controllers_list, mysql_groups_in_controllers_data_list, new_element, _groups_list.cend());// bind
-		Graph_Types::Building::find_converters_iterator(new_element, _groups_list.cend());// Найти converter TODO уведомить в commit
-		Graph_Types::Seach<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_iterator(new_element, _groups_list.cend());
+		add_to_notify_set(Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_iterator(new_element, _groups_list.cend())); // Найти converter TODO уведомить в commit
 	}
 	catch (const std::exception& error) {
 		Log(MessageTypes::ERR) << "Update groups prevented!";
