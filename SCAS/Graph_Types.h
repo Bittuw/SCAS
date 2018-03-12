@@ -206,14 +206,16 @@ namespace Graph_Types {
 	using Graph_Controller_sRef = std::shared_ptr<Graph_Controller>; // Указатель на контроллер
 	using Graph_User_sRef = std::shared_ptr<Graph_User>; // Указатель на пользователя
 	using Graph_Group_sRef = std::shared_ptr<Graph_Group>; // Указатель на группу
+	using Graph_Nullptr_sRef = std::shared_ptr<nullptr_t>;
 
 	using Graph_Converters_sRefs = std::vector<Graph_Converter_sRef>; // Список указателей на конверторы
 	using Graph_Controlles_sRefs = std::vector<Graph_Controller_sRef>; // Список указателей на контроллеры
 	using Graph_Users_sRefs = std::vector<Graph_User_sRef>; // Список указателей на пользователей
 	using Graph_Groups_sRefs = std::vector<Graph_Group_sRef>; // Список указателй на группы
 
-	using Grapg_Group_Pair = std::pair<unsigned int, Graph_Group_sRef>; // Пара "позиция:группа"
-	using Graph_Groups_Pairs_sRefs = std::vector<std::pair<unsigned int, Graph_Group_sRef>>; // Список пар "позиция:группа"
+	using Graph_Group_Pair = std::pair<unsigned int, Graph_Group_sRef>; // Пара "позиция:группа"
+	using Graph_Group_Pair_sRef = std::shared_ptr<Graph_Group_Pair>;
+	using Graph_Groups_Pairs_sRefs = std::vector<Graph_Group_Pair_sRef>; // Список пар "позиция:группа"
 
 	using Graph_Converters_Set_Ref = std::unique_ptr<std::set<Graph_Converter_sRef, Less<Graph_Converter_sRef>>>;
 
@@ -285,23 +287,70 @@ namespace Graph_Types {
 		D _data;
 		C _child;
 
-		using _parent_type = P;
-		using _data_type = D;
-		using _child_type = C;
+		using _Parent_Type = P;
+		using _Data_Type = D;
+		using _Child_Type = C;
 
 		Graph_Point() = default;
 		Graph_Point(const D& data) : Graph_Base(), _data(data){}
 	};
 
+
+	//template <
+	//	typename P, typename D, typename C,
+	//	typename P_True_Type,
+	//	typename D_True_Type,
+	//	typename C_True_Type
+	//>
+	//class Graph_Data_Type_Deduct : public Graph_Point<P,D,C>{
+	//public:
+	//	using _Parent_True_Type = P_True_Type;
+	//	using _Data_True_Type = D_True_Type;
+	//	using _Child_True_type = C_True_Type;
+
+	//	Graph_Data_Type_Deduct() = default;
+	//	Graph_Data_Type_Deduct(const D& data) : Graph_Point(data){}
+	//};
+
+
+	//template <typename P, typename D, typename C, typename D_True_Type, typename C_True_Type>
+	//class Graph_Vector_Parent : public Graph_Data_Type_Deduct <P,D,C,P::value_type::element_type, D_True_Type, C_True_Type> {
+	//public:
+	//	Graph_Vector_Parent() = default;
+	//	Graph_Vector_Parent(const D& data) : Graph_Data_Type_Deduct(data) {}
+	//};
+
+
+	//template <typename P, typename D, typename C, typename D_True_Type, typename C_True_Type>
+	//class Graph_Single_Parent : public virtual Graph_Data_Type_Deduct <P, D, C, P::element_type, D_True_Type, C_True_Type> {
+	//public:
+	//	Graph_Single_Parent() = default;
+	//	Graph_Single_Parent(const D& data) : Graph_Data_Type_Deduct(data) {}
+	//};
+
+	//template <typename P, typename D, typename C, typename D_True_Type, typename P_True_Type>
+	//class Graph_Vector_Child : public virtual Graph_Data_Type_Deduct <P, D, C, P_True_Type, D_True_Type, C::value_type::element_type> {
+	//public:
+	//	Graph_Vector_Child() = default;
+	//	Graph_Vector_Child(const D& data) : Graph_Data_Type_Deduct(data) {}
+	//};
+
+	//template <typename P, typename D, typename C, typename D_True_Type, typename P_True_Type>
+	//class Graph_Single_Child : public virtual Graph_Data_Type_Deduct <P, D, C, P_True_Type, D_True_Type, C::value_type::element_type> {
+	//public:
+	//	Graph_Single_Child() = default;
+	//	Graph_Single_Child(const D& data) : Graph_Data_Type_Deduct(data) {}
+	//};
+
 	template <typename D, typename C>
-	class Graph_Zero_Parent : public Graph_Point<nullptr_t, D, C> {
+	class Graph_Zero_Parent : public virtual Graph_Point<Graph_Nullptr_sRef, D, C> {
 	public:
 		Graph_Zero_Parent() = default;
 		Graph_Zero_Parent(const D& data) : Graph_Point(data) {}
 	};
 
 	template <typename P, typename D>
-	class Graph_Zero_Child : public Graph_Point<P, D, nullptr_t> {
+	class Graph_Zero_Child : public Graph_Point<P, D, Graph_Nullptr_sRef> {
 	public:
 		Graph_Zero_Child() = default;
 		Graph_Zero_Child(const D& data) : Graph_Point(data) {}
@@ -366,21 +415,40 @@ namespace Graph_Types {
 	// Трансформируем иходные списки
 	template
 		<
-		typename From, typename To,
-		typename F = From::value_type,
-		typename T = To::value_type::element_type,
-		typename Arg = T::_data_type::element_type
-		>
-		inline static decltype(auto) transform(const From& flist, To& tlist) {
+		template <typename, typename> class From,
+		template <typename, typename> class To,
+		typename From_Element, typename To_Element
+		> // Трансформировать список в список
+		inline static decltype(auto) transform(const From<From_Element, std::allocator<From_Element>>& flist, To<To_Element, std::allocator<To_Element>>& tlist) {
 		std::transform(
 			flist.cbegin(),
 			flist.cend(),
 			std::back_inserter(tlist),
-			[](const F& felement)
-		{ return std::make_shared<T>(std::make_shared<Arg>(felement)); }
+			[](const From_Element& element)
+		{ return nullptr/*std::make_shared<To_Element::element_type>(std::make_shared<To_Element::element_type::_Data_Type>(element))*/; }
 		);
 		auto new_element = (tlist.cend() - flist.size());
 		return new_element;
+	}
+
+
+	template <template <typename, typename> class Save_In, typename Save_In_Element, typename Element> // Аналог для единичного элемента
+	inline static decltype(auto) transform(const Element& element, Save_In<Save_In_Element, std::allocator<Save_In_Element>>& s_list)
+	{
+		s_list.push_back(
+			std::make_shared<Save_In_Element::element_type>(
+				std::make_shared<Save_In_Element::element_type::_Data_Type::element_type>(element)
+				)
+		);
+		return s_list.back();
+	}
+
+
+	template <typename Element>
+	inline static decltype(auto) find_links(const Element& element, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& all_binds) {
+		Mysql_Types::Mysql_Groups_In_Controllers_Data_List bind_by;
+		std::remove_copy_if(all_binds.cbegin(), all_binds.cend(), std::back_inserter(bind_by), [&element](auto& link) { return element->_data->_pk.pk == link._id_groups; });
+		return bind_by;
 	}
 
 	class Building {
@@ -391,14 +459,14 @@ namespace Graph_Types {
 			return list.back();
 		}
 
-		template <typename Parent, typename Child> // Связать родителя и ребенка (Много к много)
-		inline static void bind_one_one(
+		template <typename Parent, typename Child> // Связать родителя и ребенка (Много к много) Специально для controller <-> group
+		inline static decltype(auto) bind_one_one(
 			const Parent& parent,
 			const Child& child,
 			const unsigned int position
 		)
-		{ // Специально для controller <-> group
-			Child::element_type::_parent_type::const_iterator result;
+		{ 
+			Child::element_type::_Parent_Type::const_iterator result;
 			if ((result = std::find_if(child->_parent.cbegin(), child->_parent.cend(), [parent](const Parent& element) { return parent->_data->_pk.pk == element->_data->_pk.pk; })) != child->_parent.cend())
 				throw Programm_Exceptions(
 					LoggerFormat::format(
@@ -409,12 +477,13 @@ namespace Graph_Types {
 						child->_data->_pk.pk
 					)
 				);
-			parent->_child.emplace_back(position, child);
+			parent->_child.push_back(std::make_shared<Parent::element_type::_Child_Type::value_type::element_type>(position, child));
 			child->_parent.push_back(parent);
+			return std::prev(parent->_child.cend(), 1);
 		}
 
 		template <typename Parent, typename Child> // Связать родителя и ребенка (Много к 1)
-		inline static void bind_many_one(const Parent& parent, const Child& child)
+		inline static decltype(auto) bind_many_one(const Parent& parent, const Child& child)
 		{
 			if (child->_parent != nullptr)
 				throw Programm_Exceptions(
@@ -428,9 +497,10 @@ namespace Graph_Types {
 				);
 			parent->_child.push_back(child);
 			child->_parent = parent;
+			return std::prev(parent->_child.cend(), 1);
 		}
 
-		template <typename Parent, typename Child>
+		template <typename Parent, typename Child> // Отвязать родителя и ребенка (Много к 1)
 		inline static void unbind_many_one(const Parent& parent, const Child& child) {
 			if (child->_parent == nullptr || parent->_child.empty())
 				throw Programm_Exceptions(
@@ -445,7 +515,7 @@ namespace Graph_Types {
 				parent->_child.erase(std::remove_if(
 						parent->_child.begin(), 
 						parent->_child.end(), 
-						[&child](const Parent::element_type::_child_type::value_type& element_to_delete)
+						[&child](const Parent::element_type::_Child_Type::value_type& element_to_delete)
 						{ return child->_data->_pk.pk == element_to_delete->_data->_pk.pk; }
 					)
 				);
@@ -530,6 +600,7 @@ namespace Graph_Types {
 			}
 		}
 
+		///
 		template <typename Child_Iterator, typename T> // Заполнение таблиц связей
 		inline static void bind_elements(const T& parent_list, Child_Iterator& from, Child_Iterator& to)
 		{
@@ -545,26 +616,52 @@ namespace Graph_Types {
 					bind_many_one(*result, *from);
 			});
 		}
-
+		
 		template <typename Child_Iterator, typename T> // Заполнение таблиц связей Only for controllers <-> groups
 		inline static void bind_elements(const T& parent_list, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& bind_by_list, Child_Iterator& from, Child_Iterator& to) {
 			for (auto& bind_element : bind_by_list) {
 				auto result_c = std::find_if(parent_list.cbegin(), parent_list.cend(), [bind_element](const T::value_type& element) { return element->_data->_pk.pk == bind_element._id_controllers; });
 				auto result_g = std::find_if(from, to, [bind_element](const std::iterator_traits<Child_Iterator>::value_type& element) { return element->_data->_pk.pk == bind_element._id_groups; });
-
 				if ((result_c == parent_list.cend()) || (result_g == to)) {
 					bind_one_one(*result_c, *result_g, bind_element._position_in_controller);
 				}
 			}
 			/*for (; from < to; from++) {
-				auto result = std::find_if(
-					parent_list.cbegin(),
-					parent_list.cend(),
-					[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
-				(*result)->_child.push_back(*from);
-				(*from)->_parent = *result;
+			auto result = std::find_if(
+			parent_list.cbegin(),
+			parent_list.cend(),
+			[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
+			(*result)->_child.push_back(*from);
+			(*from)->_parent = *result;
 			}*/
 		}
+
+		template <template <typename, typename> class Parent_List, typename Parent_Object, typename Child_Object> // Аналог для единичного элемента (Возврат родителя)
+		inline static decltype(auto) bind_element(Parent_List<Parent_Object, std::allocator<Parent_Object>>& parent_list, Child_Object& child_element) {
+			auto parent = std::find_if(parent_list.cbegin(), parent_list.cend(), [&child_element](auto& parent) { return parent->_data->_pk.pk == child_element->_data->_fk.fk; });
+			if (parent == parent_list.cend()) {
+				throw Programm_Exceptions(LoggerFormat::format("Lel %", std::to_string(1) ));
+			}
+			auto child_in_parent = bind_many_one(*parent, child_element);
+			return std::make_pair(std::ref((*parent)->_child), child_in_parent);
+		}
+
+		template <template <typename, typename> class Parent_List, typename Parent_Object, typename Child_Object>
+		inline static decltype(auto) bind_element(Parent_List<Parent_Object, std::allocator<Parent_Object>>& parent_list, Child_Object& child_element, Mysql_Types::Mysql_Groups_In_Controllers_Data_List& bind_by) {
+			std::vector<std::pair<Graph_Types::Graph_Controller::_Child_Type, Graph_Types::Graph_Controller::_Child_Type::const_iterator>> parents_list_pair;
+			for (auto& bind : bind_by) {
+				auto result_c = std::find_if(parent_list.cbegin(), parent_list.cend(), [bind](const auto& element) { return element->_data->_pk.pk == bind._id_controllers; });
+				if (result_c == parent_list.cend()) {
+					parents_list_pair.emplace_back(
+						std::ref((*result_c)->_child),
+						bind_one_one(*result_c, child_element, bind._position_in_controller)
+					);
+				}
+			}
+			return parents_list_pair;
+		}
+		///
+
 
 		template <typename F, template <typename,typename> class T, typename T_O>
 		inline static decltype(auto) unbind_elements(const F& unbinding_data_list, T<T_O, std::allocator<T_O>>& unbinding_list) {
@@ -585,8 +682,9 @@ namespace Graph_Types {
 					);
 					if (result != unbinding_list.cend()) { 
 						unbinded_elements.push_back(*result);
+						auto old_element = *result;
 						unbinding_list.erase(result);
-						unbind_many_one((*result)->_parent, *result);
+						unbind_many_one(old_element->_parent, old_element);
 					}
 				}
 			);
@@ -613,6 +711,7 @@ namespace Graph_Types {
 			return targer_set_ref;
 		}
 
+		// Для всего контейнера
 		template <template <typename,typename> class List, typename Object>
 		static decltype(auto) find_container(const List<Object, std::allocator<Object>>& container) {
 			Target_Set_Ref targer_set_ref = std::make_unique<Target_Set_Ref::element_type>();
@@ -622,9 +721,19 @@ namespace Graph_Types {
 					find(targer_set_ref, element->_parent);
 				}
 			);
-			return targer_set_ref;
+			return std::move(targer_set_ref);
 		}
 
+		// Для одного объекта
+		template <typename Object>
+		static decltype(auto) find_single(const Object& object) {
+			Target_Set_Ref target_set_ref = std::make_unique<Target_Set_Ref::element_type>();
+			find(target_set_ref, object->_parent);
+			return std::move(target_set_ref);
+		}
+
+		
+		/// Можно свой set
 		// Для одного родителя
 		template <typename Object>
 		inline static void find(Target_Set_Ref& targer_set_ref, const Object& element) {
@@ -643,7 +752,7 @@ namespace Graph_Types {
 		private:
 		// Остановка ветки поиска (Целевой объект ветки найден)
 		template <>
-		inline static void find<Graph_Converter_sRef>(Target_Set_Ref& targer_set_ref, const Target& element) {
+		inline static void find<Target>(Target_Set_Ref& targer_set_ref, const Target& element) {
 			targer_set_ref->insert(element);
 		}
 
