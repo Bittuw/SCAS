@@ -98,12 +98,13 @@ private:
 
 	// С уничтожение объекта
 	template <typename Parent_Pair_First, typename Parent_Pair_Second, typename Target_Element>
-	inline void cancel(std::pair<Parent_Pair_First, Parent_Pair_Second>& parent_element, Target_Element& child_element) {
-		if (parent_element.first.cend() != parent_element.second)
-			parent_element.first.erase(parent_element.second);
+	inline void cancel(std::pair<Parent_Pair_First, Parent_Pair_Second>& parent_pair, Target_Element& child_element) {
+		if (parent_pair.first.cend() != parent_pair.second)
+			parent_pair.first.erase(parent_pair.second);
 		if (child_element != nullptr)
 			child_element.reset();
 	}
+
 	template <typename Pair_First, typename Pair_Second, typename Target_Element>
 	inline void cancel(std::vector<std::pair<Pair_First, Pair_Second>, std::allocator<std::pair<Pair_First, Pair_Second>>>& parents_list_pair, Target_Element& child_element) {
 		std::for_each(parents_list_pair.begin(), parents_list_pair.end(), 
@@ -117,10 +118,10 @@ private:
 			child_element.reset();
 	}
 
-	Graph_Types::Converters_sRefs _converters_info_list; // Информация о конверторе Left
-	Graph_Types::Controllers_sRefs _controllers_info_list; // Информация о контроллере left
-	Graph_Types::Users_sRefs _users_info_list; // Информация о пользователе right
-	Graph_Types::Groups_sRefs _groups_info_list; // Информация о группе right
+	//Graph_Types::Converters_sRefs _converters_info_list; // Информация о конверторе Left
+	//Graph_Types::Controllers_sRefs _controllers_info_list; // Информация о контроллере left
+	//Graph_Types::Users_sRefs _users_info_list; // Информация о пользователе right
+	//Graph_Types::Groups_sRefs _groups_info_list; // Информация о группе right
 	//Graph_Types::Groups_In_Controllers_sRefs _groups_in_controllers_list; // Информация о связи группа <-> контроллер binding возможно удалить
 
 	Graph_Types::Graph_Converters_sRefs _converters_list; // Элемент графа (конверторы) left

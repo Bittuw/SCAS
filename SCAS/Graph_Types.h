@@ -217,7 +217,7 @@ namespace Graph_Types {
 	using Graph_Group_Pair_sRef = std::shared_ptr<Graph_Group_Pair>;
 	using Graph_Groups_Pairs_sRefs = std::vector<Graph_Group_Pair_sRef>; // Список пар "позиция:группа"
 
-	using Graph_Converters_Set_Ref = std::unique_ptr<std::set<Graph_Converter_sRef, Less<Graph_Converter_sRef>>>;
+	using Graph_Converters_Set_Ref = std::unique_ptr<std::set<Graph_Converter_sRef, Less<Graph_Converter_sRef>>>; // Уникально множество конверторов
 
 	//////
 
@@ -397,7 +397,11 @@ namespace Graph_Types {
 		{}
 	};
 
+	///
 
+	using  User_In_Group_Pair = std::pair<Graph_Group::_Child_Type, Graph_Group::_Child_Type::const_iterator>;
+	using Groups_In_Controllers_Pairs = std::vector<std::pair<Graph_Types::Graph_Controller::_Child_Type, Graph_Types::Graph_Controller::_Child_Type::const_iterator>>;
+	///
 	template <typename Element>
 	struct Less {
 		constexpr bool operator()(const Element& right, const Element& left) {
@@ -640,7 +644,14 @@ namespace Graph_Types {
 		inline static decltype(auto) bind_element(Parent_List<Parent_Object, std::allocator<Parent_Object>>& parent_list, Child_Object& child_element) {
 			auto parent = std::find_if(parent_list.cbegin(), parent_list.cend(), [&child_element](auto& parent) { return parent->_data->_pk.pk == child_element->_data->_fk.fk; });
 			if (parent == parent_list.cend()) {
-				throw Programm_Exceptions(LoggerFormat::format("Lel %", std::to_string(1) ));
+				throw Programm_Exceptions (
+					LoggerFormat::format(
+						"No group (id:'%') was found for the user (id:'%', name:'%', surname:'%')",
+						child_element->_data->_fk.fk,
+						child_element->_data->_pk.pk,
+						Utils::WideToMulti(child_element->_data->_name._name),
+						Utils::WideToMulti(child_element->_data->_surname._surname))
+					);
 			}
 			auto child_in_parent = bind_many_one(*parent, child_element);
 			return std::make_pair(std::ref((*parent)->_child), child_in_parent);
@@ -648,7 +659,7 @@ namespace Graph_Types {
 
 		template <template <typename, typename> class Parent_List, typename Parent_Object, typename Child_Object>
 		inline static decltype(auto) bind_element(Parent_List<Parent_Object, std::allocator<Parent_Object>>& parent_list, Child_Object& child_element, Mysql_Types::Mysql_Groups_In_Controllers_Data_List& bind_by) {
-			std::vector<std::pair<Graph_Types::Graph_Controller::_Child_Type, Graph_Types::Graph_Controller::_Child_Type::const_iterator>> parents_list_pair;
+			Groups_In_Controllers_Pairs parents_list_pair;
 			for (auto& bind : bind_by) {
 				auto result_c = std::find_if(parent_list.cbegin(), parent_list.cend(), [bind](const auto& element) { return element->_data->_pk.pk == bind._id_controllers; });
 				if (result_c == parent_list.cend()) {

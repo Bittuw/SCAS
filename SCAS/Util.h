@@ -19,6 +19,14 @@ namespace Utils {
 		return temp;
 	}
 
+	inline std::string WideToMulti(const std::wstring& from) {
+		std::string temp;
+		temp.reserve(from.size());
+		WideCharToMultiByte(CP_ACP, 0, from.c_str(), from.size(), &temp[0], from.size(), 0, 0);
+		temp[from.size()] = '\0';
+		return temp;
+	}
+
 	inline void MultiToWide(const char * from, size_t& s_from, wchar_t* to, size_t& s_to) {
 		MultiByteToWideChar(CP_ACP, 0, from, s_from, to, s_to);
 		to[s_to] = L'\0';
@@ -31,5 +39,7 @@ namespace Utils {
 		temp[s_from] = L'\0';
 		return temp;
 	}
+
+
 }
 #endif

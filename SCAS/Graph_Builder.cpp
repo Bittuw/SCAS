@@ -8,7 +8,9 @@
 ///
 
 Graph_Builder::Graph_Builder()
-{}
+{
+	
+}
 
 
 Graph_Builder::~Graph_Builder()
@@ -128,8 +130,7 @@ void Graph_Builder::add_Users(const Mysql_Types::Mysql_Employees_Data_List& mysq
 
 void Graph_Builder::add_User(Mysql_Types::Mysql_Employee_Data_Type& user) {
 	auto new_element = Graph_Types::transform(user, _users_list);
-	std::pair<Graph_Types::Graph_Group::_Child_Type, Graph_Types::Graph_Group::_Child_Type::const_iterator> parent_pair; // TODO
-
+	Graph_Types::User_In_Group_Pair parent_pair; 
 	try {
 		parent_pair = Graph_Types::Building::bind_element(_groups_list, new_element); // bind
 		add_to_notify_set(Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_single(new_element)); // Найти converter TODO уведомить в commit
@@ -177,8 +178,7 @@ void Graph_Builder::add_Groups(const Mysql_Types::Mysql_Groups_Data_List& mysql_
 void Graph_Builder::add_Group(Mysql_Types::Mysql_Group_Data_Type& group, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list) {
 	auto new_element = Graph_Types::transform(group, _groups_list);
 	auto bind_by = Graph_Types::find_links(new_element, mysql_groups_in_controllers_data_list);
-	std::vector<std::pair<Graph_Types::Graph_Controller::_Child_Type, Graph_Types::Graph_Controller::_Child_Type::const_iterator>>  parents_list_pair; // TODO
-
+	Graph_Types::Groups_In_Controllers_Pairs  parents_list_pair; 
 	try {
 		parents_list_pair = Graph_Types::Building::bind_element(_controllers_list, new_element, bind_by); // bind
 		add_to_notify_set(Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_single(new_element)); // Найти converter TODO уведомить в commit
