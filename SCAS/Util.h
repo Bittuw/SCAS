@@ -21,7 +21,7 @@ namespace Utils {
 
 	inline std::string WideToMulti(const std::wstring& from) {
 		std::string temp;
-		temp.reserve(from.size());
+		temp.resize(from.size());
 		WideCharToMultiByte(CP_ACP, 0, from.c_str(), from.size(), &temp[0], from.size(), 0, 0);
 		temp[from.size()] = '\0';
 		return temp;

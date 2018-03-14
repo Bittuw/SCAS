@@ -154,6 +154,8 @@ namespace Graph_Types {
 
 	template <typename Element>
 	struct Less;
+	template <typename Element_1, typename Element_2>
+	struct Equal;
 	/*struct Group_In_Controller_Info {
 
 		Group_In_Controller_Fields
@@ -343,7 +345,7 @@ namespace Graph_Types {
 	//};
 
 	template <typename D, typename C>
-	class Graph_Zero_Parent : public virtual Graph_Point<Graph_Nullptr_sRef, D, C> {
+	class Graph_Zero_Parent : public Graph_Point<Graph_Nullptr_sRef, D, C> {
 	public:
 		Graph_Zero_Parent() = default;
 		Graph_Zero_Parent(const D& data) : Graph_Point(data) {}
@@ -399,8 +401,11 @@ namespace Graph_Types {
 
 	///
 
-	using  User_In_Group_Pair = std::pair<Graph_Group::_Child_Type, Graph_Group::_Child_Type::const_iterator>;
-	using Groups_In_Controllers_Pairs = std::vector<std::pair<Graph_Types::Graph_Controller::_Child_Type, Graph_Types::Graph_Controller::_Child_Type::const_iterator>>;
+	using  User_In_Group_Pair = std::pair<Graph_Group_sRef, Graph_Group::_Child_Type::const_iterator>;
+	using Groups_In_Controllers_Pairs = std::vector<std::pair<Graph_Controller_sRef, Graph_Controller::_Child_Type::const_iterator>>;
+
+	using User_In_Group_Pair_uRef = std::unique_ptr<User_In_Group_Pair>;
+	using Groups_In_Controllers_Pairs_uRef = std::unique_ptr<Groups_In_Controllers_Pairs>;
 	///
 	template <typename Element>
 	struct Less {
@@ -416,6 +421,26 @@ namespace Graph_Types {
 		}
 	};
 
+	template <typename Element_1, typename Element_2>
+	struct Equal {
+		Equal(const Element_1& compare_to) : _compare_to(compare_to) {}
+		virtual bool operator()(const Element_2&) const { throw std::runtime_error("Need implement!"); };
+	protected:
+		const Element_1& _compare_to;
+	};
+
+	template <typename Element_1, typename Element_2>
+	struct Equal_NEQ : Equal<Element_2, Element_1> {
+		Equal_NEQ(const Element_2& compare_to) : Equal(compare_to) {}
+		bool operator()(const Element_1& compare) const { return _compare_to->_data->_pk.pk == compare._id ; };
+	};
+
+	template <typename Element>
+	struct Equal_EQ : Equal<Element, Element> {
+		Equal_EQ(const Element& compare_to) : Equal(compare_to) {}
+		bool operator()(const Element& compare) const { return _compare_to->_data->_pk.pk == compare->_data->_pk.pk; }
+	};
+
 	// Трансформируем иходные списки
 	template
 		<
@@ -429,7 +454,7 @@ namespace Graph_Types {
 			flist.cend(),
 			std::back_inserter(tlist),
 			[](const From_Element& element)
-		{ return nullptr/*std::make_shared<To_Element::element_type>(std::make_shared<To_Element::element_type::_Data_Type>(element))*/; }
+		{ return std::make_shared<To_Element::element_type>(std::make_shared<To_Element::element_type::_Data_Type::element_type>(element)); }
 		);
 		auto new_element = (tlist.cend() - flist.size());
 		return new_element;
@@ -454,14 +479,18 @@ namespace Graph_Types {
 		std::remove_copy_if(all_binds.cbegin(), all_binds.cend(), std::back_inserter(bind_by), [&element](auto& link) { return element->_data->_pk.pk == link._id_groups; });
 		return bind_by;
 	}
+	template <typename Element, typename Wrappers>
+	inline static decltype(auto) find_wrapper(const Element& element, const Wrappers& wrappers) {
+		return std::find_if(wrappers.cbegin(), wrappers.cend(), [&element](const auto& wrapper) { return element._id == wrapper->_data->_pk.pk; });
+	}
 
 	class Building {
 
-		template <typename List, typename Parametr>
+		/*template <typename List, typename Parametr>
 		inline static decltype(auto) build_one(List& list, const Parametr& parametr) {
 			list.emplace_back(new List::value_type::element_type(parametr));
 			return list.back();
-		}
+		}*/
 
 		template <typename Parent, typename Child> // Связать родителя и ребенка (Много к много) Специально для controller <-> group
 		inline static decltype(auto) bind_one_one(
@@ -483,7 +512,8 @@ namespace Graph_Types {
 				);
 			parent->_child.push_back(std::make_shared<Parent::element_type::_Child_Type::value_type::element_type>(position, child));
 			child->_parent.push_back(parent);
-			return std::prev(parent->_child.cend(), 1);
+			auto new_link = std::prev(parent->_child.cend(), 1);
+			return new_link;
 		}
 
 		template <typename Parent, typename Child> // Связать родителя и ребенка (Много к 1)
@@ -501,7 +531,8 @@ namespace Graph_Types {
 				);
 			parent->_child.push_back(child);
 			child->_parent = parent;
-			return std::prev(parent->_child.cend(), 1);
+			auto new_link = std::prev(parent->_child.cend(), 1);
+			return new_link;
 		}
 
 		template <typename Parent, typename Child> // Отвязать родителя и ребенка (Много к 1)
@@ -509,17 +540,18 @@ namespace Graph_Types {
 			if (child->_parent == nullptr || parent->_child.empty())
 				throw Programm_Exceptions(
 					LoggerFormat::format(
-						"Cannot unbind child '%:id(%)' from parent '%:id(%)'",
+						"Cannot unbind % (id:'%') from % (id:'%')",
 						typeid(child).name(),
 						child->_data->_fk.fk,
 						typeid(parent).name(),
 						parent->_data->_pk.pk
 					)
 				);
-				parent->_child.erase(std::remove_if(
+				parent->_child.erase(
+					std::remove_if(
 						parent->_child.begin(), 
 						parent->_child.end(), 
-						[&child](const Parent::element_type::_Child_Type::value_type& element_to_delete)
+						[&child](const auto& element_to_delete)
 						{ return child->_data->_pk.pk == element_to_delete->_data->_pk.pk; }
 					)
 				);
@@ -654,17 +686,17 @@ namespace Graph_Types {
 					);
 			}
 			auto child_in_parent = bind_many_one(*parent, child_element);
-			return std::make_pair(std::ref((*parent)->_child), child_in_parent);
+			return std::make_unique<std::pair<std::remove_const_t<std::remove_reference_t<decltype(*parent)>>, std::remove_const_t<decltype(child_in_parent)>>>(*parent, child_in_parent);
 		}
 
 		template <template <typename, typename> class Parent_List, typename Parent_Object, typename Child_Object>
 		inline static decltype(auto) bind_element(Parent_List<Parent_Object, std::allocator<Parent_Object>>& parent_list, Child_Object& child_element, Mysql_Types::Mysql_Groups_In_Controllers_Data_List& bind_by) {
-			Groups_In_Controllers_Pairs parents_list_pair;
+			Groups_In_Controllers_Pairs_uRef parents_list_pair = std::make_unique<Groups_In_Controllers_Pairs>();
 			for (auto& bind : bind_by) {
 				auto result_c = std::find_if(parent_list.cbegin(), parent_list.cend(), [bind](const auto& element) { return element->_data->_pk.pk == bind._id_controllers; });
 				if (result_c == parent_list.cend()) {
-					parents_list_pair.emplace_back(
-						std::ref((*result_c)->_child),
+					parents_list_pair->emplace_back(
+						*result_c,
 						bind_one_one(*result_c, child_element, bind._position_in_controller)
 					);
 				}
@@ -700,6 +732,15 @@ namespace Graph_Types {
 				}
 			);
 			return unbinded_elements;
+		}
+
+		template<template<typename,typename> class Unbind_From, typename Unbind_From_Element>
+		inline static decltype(auto) unbind_element(Unbind_From<Unbind_From_Element, std::allocator<Unbind_From_Element>>& elements_list, typename Unbind_From<Unbind_From_Element, std::allocator<Unbind_From_Element>>::const_iterator old_element) {
+			//static_assert(std::is_same<typename Unbind_From, typename Unbind_From>::value, "Nope!");
+			unbind_many_one((*old_element)->_parent, *old_element);
+			auto undinded_element = *old_element;
+			elements_list.erase(old_element);
+			return undinded_element;
 		}
 	};
 

@@ -130,34 +130,33 @@ void Graph_Builder::add_Users(const Mysql_Types::Mysql_Employees_Data_List& mysq
 
 void Graph_Builder::add_User(Mysql_Types::Mysql_Employee_Data_Type& user) {
 	auto new_element = Graph_Types::transform(user, _users_list);
-	Graph_Types::User_In_Group_Pair parent_pair; 
+	Graph_Types::User_In_Group_Pair_uRef parent_pair; 
 	try {
 		parent_pair = Graph_Types::Building::bind_element(_groups_list, new_element); // bind
 		add_to_notify_set(Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_single(new_element)); // Найти converter TODO уведомить в commit
 	}
 	catch (const std::exception& error){
-		Log(MessageTypes::ERR) << LoggerFormat::format("Add user '(id:%, name:%, surname:%)' prevented!", user._id, user._name, user._surname);
+		Log(MessageTypes::WARNING) << LoggerFormat::format("Add user '(id:%, name:%, surname:%)' prevented!", user._id, user._name, user._surname);
 		cancel(parent_pair, new_element);
-		// cancel
 	}
 }
 
 void Graph_Builder::delete_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
 	auto copy_users = mysql_employees_data_list;
-	copy_users = filter_by(filter(copy_users), _users_list);
-
-	try {
-		auto old_elements = Graph_Types::Building::unbind_elements(copy_users, _users_list); // Список удаляемых элементов (удалить из общего вектора)
-																							// Ищем затрагиваемые
-																							// Удаляем связи
-		Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_container(old_elements);															// Удалить
-																							// Найти затронутые конверторы
-	}
-	catch (std::exception& error) {
-		Log(MessageTypes::WARNING) << "Delete users prevented!";
-	}
+	copy_users = filter_by(copy_users, _users_list);
+	std::for_each(copy_users.begin(), copy_users.end(), [this](auto& user) { delete_User(user); });
 }
 
+void Graph_Builder::delete_User(Mysql_Types::Mysql_Employee_Data_Type& user) {
+	try {
+		auto old_element = Graph_Types::find_wrapper(user, _users_list);
+		add_to_notify_set(Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_single(*old_element));
+		Graph_Types::Building::unbind_element(_users_list, old_element);
+	}
+	catch (const std::exception& error) {
+
+	}
+}
 
 void Graph_Builder::update_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
 	try {
@@ -170,21 +169,23 @@ void Graph_Builder::update_Users(const Mysql_Types::Mysql_Employees_Data_List& m
 
 void Graph_Builder::add_Groups(const Mysql_Types::Mysql_Groups_Data_List& mysql_groups_data_list, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list) {
 	auto copy_groups = mysql_groups_data_list;
+	auto copy_ginc = mysql_groups_in_controllers_data_list;
 	copy_groups = filter_by(copy_groups, _groups_list);
-	std::for_each(copy_groups.begin(), copy_groups.end(), [this, &mysql_groups_in_controllers_data_list](auto& group) { add_Group(group, mysql_groups_in_controllers_data_list); });
+	std::for_each(copy_groups.begin(), copy_groups.end(), [this, &copy_ginc](auto& group) { add_Group(group, copy_ginc); });
 }
 
 
-void Graph_Builder::add_Group(Mysql_Types::Mysql_Group_Data_Type& group, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list) {
+void Graph_Builder::add_Group(Mysql_Types::Mysql_Group_Data_Type& group, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& copy_ginc) {
 	auto new_element = Graph_Types::transform(group, _groups_list);
-	auto bind_by = Graph_Types::find_links(new_element, mysql_groups_in_controllers_data_list);
-	Graph_Types::Groups_In_Controllers_Pairs  parents_list_pair; 
+	auto bind_by = Graph_Types::find_links(new_element, copy_ginc);
+	Graph_Types::Groups_In_Controllers_Pairs_uRef  parents_list_pair; 
+
 	try {
 		parents_list_pair = Graph_Types::Building::bind_element(_controllers_list, new_element, bind_by); // bind
 		add_to_notify_set(Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_single(new_element)); // Найти converter TODO уведомить в commit
 	}
 	catch (const std::exception& error) {
-		Log(MessageTypes::ERR) << LoggerFormat::format("Add group '(id:%, name:%)' prevented!", group._id, group._name);
+		Log(MessageTypes::WARNING) << LoggerFormat::format("Add group '(id:%, name:%)' prevented!", group._id, group._name);
 		cancel(parents_list_pair, new_element);
 		// cancel
 	}

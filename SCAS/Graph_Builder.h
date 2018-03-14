@@ -28,7 +28,6 @@ public:
 			list.end(),
 			[](const T::value_type& a, const T::value_type& b) 
 			{
-				Log(MessageTypes::WARNING) << LoggerFormat::format("Delete dublicate from table: '%'", *a._table_name);
 				return (a._id) == (b._id);
 			}
 		);
@@ -40,14 +39,9 @@ public:
 	static T& filter_by(T& list, const R& list_by) {
 		filter(list);
 		std::for_each(list_by.cbegin(), list_by.cend(),
-			[&list](const R::value_type& element) 
+			[&list](const auto& element) 
 			{
-				auto result = std::find_if(list.cbegin(), list.cend(),
-					[&element](const T::value_type& new_element)
-					{
-						return (new_element._id == element->_data->_pk.pk);
-					}
-				);
+				auto result = std::find_if(list.cbegin(), list.cend(), Graph_Types::Equal_NEQ<T::value_type, R::value_type>(element));
 				if(result != list.cend()) list.erase(result);
 			}
 		);
@@ -93,27 +87,43 @@ private:
 	inline void add_to_notify_set(Graph_Types::Graph_Converters_Set_Ref&);
 	inline void add_User(Mysql_Types::Mysql_Employee_Data_Type&);
 	inline void add_Group(Mysql_Types::Mysql_Group_Data_Type&, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List&);
+	inline void delete_User(Mysql_Types::Mysql_Employee_Data_Type&);
 	//inline static void add_Group(Mysql_Types::Mysql_Group_Data_Type&);
 	//void commit()
 
 	// С уничтожение объекта
 	template <typename Parent_Pair_First, typename Parent_Pair_Second, typename Target_Element>
-	inline void cancel(std::pair<Parent_Pair_First, Parent_Pair_Second>& parent_pair, Target_Element& child_element) {
-		if (parent_pair.first.cend() != parent_pair.second)
-			parent_pair.first.erase(parent_pair.second);
+	inline void cancel(std::unique_ptr<std::pair<Parent_Pair_First, Parent_Pair_Second>>& parent_pair, Target_Element& child_element) {
+		if (parent_pair != nullptr) {
+			if (parent_pair->first->_child.cend() != parent_pair->second)
+				parent_pair->first->_child.erase(parent_pair->second);
+		}
+		else {
+			Log(MessageTypes::WARNING) << 
+				LoggerFormat::format(
+					"Add % (id:'%') canceled, % (id:'%') not found!",
+					typeid(Target_Element::element_type).name(),
+					child_element->_data->_pk.pk,
+					typeid(Parent_Pair_First::element_type).name(),
+					child_element->_data->_fk.fk
+					);
+		}
 		if (child_element != nullptr)
 			child_element.reset();
 	}
 
-	template <typename Pair_First, typename Pair_Second, typename Target_Element>
-	inline void cancel(std::vector<std::pair<Pair_First, Pair_Second>, std::allocator<std::pair<Pair_First, Pair_Second>>>& parents_list_pair, Target_Element& child_element) {
-		std::for_each(parents_list_pair.begin(), parents_list_pair.end(), 
-			[](auto& parent_pair) 
-			{
-				if (parent_pair.first.cend() != parent_pair.second)
-					parent_pair.first.erase(parent_pair.second);
-			}
+	template <typename Parent_Pair_First, typename Parent_Pair_Second, typename Target_Element>
+	inline void cancel(std::unique_ptr<std::vector<std::pair<Parent_Pair_First, Parent_Pair_Second>, std::allocator<std::pair<Parent_Pair_First, Parent_Pair_Second>>>>& parents_list_pairs, Target_Element& child_element) {
+		if (parents_list_pairs != nullptr)
+			std::for_each(parents_list_pairs->begin(), parents_list_pairs->end(),
+				[](auto& parent_pair)
+				{
+					if (parent_pair.first->_child.cend() != parent_pair.second)
+						parent_pair.first->_child.erase(parent_pair.second);
+				}	
 		);
+		else
+			Log() << "";
 		if (child_element != nullptr)
 			child_element.reset();
 	}
