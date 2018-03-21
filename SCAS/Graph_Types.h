@@ -211,9 +211,9 @@ namespace Graph_Types {
 	using Graph_Nullptr_sRef = std::shared_ptr<nullptr_t>;
 
 	using Graph_Converters_sRefs = std::vector<Graph_Converter_sRef>; // Список указателей на конверторы
-	using Graph_Controlles_sRefs = std::vector<Graph_Controller_sRef>; // Список указателей на контроллеры
-	using Graph_Users_sRefs = std::vector<Graph_User_sRef>; // Список указателей на пользователей
-	using Graph_Groups_sRefs = std::vector<Graph_Group_sRef>; // Список указателй на группы
+	using Graph_Controllers_sRefs = std::vector<Graph_Controller_sRef>; // Список указателей на контроллеры
+	using Graph_Users_sRefs = std::vector<Graph_User_sRef, std::allocator<Graph_User_sRef>>; // Список указателей на пользователей
+	using Graph_Groups_sRefs = std::vector<Graph_Group_sRef, std::allocator<Graph_Group_sRef>>; // Список указателй на группы
 
 	using Graph_Group_Pair = std::pair<unsigned int, Graph_Group_sRef>; // Пара "позиция:группа"
 	using Graph_Group_Pair_sRef = std::shared_ptr<Graph_Group_Pair>;
@@ -359,7 +359,7 @@ namespace Graph_Types {
 	};
 
 	class Graph_Converter : public Graph_Zero_Parent<
-		Converter_sRef, Graph_Controlles_sRefs> {
+		Converter_sRef, Graph_Controllers_sRefs> {
 	public:
 		Graph_Converter() = default;
 		Graph_Converter(const Converter_sRef& converter_info) 
@@ -379,7 +379,7 @@ namespace Graph_Types {
 	};
 
 	class Graph_Group : public Graph_Point
-		<Graph_Controlles_sRefs, Group_sRef, Graph_Users_sRefs> {
+		<Graph_Controllers_sRefs, Group_sRef, Graph_Users_sRefs> {
 	public:
 		Graph_Group() = default;
 		Graph_Group(const Group_sRef& group_info)
@@ -401,10 +401,15 @@ namespace Graph_Types {
 
 	///
 
-	using  User_In_Group_Pair = std::pair<Graph_Group_sRef, Graph_Group::_Child_Type::const_iterator>;
-	using Groups_In_Controllers_Pairs = std::vector<std::pair<Graph_Controller_sRef, Graph_Controller::_Child_Type::const_iterator>>;
+	using User_Group_Pair = std::pair<Graph_Group_sRef, Graph_User_sRef>; // Пара не связанных
+	using User_In_Group_Pair = std::pair<Graph_Group_sRef, Graph_Group::_Child_Type::const_iterator>; // Пара связанных
+	using Group_Controllers_Pair = std::pair<Graph_Group_sRef, Graph_Controllers_sRefs>; // пара не связанных
+	using Group_In_Controller_Pair = std::pair<Graph_Controller_sRef, Graph_Controller::_Child_Type::const_iterator>; // Пара связанных
+	using Groups_In_Controllers_Pairs = std::vector<Group_In_Controller_Pair>; // Векторы пар
 
+	using User_Group_Pair_uRef = std::unique_ptr<User_Group_Pair>;
 	using User_In_Group_Pair_uRef = std::unique_ptr<User_In_Group_Pair>;
+	using Group_Controllers_uRef = std::unique_ptr<Group_Controllers_Pair>;
 	using Groups_In_Controllers_Pairs_uRef = std::unique_ptr<Groups_In_Controllers_Pairs>;
 	///
 	template <typename Element>
@@ -429,16 +434,28 @@ namespace Graph_Types {
 		const Element_1& _compare_to;
 	};
 
-	template <typename Element_1, typename Element_2>
-	struct Equal_NEQ : Equal<Element_2, Element_1> {
-		Equal_NEQ(const Element_2& compare_to) : Equal(compare_to) {}
+	template <typename Element_1, typename Element_2> // Not same type but equal
+	struct Equal_NSTEQ : Equal<Element_2, Element_1> {
+		Equal_NSTEQ(const Element_2& compare_to) : Equal(compare_to) {}
 		bool operator()(const Element_1& compare) const { return _compare_to->_data->_pk.pk == compare._id ; };
 	};
 
+	template <typename Element_1, typename Element_2> // Not same type and not equal
+	struct Equal_NSTNEQ : Equal<Element_2, Element_1> {
+		Equal_NSTNEQ(const Element_2& compare_to) : Equal(compare_to) {}
+		bool operator()(const Element_1& compare) const { return !(_compare_to->_data->_pk.pk == compare._id); };
+	};
+
 	template <typename Element>
-	struct Equal_EQ : Equal<Element, Element> {
+	struct Equal_EQ : Equal<Element, Element> /*Same type and equal*/{
 		Equal_EQ(const Element& compare_to) : Equal(compare_to) {}
 		bool operator()(const Element& compare) const { return _compare_to->_data->_pk.pk == compare->_data->_pk.pk; }
+	};
+
+	template <typename Element>
+	struct Equal_NEQ : Equal<Element, Element> /*Same type and not equal*/ {
+		Equal_NEQ(const Element& compare_to) : Equal(compare_to) {}
+		bool operator()(const Element& compare) const { return !(_compare_to->_data->_pk.pk == compare->_data->_pk.pk); }
 	};
 
 	// Трансформируем иходные списки
@@ -447,7 +464,7 @@ namespace Graph_Types {
 		template <typename, typename> class From,
 		template <typename, typename> class To,
 		typename From_Element, typename To_Element
-		> // Трансформировать список в список
+		> /*Построение*/
 		inline static decltype(auto) transform(const From<From_Element, std::allocator<From_Element>>& flist, To<To_Element, std::allocator<To_Element>>& tlist) {
 		std::transform(
 			flist.cbegin(),
@@ -469,7 +486,8 @@ namespace Graph_Types {
 				std::make_shared<Save_In_Element::element_type::_Data_Type::element_type>(element)
 				)
 		);
-		return s_list.back();
+		auto new_element_iterator = (s_list.cend() - 1);
+		return new_element_iterator;
 	}
 
 
@@ -484,13 +502,12 @@ namespace Graph_Types {
 		return std::find_if(wrappers.cbegin(), wrappers.cend(), [&element](const auto& wrapper) { return element._id == wrapper->_data->_pk.pk; });
 	}
 
-	class Building {
+	template <typename Elements_List>
+	inline static typename Elements_List::const_iterator find_same(Elements_List& elements_list, typename Elements_List::value_type& target_element) {
+		return std::find_if(elements_list.cbegin(), elements_list.cend(), [&target_element](const auto& element) { return element->_data->_pk.pk == target_element->_data->_pk.pk; });
+	}
 
-		/*template <typename List, typename Parametr>
-		inline static decltype(auto) build_one(List& list, const Parametr& parametr) {
-			list.emplace_back(new List::value_type::element_type(parametr));
-			return list.back();
-		}*/
+	class Building {
 
 		template <typename Parent, typename Child> // Связать родителя и ребенка (Много к много) Специально для controller <-> group
 		inline static decltype(auto) bind_one_one(
@@ -557,6 +574,50 @@ namespace Graph_Types {
 				);
 				child->_parent.reset();
 		}
+
+		template <typename Parents_List, typename Child> // Отвязать родителя и ребенка (Много к Много)
+		inline static decltype(auto) unbind_many_many(const Parents_List& parents, const Child& child) {
+			if (child->_parent.empty() || parents.empty())
+				throw Programm_Exceptions(
+					LoggerFormat::format(
+						"Cannot unbind % (id:'%')!",
+						typeid(child).name(),
+						child->_data->_pk.pk
+					)
+				);
+
+			std::unique_ptr<std::pair<Child, Parents_List>> temp_links = std::make_unique<std::pair<Child, Parents_List>>();
+			temp_links->first = child;
+
+			std::for_each(parents.cbegin(), parents.cend(), [&child, &temp_links](auto& parent) {
+
+				auto result_c = std::find_if(
+					parent->_child.begin(),
+					parent->_child.end(),
+					[&child](const auto& element_to_delete)
+					{ return child->_data->_pk.pk == element_to_delete->second->_data->_pk.pk; }
+				);
+
+				auto result_p = std::find_if(
+					child->_parent.begin(),
+					child->_parent.end(),
+					[&parent](const auto& element_to_delete)
+					{ return parent->_data->_pk.pk == element_to_delete->_data->_pk.pk; }
+				);
+
+				if (result_c != parent->_child.end() && result_p != child->_parent.end()) {
+					temp_links->second.push_back(*result_p);
+					child->_parent.erase(result_p);
+					parent->_child.erase(result_c);
+				}
+				else {
+					throw Not_Found_Exception("");
+				}
+			});
+
+			return temp_links;
+		}
+
 	public:
 		template <
 			typename PList, typename CList
@@ -602,7 +663,7 @@ namespace Graph_Types {
 
 		// Спецефичное заполнение таблиц связей (Controller <-> Group)
 		static void stiching(
-			const Graph_Controlles_sRefs& controllers_srefs,
+			const Graph_Controllers_sRefs& controllers_srefs,
 			const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& mysql_groups_in_controllers_data_list,
 			const Graph_Groups_sRefs& groups_srefs
 		) 
@@ -689,15 +750,22 @@ namespace Graph_Types {
 			return std::make_unique<std::pair<std::remove_const_t<std::remove_reference_t<decltype(*parent)>>, std::remove_const_t<decltype(child_in_parent)>>>(*parent, child_in_parent);
 		}
 
-		template <template <typename, typename> class Parent_List, typename Parent_Object, typename Child_Object>
+		template <template <typename, typename> class Parent_List, typename Parent_Object, typename Child_Object> // Аналог для единичного элемента (Возврат родителя и специализация)
 		inline static decltype(auto) bind_element(Parent_List<Parent_Object, std::allocator<Parent_Object>>& parent_list, Child_Object& child_element, Mysql_Types::Mysql_Groups_In_Controllers_Data_List& bind_by) {
 			Groups_In_Controllers_Pairs_uRef parents_list_pair = std::make_unique<Groups_In_Controllers_Pairs>();
 			for (auto& bind : bind_by) {
 				auto result_c = std::find_if(parent_list.cbegin(), parent_list.cend(), [bind](const auto& element) { return element->_data->_pk.pk == bind._id_controllers; });
-				if (result_c == parent_list.cend()) {
+				if (result_c != parent_list.cend()) {
 					parents_list_pair->emplace_back(
 						*result_c,
 						bind_one_one(*result_c, child_element, bind._position_in_controller)
+					);
+				}
+				else {
+					throw Not_Found_Exception(LoggerFormat::format(
+						"Element % with (id:'%') not found!", 
+						typeid(Parent_Object::element_type).name(),
+						bind._id_controllers)
 					);
 				}
 			}
@@ -734,13 +802,22 @@ namespace Graph_Types {
 			return unbinded_elements;
 		}
 
-		template<template<typename,typename> class Unbind_From, typename Unbind_From_Element>
-		inline static decltype(auto) unbind_element(Unbind_From<Unbind_From_Element, std::allocator<Unbind_From_Element>>& elements_list, typename Unbind_From<Unbind_From_Element, std::allocator<Unbind_From_Element>>::const_iterator old_element) {
+		template<typename Unbind_From>
+		inline static decltype(auto) unbind_element(Unbind_From& elements_list, typename Unbind_From::const_iterator& old_element_iterator) {
 			//static_assert(std::is_same<typename Unbind_From, typename Unbind_From>::value, "Nope!");
-			unbind_many_one((*old_element)->_parent, *old_element);
-			auto undinded_element = *old_element;
-			elements_list.erase(old_element);
+			unbind_many_one((*old_element_iterator)->_parent, *old_element_iterator);
+			auto undinded_element = *old_element_iterator;
+			elements_list.erase(old_element_iterator);
+			old_element_iterator = elements_list.cend();
 			return undinded_element;
+		}
+
+		template<>
+		inline static decltype(auto) unbind_element<Graph_Groups_sRefs>(Graph_Groups_sRefs& elements_list, Graph_Groups_sRefs::const_iterator& old_element_iterator) {
+			auto unbinded_data = unbind_many_many((*old_element_iterator)->_parent, *old_element_iterator);
+			elements_list.erase(old_element_iterator);
+			old_element_iterator = elements_list.cend();
+			return unbinded_data;
 		}
 	};
 
@@ -753,6 +830,7 @@ namespace Graph_Types {
 		// Для диапазона элементов
 		template <typename Iterator>
 		static decltype(auto) find_iterator(Iterator& from, Iterator& to) {
+			static_assert(, "Nine!");
 			Target_Set_Ref targer_set_ref = std::make_unique<Target_Set_Ref::element_type>();
 			std::for_each(from, to,
 				[&targer_set_ref, &from](const std::iterator_traits<Iterator>::value_type& element)
@@ -773,15 +851,17 @@ namespace Graph_Types {
 					find(targer_set_ref, element->_parent);
 				}
 			);
-			return std::move(targer_set_ref);
+			return targer_set_ref;
 		}
 
 		// Для одного объекта
 		template <typename Object>
-		static decltype(auto) find_single(const Object& object) {
+		static decltype(auto) find_single(const Object& object) 
+		{
+
 			Target_Set_Ref target_set_ref = std::make_unique<Target_Set_Ref::element_type>();
 			find(target_set_ref, object->_parent);
-			return std::move(target_set_ref);
+			return target_set_ref;
 		}
 
 		
@@ -802,6 +882,7 @@ namespace Graph_Types {
 		}
 
 		private:
+
 		// Остановка ветки поиска (Целевой объект ветки найден)
 		template <>
 		inline static void find<Target>(Target_Set_Ref& targer_set_ref, const Target& element) {
@@ -809,6 +890,7 @@ namespace Graph_Types {
 		}
 
 	};
+
 //	// Структура, которая используется/заполняется в runtime
 //	struct Runtime_Info {
 //
