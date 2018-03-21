@@ -35,14 +35,14 @@ public:
 		return list;
 	}
 
-	template <typename Predicat, typename T, typename R> 
+	template <typename Search_Predicat, typename Delete_Predicat, typename T, typename R>
 	static T& filter_by(T& list, const R& list_by) {
 		filter(list);
 		std::for_each(list_by.cbegin(), list_by.cend(),
 			[&list](const auto& element) 
 			{
-				auto result = std::find_if(list.cbegin(), list.cend(), Predicat(element));
-				if(result != list.cend()) list.erase(result);
+				auto result = std::find_if(list.cbegin(), list.cend(), Search_Predicat(element));
+				if (Delete_Predicat(result)(list.cend())) list.erase(result);
 			}
 		);
 		return list;

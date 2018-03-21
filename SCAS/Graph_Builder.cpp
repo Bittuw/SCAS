@@ -83,6 +83,10 @@ void Graph_Builder::add_Users(const Mysql_Types::Mysql_Employees_Data_List& mysq
 			<
 			Mysql_Types::Mysql_Employees_Data_List::value_type,
 			Graph_Types::Graph_User_sRef
+			>,
+		Graph_Types::Equal_SimpleNEQ
+			<
+				Mysql_Types::Mysql_Employees_Data_List::const_iterator
 			>
 		>
 		(copy_users, _users_list);
@@ -116,6 +120,10 @@ void Graph_Builder::delete_Users(const Mysql_Types::Mysql_Employees_Data_List& m
 		<
 			Mysql_Types::Mysql_Employees_Data_List::value_type,
 			Graph_Types::Graph_User_sRef
+		>,
+		Graph_Types::Equal_SimpleNEQ
+		<
+			Mysql_Types::Mysql_Employees_Data_List::const_iterator
 		>
 	>
 	(copy_users, _users_list);
@@ -174,6 +182,10 @@ void Graph_Builder::add_Groups(const Mysql_Types::Mysql_Groups_Data_List& mysql_
 			<
 				Mysql_Types::Mysql_Groups_Data_List::value_type,
 				Graph_Types::Graph_Group_sRef
+			>,
+			Graph_Types::Equal_SimpleEQ
+			<
+				Mysql_Types::Mysql_Groups_Data_List::const_iterator
 			>
 		>
 		(copy_groups, _groups_list);
@@ -209,6 +221,10 @@ void Graph_Builder::delete_Groups(const Mysql_Types::Mysql_Groups_Data_List& mys
 			<
 				Mysql_Types::Mysql_Groups_Data_List::value_type,
 				Graph_Types::Graph_Group_sRef
+			>,
+			Graph_Types::Equal_SimpleNEQ 
+			<
+				Mysql_Types::Mysql_Groups_Data_List::const_iterator
 			>
 		>
 		(copy_groups, _groups_list);

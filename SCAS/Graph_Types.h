@@ -458,6 +458,18 @@ namespace Graph_Types {
 		bool operator()(const Element& compare) const { return !(_compare_to->_data->_pk.pk == compare->_data->_pk.pk); }
 	};
 
+	template <typename Element>
+	struct Equal_SimpleEQ : Equal<Element, Element> {
+		Equal_SimpleEQ(const Element& compare_to) : Equal(compare_to) {}
+		bool operator()(const Element& compare) const { return _compare_to == compare; }
+	};
+
+	template <typename Element>
+	struct Equal_SimpleNEQ : Equal<Element, Element> {
+		Equal_SimpleNEQ(const Element& compare_to) : Equal(compare_to) {}
+		bool operator()(const Element& compare) const { return _compare_to != compare; }
+	};
+
 	// Трансформируем иходные списки
 	template
 		<
