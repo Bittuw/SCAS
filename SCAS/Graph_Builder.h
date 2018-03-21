@@ -38,13 +38,19 @@ public:
 	template <typename Search_Predicat, typename Delete_Predicat, typename T, typename R>
 	static T& filter_by(T& list, const R& list_by) {
 		filter(list);
-		std::for_each(list_by.cbegin(), list_by.cend(),
+		auto iterator = list.begin();
+		while (iterator != list.end()) {
+			auto result = std::find_if(list_by.cbegin(), list_by.cend(), Search_Predicat(*iterator));
+			if (Delete_Predicat(result)(list_by.cend())) list.erase(iterator);
+			iterator++;
+		}
+		/*std::for_each(list_by.cbegin(), list_by.cend(),
 			[&list](const auto& element) 
 			{
 				auto result = std::find_if(list.cbegin(), list.cend(), Search_Predicat(element));
 				if (Delete_Predicat(result)(list.cend())) list.erase(result);
 			}
-		);
+		);*/
 		return list;
 	}
 
@@ -158,7 +164,8 @@ private:
 	inline std::unique_ptr<Target_List> force_delete(Target_List& parent_list, Target_List& main_list) {
 		auto deleted_elements = std::make_unique<Target_List>();
 		for (auto& element : parent_list) {
-			std::remove_copy_if(main_list.begin(), main_list.end(), deleted_elements->begin(), Graph_Types::Equal_NEQ<Target_List::value_type>(element));
+			auto result = std::find_if(main_list.begin(), main_list.end(), Graph_Types::Equal_EQ<Target_List::value_type>(element));
+			if (result != main_list.end()) main_list.erase(result);
 		}
 		return deleted_elements;
 	}

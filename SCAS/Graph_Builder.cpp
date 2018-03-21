@@ -86,7 +86,7 @@ void Graph_Builder::add_Users(const Mysql_Types::Mysql_Employees_Data_List& mysq
 			>,
 		Graph_Types::Equal_SimpleNEQ
 			<
-				Mysql_Types::Mysql_Employees_Data_List::const_iterator
+				Graph_Types::Graph_Users_sRefs::const_iterator
 			>
 		>
 		(copy_users, _users_list);
@@ -121,9 +121,9 @@ void Graph_Builder::delete_Users(const Mysql_Types::Mysql_Employees_Data_List& m
 			Mysql_Types::Mysql_Employees_Data_List::value_type,
 			Graph_Types::Graph_User_sRef
 		>,
-		Graph_Types::Equal_SimpleNEQ
+		Graph_Types::Equal_SimpleEQ
 		<
-			Mysql_Types::Mysql_Employees_Data_List::const_iterator
+			Graph_Types::Graph_Users_sRefs::const_iterator
 		>
 	>
 	(copy_users, _users_list);
@@ -158,16 +158,39 @@ void Graph_Builder::delete_User(Mysql_Types::Mysql_Employee_Data_Type& user) {
 
 ///  UPDATE USER NEED
 void Graph_Builder::update_Users(const Mysql_Types::Mysql_Employees_Data_List& mysql_employees_data_list) {
-	try {
-
-	}
-	catch (std::exception& error) {
-		Log(MessageTypes::WARNING) << "Update users prevented!";
-	}
+	auto copy_users = mysql_employees_data_list;
+	copy_users = filter_by<
+		Graph_Types::Equal_NSTNEQ
+		<
+			Mysql_Types::Mysql_Employees_Data_List::value_type,
+			Graph_Types::Graph_User_sRef
+		>,
+		Graph_Types::Equal_SimpleEQ
+		<
+			Graph_Types::Graph_Users_sRefs::const_iterator
+		>
+	>(copy_users, _users_list);
+	std::for_each(copy_users.begin(), copy_users.end(), [this](auto& user) { update_User(user); });
 }
 
-void Graph_Builder::update_User(Mysql_Types::Mysql_Employee_Data_Type&) {
+void Graph_Builder::update_User(Mysql_Types::Mysql_Employee_Data_Type& user) {
+	Graph_Types::Graph_Users_sRefs::const_iterator old_element_iterator = _users_list.cend();
+	Graph_Types::Graph_Converters_Set_Ref converter_set = nullptr;
 
+	try {
+		if ((old_element_iterator = Graph_Types::find_wrapper(user, _users_list)) != _users_list.cend()) 
+			throw Not_Found_Exception(LoggerFormat::format(
+				"User (id:'%', name:'%', surname:'%') not found to update!",
+				user._id, user._name, user._surname)); // Нашли обертку
+		converter_set = Graph_Types::Search<Graph_Types::Graph_Converter_sRef, Graph_Types::Less<Graph_Types::Graph_Converter_sRef>>::find_single(*old_element_iterator); // Нашли конверторы
+		Graph_Types::Building::update_element(*old_element_iterator, user)// Обновить
+		// Перестроить связь, если надо
+
+	}
+	catch (const std::exception& error) {
+
+	}
+	add_to_notify_set(converter_set);
 }
 ///  UPDATE USER
 
@@ -183,9 +206,9 @@ void Graph_Builder::add_Groups(const Mysql_Types::Mysql_Groups_Data_List& mysql_
 				Mysql_Types::Mysql_Groups_Data_List::value_type,
 				Graph_Types::Graph_Group_sRef
 			>,
-			Graph_Types::Equal_SimpleEQ
+			Graph_Types::Equal_SimpleNEQ
 			<
-				Mysql_Types::Mysql_Groups_Data_List::const_iterator
+				Graph_Types::Graph_Groups_sRefs::const_iterator
 			>
 		>
 		(copy_groups, _groups_list);
@@ -222,9 +245,9 @@ void Graph_Builder::delete_Groups(const Mysql_Types::Mysql_Groups_Data_List& mys
 				Mysql_Types::Mysql_Groups_Data_List::value_type,
 				Graph_Types::Graph_Group_sRef
 			>,
-			Graph_Types::Equal_SimpleNEQ 
+			Graph_Types::Equal_SimpleEQ 
 			<
-				Mysql_Types::Mysql_Groups_Data_List::const_iterator
+				Graph_Types::Graph_Groups_sRefs::const_iterator
 			>
 		>
 		(copy_groups, _groups_list);

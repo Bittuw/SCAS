@@ -83,6 +83,7 @@ namespace Graph_Types {
 	///
 
 	struct Model_Info {
+		Model_Info() = default;
 		Model_Info(Model_Info&&) = default;
 		Model_Info& operator=(Model_Info&&) = default;
 		virtual ~Model_Info() {};
@@ -121,6 +122,7 @@ namespace Graph_Types {
 			_max_w_event_at_time({ mysql_controller._max_w_event_at_time }),
 			_fk({ mysql_controller._id_converter })
 		{}
+
 	};
 
 	struct User_Info {
@@ -277,8 +279,10 @@ namespace Graph_Types {
 	class Graph_Base {
 	public:
 		Graph_Base() = default;
+		Graph_Base(const Graph_Base&) = default;
 		Graph_Base(Graph_Base&&) = default;
 		Graph_Base& operator=(Graph_Base&&) = default;
+		Graph_Base& operator=(const Graph_Base&) = default;
 		virtual ~Graph_Base() = default;
 	};
 
@@ -435,15 +439,15 @@ namespace Graph_Types {
 	};
 
 	template <typename Element_1, typename Element_2> // Not same type but equal
-	struct Equal_NSTEQ : Equal<Element_2, Element_1> {
-		Equal_NSTEQ(const Element_2& compare_to) : Equal(compare_to) {}
-		bool operator()(const Element_1& compare) const { return _compare_to->_data->_pk.pk == compare._id ; };
+	struct Equal_NSTEQ : Equal<Element_1, Element_2> {
+		Equal_NSTEQ(const Element_1& compare_to) : Equal(compare_to) {}
+		bool operator()(const Element_2& compare) const { return _compare_to._id == compare->_data->_pk.pk; };
 	};
 
 	template <typename Element_1, typename Element_2> // Not same type and not equal
-	struct Equal_NSTNEQ : Equal<Element_2, Element_1> {
-		Equal_NSTNEQ(const Element_2& compare_to) : Equal(compare_to) {}
-		bool operator()(const Element_1& compare) const { return !(_compare_to->_data->_pk.pk == compare._id); };
+	struct Equal_NSTNEQ : Equal<Element_1, Element_2> {
+		Equal_NSTNEQ(const Element_1& compare_to) : Equal(compare_to) {}
+		bool operator()(const Element_2& compare) const { return _compare_to._id != compare->_data->_pk.pk; };
 	};
 
 	template <typename Element>
@@ -516,7 +520,7 @@ namespace Graph_Types {
 
 	template <typename Elements_List>
 	inline static typename Elements_List::const_iterator find_same(Elements_List& elements_list, typename Elements_List::value_type& target_element) {
-		return std::find_if(elements_list.cbegin(), elements_list.cend(), [&target_element](const auto& element) { return element->_data->_pk.pk == target_element->_data->_pk.pk; });
+		return std::find_if(elements_list.cbegin(), elements_list.cend(), Equal_EQ<Elements_List::value_type>(target_element));
 	}
 
 	class Building {
@@ -609,12 +613,13 @@ namespace Graph_Types {
 					[&child](const auto& element_to_delete)
 					{ return child->_data->_pk.pk == element_to_delete->second->_data->_pk.pk; }
 				);
-
+			
 				auto result_p = std::find_if(
 					child->_parent.begin(),
 					child->_parent.end(),
-					[&parent](const auto& element_to_delete)
-					{ return parent->_data->_pk.pk == element_to_delete->_data->_pk.pk; }
+					Equal_EQ<decltype(parent)>(parent)
+					/*[&parent](const auto& element_to_delete)
+					{ return parent->_data->_pk.pk == element_to_delete->_data->_pk.pk; }*/
 				);
 
 				if (result_c != parent->_child.end() && result_p != child->_parent.end()) {
@@ -710,40 +715,41 @@ namespace Graph_Types {
 		}
 
 		///
-		template <typename Child_Iterator, typename T> // Заполнение таблиц связей
-		inline static void bind_elements(const T& parent_list, Child_Iterator& from, Child_Iterator& to)
-		{
-			std::for_each(from, to, 
-				[&](const std::iterator_traits<Child_Iterator>::value_type& element) 
-				{
-					auto result = std::find_if(
-						parent_list.cbegin(),
-						parent_list.cend(),
-						[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
-					/*(*result)->_child.push_back(*from);
-					(*from)->_parent = *result;*/
-					bind_many_one(*result, *from);
-			});
-		}
-		
-		template <typename Child_Iterator, typename T> // Заполнение таблиц связей Only for controllers <-> groups
-		inline static void bind_elements(const T& parent_list, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& bind_by_list, Child_Iterator& from, Child_Iterator& to) {
-			for (auto& bind_element : bind_by_list) {
-				auto result_c = std::find_if(parent_list.cbegin(), parent_list.cend(), [bind_element](const T::value_type& element) { return element->_data->_pk.pk == bind_element._id_controllers; });
-				auto result_g = std::find_if(from, to, [bind_element](const std::iterator_traits<Child_Iterator>::value_type& element) { return element->_data->_pk.pk == bind_element._id_groups; });
-				if ((result_c == parent_list.cend()) || (result_g == to)) {
-					bind_one_one(*result_c, *result_g, bind_element._position_in_controller);
-				}
-			}
-			/*for (; from < to; from++) {
-			auto result = std::find_if(
-			parent_list.cbegin(),
-			parent_list.cend(),
-			[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
-			(*result)->_child.push_back(*from);
-			(*from)->_parent = *result;
-			}*/
-		}
+
+		//template <typename Child_Iterator, typename T> // Заполнение таблиц связей
+		//inline static void bind_elements(const T& parent_list, Child_Iterator& from, Child_Iterator& to)
+		//{
+		//	std::for_each(from, to, 
+		//		[&](const std::iterator_traits<Child_Iterator>::value_type& element) 
+		//		{
+		//			auto result = std::find_if(
+		//				parent_list.cbegin(),
+		//				parent_list.cend(),
+		//				[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
+		//			/*(*result)->_child.push_back(*from);
+		//			(*from)->_parent = *result;*/
+		//			bind_many_one(*result, *from);
+		//	});
+		//}
+		//
+		//template <typename Child_Iterator, typename T> // Заполнение таблиц связей Only for controllers <-> groups
+		//inline static void bind_elements(const T& parent_list, const Mysql_Types::Mysql_Groups_In_Controllers_Data_List& bind_by_list, Child_Iterator& from, Child_Iterator& to) {
+		//	for (auto& bind_element : bind_by_list) {
+		//		auto result_c = std::find_if(parent_list.cbegin(), parent_list.cend(), [bind_element](const T::value_type& element) { return element->_data->_pk.pk == bind_element._id_controllers; });
+		//		auto result_g = std::find_if(from, to, [bind_element](const std::iterator_traits<Child_Iterator>::value_type& element) { return element->_data->_pk.pk == bind_element._id_groups; });
+		//		if ((result_c == parent_list.cend()) || (result_g == to)) {
+		//			bind_one_one(*result_c, *result_g, bind_element._position_in_controller);
+		//		}
+		//	}
+		//	/*for (; from < to; from++) {
+		//	auto result = std::find_if(
+		//	parent_list.cbegin(),
+		//	parent_list.cend(),
+		//	[from](const T::value_type& parent) { return parent->_data->_pk.pk == (*from)->_data->_fk.fk; });
+		//	(*result)->_child.push_back(*from);
+		//	(*from)->_parent = *result;
+		//	}*/
+		//}
 
 		template <template <typename, typename> class Parent_List, typename Parent_Object, typename Child_Object> // Аналог для единичного элемента (Возврат родителя)
 		inline static decltype(auto) bind_element(Parent_List<Parent_Object, std::allocator<Parent_Object>>& parent_list, Child_Object& child_element) {
@@ -819,17 +825,23 @@ namespace Graph_Types {
 			//static_assert(std::is_same<typename Unbind_From, typename Unbind_From>::value, "Nope!");
 			unbind_many_one((*old_element_iterator)->_parent, *old_element_iterator);
 			auto undinded_element = *old_element_iterator;
-			elements_list.erase(old_element_iterator);
-			old_element_iterator = elements_list.cend();
+			//elements_list.erase(old_element_iterator);
+			//old_element_iterator = elements_list.cend();
 			return undinded_element;
 		}
 
 		template<>
 		inline static decltype(auto) unbind_element<Graph_Groups_sRefs>(Graph_Groups_sRefs& elements_list, Graph_Groups_sRefs::const_iterator& old_element_iterator) {
 			auto unbinded_data = unbind_many_many((*old_element_iterator)->_parent, *old_element_iterator);
-			elements_list.erase(old_element_iterator);
-			old_element_iterator = elements_list.cend();
+			//elements_list.erase(old_element_iterator);
+			//old_element_iterator = elements_list.cend();
 			return unbinded_data;
+		}
+
+		template<typename Target_Element>
+		inline static decltype(auto) update_element(Target_Element& target_element, typename Target_Element::_Data_Type) {
+			Target_Element::element_type old_revolve = std::move(*target_element);
+			
 		}
 	};
 
